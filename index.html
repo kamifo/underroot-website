@@ -260,28 +260,31 @@
     requestAnimationFrame(render);
 
     // ── Audio / mute toggle ───────────────────────────────────────────────────
-    const bgm        = document.getElementById('bgm');
-    const muteBtn    = document.getElementById('mute-btn');
-    const iconSound  = document.getElementById('icon-sound');
-    const iconMute   = document.getElementById('icon-mute');
-    const btnLabel   = document.getElementById('btn-label');
+    const bgm       = document.getElementById('bgm');
+    const muteBtn   = document.getElementById('mute-btn');
+    const iconSound = document.getElementById('icon-sound');
+    const iconMute  = document.getElementById('icon-mute');
+    const btnLabel  = document.getElementById('btn-label');
     let muted = false;
 
-    // Browsers require a user gesture before playing audio — start on first interaction
-    function startAudio() {
-      bgm.volume = 0.6;
-      bgm.play().catch(() => {});
-      document.removeEventListener('click', startAudio);
-      document.removeEventListener('keydown', startAudio);
-    }
-    document.addEventListener('click', startAudio);
-    document.addEventListener('keydown', startAudio);
+    bgm.volume = 0.6;
+
+    // Try autoplay immediately; if the browser blocks it, start on first gesture
+    bgm.play().catch(() => {
+      const resume = () => {
+        bgm.play().catch(() => {});
+        document.removeEventListener('click', resume);
+        document.removeEventListener('keydown', resume);
+      };
+      document.addEventListener('click', resume);
+      document.addEventListener('keydown', resume);
+    });
 
     muteBtn.addEventListener('click', () => {
       muted = !muted;
       bgm.muted = muted;
-      iconSound.style.display = muted ? 'none'  : '';
-      iconMute.style.display  = muted ? ''      : 'none';
+      iconSound.style.display = muted ? 'none' : '';
+      iconMute.style.display  = muted ? ''     : 'none';
       btnLabel.textContent    = muted ? 'Unmute' : 'Music';
     });
   </script>
