@@ -21,6 +21,29 @@
     }
     canvas { position: absolute; top: 0; left: 0; }
 
+    #story-btn {
+      position: fixed;
+      bottom: 28px;
+      left: 28px;
+      z-index: 10;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 999px;
+      padding: 8px 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.75);
+      font-family: 'Georgia', serif;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      user-select: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    #story-btn:hover { background: rgba(0,0,0,0.65); color: #fff; }
+
     #mute-btn {
       position: fixed;
       bottom: 28px;
@@ -48,6 +71,13 @@
 </head>
 <body>
   <canvas id="c"></canvas>
+
+  <a id="story-btn" href="story.html">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+    </svg>
+    The Story
+  </a>
 
   <audio id="bgm" src="assets/music/Underroot.mp3" loop preload="auto"></audio>
 

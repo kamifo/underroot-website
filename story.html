@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Underroot - The Story</title>
+  <link rel="icon" type="image/png" href="assets/images/underroot_favicon.png" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+
+    .panel {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: contain;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      pointer-events: none;
+    }
+    .panel.visible { opacity: 1; }
+
+    /* Mute toggle */
+    #mute-btn {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 999px;
+      padding: 8px 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.75);
+      font-family: 'Georgia', serif;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      user-select: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    #mute-btn:hover { background: rgba(0,0,0,0.65); color: #fff; }
+  </style>
+</head>
+<body>
+
+  <img class="panel" src="assets/images/underroot_story_1.png" alt="" />
+  <img class="panel" src="assets/images/underroot_story_2.png" alt="" />
+  <img class="panel" src="assets/images/underroot_story_3.png" alt="" />
+  <img class="panel" src="assets/images/underroot_story_4.png" alt="" />
+  <img class="panel" src="assets/images/underroot_story_5.png" alt="" />
+
+  <audio id="bgm" src="assets/music/Underroot_story.mp3" preload="auto"></audio>
+
+  <button id="mute-btn" aria-label="Toggle music">
+    <svg id="icon-sound" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+    </svg>
+    <svg id="icon-mute" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+      <line x1="23" y1="9" x2="17" y2="15"/>
+      <line x1="17" y1="9" x2="23" y2="15"/>
+    </svg>
+    <span id="btn-label">Music</span>
+  </button>
+
+  <script>
+    const panels  = Array.from(document.querySelectorAll('.panel'));
+    const bgm     = document.getElementById('bgm');
+    const timings = [12000, 13000, 11000, 10000, 7000]; // ms per panel
+    const FADE    = 800; // ms crossfade
+
+    // ── Audio ─────────────────────────────────────────────────────────────────
+    bgm.volume = 0.6;
+    bgm.play().catch(() => {
+      const resume = () => { bgm.play().catch(() => {}); document.removeEventListener('click', resume); };
+      document.addEventListener('click', resume);
+    });
+
+    // ── Mute toggle ───────────────────────────────────────────────────────────
+    const muteBtn   = document.getElementById('mute-btn');
+    const iconSound = document.getElementById('icon-sound');
+    const iconMute  = document.getElementById('icon-mute');
+    const btnLabel  = document.getElementById('btn-label');
+    let muted = false;
+
+    muteBtn.addEventListener('click', () => {
+      muted = !muted;
+      bgm.muted = muted;
+      iconSound.style.display = muted ? 'none' : '';
+      iconMute.style.display  = muted ? ''     : 'none';
+      btnLabel.textContent    = muted ? 'Unmute' : 'Music';
+    });
+
+    // ── Panel sequence ────────────────────────────────────────────────────────
+    function advance(i) {
+      if (i >= panels.length) {
+        // All panels done — fade to black then return to main page
+        setTimeout(() => { window.location.href = 'index.html'; }, FADE);
+        return;
+      }
+
+      panels[i].classList.add('visible');
+
+      setTimeout(() => {
+        panels[i].classList.remove('visible');
+        setTimeout(() => advance(i + 1), FADE);
+      }, timings[i]);
+    }
+
+    setTimeout(() => advance(0), 400);
+  </script>
+</body>
+</html>
