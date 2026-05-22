@@ -20,13 +20,25 @@
     }
     .panel.visible { opacity: 1; }
 
+    /* Black curtain — fades out over 3s to reveal first panel */
+    #curtain {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 20;
+      opacity: 1;
+      transition: opacity 3s ease;
+      pointer-events: none;
+    }
+    #curtain.open { opacity: 0; }
+
     /* Mute toggle */
     #mute-btn {
       position: fixed;
       bottom: 28px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 10;
+      z-index: 30;
       background: rgba(0,0,0,0.45);
       border: 1px solid rgba(255,255,255,0.18);
       border-radius: 999px;
@@ -46,6 +58,9 @@
   </style>
 </head>
 <body>
+
+  <!-- Black curtain for opening fade -->
+  <div id="curtain"></div>
 
   <img class="panel" src="assets/images/underroot_story_1.png" alt="" />
   <img class="panel" src="assets/images/underroot_story_2.png" alt="" />
@@ -72,10 +87,12 @@
   <script>
     const panels  = Array.from(document.querySelectorAll('.panel'));
     const bgm     = document.getElementById('bgm');
+    const curtain = document.getElementById('curtain');
     const timings = [12000, 13000, 11000, 10000, 7000]; // ms per panel
-    const FADE    = 800; // ms crossfade
+    const FADE    = 800;   // ms crossfade between panels
+    const OPEN_MS = 3000;  // ms for curtain to fade out
 
-    // ── Audio ─────────────────────────────────────────────────────────────────
+    // ── Audio — starts immediately with the black screen ─────────────────────
     bgm.volume = 0.6;
     bgm.play().catch(() => {
       const resume = () => { bgm.play().catch(() => {}); document.removeEventListener('click', resume); };
@@ -104,16 +121,29 @@
         setTimeout(() => { window.location.href = 'index.html'; }, FADE);
         return;
       }
-
       panels[i].classList.add('visible');
-
       setTimeout(() => {
         panels[i].classList.remove('visible');
         setTimeout(() => advance(i + 1), FADE);
       }, timings[i]);
     }
 
-    setTimeout(() => advance(0), 400);
+    // ── Opening sequence ──────────────────────────────────────────────────────
+    // Show panel 1 immediately (hidden under curtain), then fade curtain out
+    panels[0].classList.add('visible');
+
+    // Small rAF delay ensures the curtain transition fires properly
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      curtain.classList.add('open');
+    }));
+
+    // After curtain finishes fading, start the panel timer
+    setTimeout(() => {
+      setTimeout(() => {
+        panels[0].classList.remove('visible');
+        setTimeout(() => advance(1), FADE);
+      }, timings[0]);
+    }, OPEN_MS + 100);
   </script>
 </body>
 </html>

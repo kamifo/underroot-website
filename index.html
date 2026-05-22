@@ -117,10 +117,38 @@
       text-align: center;
     }
 
-    /* ── Bottom buttons ─────────────────────────────────────────────────── */
-    .pill-btn {
+    /* ── Story link (in content flow, below email) ──────────────────────── */
+    #story-btn {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 999px;
+      padding: 10px 28px;
+      color: rgba(255,255,255,0.8);
+      font-family: 'Georgia', serif;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-decoration: none;
+      text-transform: uppercase;
+      user-select: none;
+      white-space: nowrap;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    #story-btn:hover { background: rgba(0,0,0,0.7); color: #fff; border-color: rgba(255,255,255,0.5); }
+    #story-btn svg   { flex-shrink: 0; }
+
+    /* ── Mute button ────────────────────────────────────────────────────── */
+    #mute-btn {
       position: fixed;
       bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 10;
       background: rgba(0,0,0,0.45);
       border: 1px solid rgba(255,255,255,0.18);
@@ -134,14 +162,11 @@
       font-family: 'Georgia', serif;
       font-size: 13px;
       letter-spacing: 0.08em;
-      text-decoration: none;
       user-select: none;
       transition: background 0.2s, color 0.2s;
     }
-    .pill-btn:hover { background: rgba(0,0,0,0.65); color: #fff; }
-    .pill-btn svg   { flex-shrink: 0; }
-    #story-btn { left: 28px; }
-    #mute-btn  { left: 50%; transform: translateX(-50%); }
+    #mute-btn:hover { background: rgba(0,0,0,0.65); color: #fff; }
+    #mute-btn svg   { flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -180,11 +205,11 @@
 
   <audio id="bgm" src="assets/music/Underroot.mp3" loop preload="auto"></audio>
 
-  <a id="story-btn" class="pill-btn" href="story.html">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+  <a id="story-btn" href="story.html">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="5 3 19 12 5 21 5 3"/>
     </svg>
-    The Story
+    Watch The Story
   </a>
 
   <button id="mute-btn" class="pill-btn" aria-label="Toggle music">
@@ -335,12 +360,16 @@
     }
 
     function updateOverlayPositions() {
-      const last      = lineLayouts[lineLayouts.length - 1];
+      const last       = lineLayouts[lineLayouts.length - 1];
       const textBottom = last.offsetY + 5 * TH;
-      const cdEl      = document.getElementById('countdown');
-      const emailEl   = document.getElementById('email-section');
-      cdEl.style.top    = (textBottom + TH * 4) + 'px';
-      emailEl.style.top = (textBottom + TH * 4 + 80) + 'px';
+      const cdEl       = document.getElementById('countdown');
+      const emailEl    = document.getElementById('email-section');
+      const storyEl    = document.getElementById('story-btn');
+      const cdTop      = textBottom + TH * 4;
+      const emailTop   = cdTop + 80;
+      cdEl.style.top    = cdTop + 'px';
+      emailEl.style.top = emailTop + 'px';
+      storyEl.style.top = (emailTop + 110) + 'px';
     }
 
     // ── Build tiles ──────────────────────────────────────────────────────────
@@ -437,14 +466,39 @@
     const iconSound = document.getElementById('icon-sound');
     const iconMute  = document.getElementById('icon-mute');
     const btnLabel  = document.getElementById('btn-label');
-    let muted = false;
+    let muted = false, audioStarted = false, resumeHandler = null;
+
+    // Start in muted/paused appearance until music actually plays
+    iconSound.style.display = 'none';
+    iconMute.style.display  = '';
+    btnLabel.textContent    = 'Unmute';
+
+    function showPlaying() {
+      audioStarted = true;
+      iconSound.style.display = '';
+      iconMute.style.display  = 'none';
+      btnLabel.textContent    = 'Music';
+      if (resumeHandler) {
+        document.removeEventListener('click', resumeHandler);
+        document.removeEventListener('keydown', resumeHandler);
+        resumeHandler = null;
+      }
+    }
+
     bgm.volume = 0.6;
-    bgm.play().catch(() => {
-      const resume = () => { bgm.play().catch(()=>{}); document.removeEventListener('click', resume); document.removeEventListener('keydown', resume); };
-      document.addEventListener('click', resume);
-      document.addEventListener('keydown', resume);
+    bgm.play().then(showPlaying).catch(() => {
+      resumeHandler = () => { bgm.play().catch(() => {}); showPlaying(); };
+      document.addEventListener('click', resumeHandler);
+      document.addEventListener('keydown', resumeHandler);
     });
+
     muteBtn.addEventListener('click', () => {
+      if (!audioStarted) {
+        // First interaction — start music
+        bgm.play().catch(() => {});
+        showPlaying();
+        return;
+      }
       muted = !muted;
       bgm.muted = muted;
       iconSound.style.display = muted ? 'none' : '';
