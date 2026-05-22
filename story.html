@@ -20,7 +20,7 @@
     }
     .panel.visible { opacity: 1; }
 
-    /* Black curtain — fades out over 3s to reveal first panel */
+    /* Black curtain — holds for 2s then fades out over 3s */
     #curtain {
       position: fixed;
       inset: 0;
@@ -29,8 +29,25 @@
       opacity: 1;
       transition: opacity 3s ease;
       pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     #curtain.open { opacity: 0; }
+
+    #curtain-msg {
+      font-family: 'Georgia', serif;
+      font-size: clamp(11px, 2.5vw, 14px);
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      text-align: center;
+      padding: 0 32px;
+      display: none; /* shown only on portrait mobile */
+    }
+    @media (max-width: 768px) and (orientation: portrait) {
+      #curtain-msg { display: block; }
+    }
 
     /* Mute toggle */
     #mute-btn {
@@ -60,7 +77,9 @@
 <body>
 
   <!-- Black curtain for opening fade -->
-  <div id="curtain"></div>
+  <div id="curtain">
+    <span id="curtain-msg">Rotate your device for the best experience</span>
+  </div>
 
   <img class="panel" src="assets/images/underroot_story_1.png" alt="" />
   <img class="panel" src="assets/images/underroot_story_2.png" alt="" />
@@ -90,6 +109,7 @@
     const curtain = document.getElementById('curtain');
     const timings = [12000, 13000, 11000, 10000, 7000]; // ms per panel
     const FADE    = 800;   // ms crossfade between panels
+    const HOLD_MS = 2000;  // ms to hold black before fade starts
     const OPEN_MS = 3000;  // ms for curtain to fade out
 
     // ── Audio — starts immediately with the black screen ─────────────────────
@@ -132,18 +152,16 @@
     // Show panel 1 immediately (hidden under curtain), then fade curtain out
     panels[0].classList.add('visible');
 
-    // Small rAF delay ensures the curtain transition fires properly
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      curtain.classList.add('open');
-    }));
+    // Hold black for HOLD_MS, then fade curtain out over OPEN_MS
+    setTimeout(() => curtain.classList.add('open'), HOLD_MS);
 
-    // After curtain finishes fading, start the panel timer
+    // After hold + fade, start the panel 0 timer
     setTimeout(() => {
       setTimeout(() => {
         panels[0].classList.remove('visible');
         setTimeout(() => advance(1), FADE);
       }, timings[0]);
-    }, OPEN_MS + 100);
+    }, HOLD_MS + OPEN_MS + 100);
   </script>
 </body>
 </html>
