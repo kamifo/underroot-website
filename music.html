@@ -387,7 +387,8 @@
       requestAnimationFrame(render);
     }
 
-    window.addEventListener('resize', resize);
+    let resizeTimer;
+    window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150); });
     resize();
     requestAnimationFrame(render);
   </script>

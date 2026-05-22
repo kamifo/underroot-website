@@ -519,7 +519,11 @@
     });
 
     // ── Init ─────────────────────────────────────────────────────────────────
-    window.addEventListener('resize', () => { resize(); buildTiles(); initParticles(); });
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { resize(); buildTiles(); initParticles(); }, 150);
+    });
     resize();
     buildTiles();
     initParticles();
