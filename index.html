@@ -3,238 +3,383 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Underroot</title>
+  <title>Underroot — an idle survival-digger</title>
+  <meta name="description" content="Underroot is an idle survival-digger. The Maw is coming from the east, devouring everything in its way. Dig, build a village, and hold the line. Play free in your browser." />
   <link rel="icon" type="image/png" href="assets/images/underroot_favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg:    #14100c;
+      --panel: #1b1611;
+      --ink:   rgba(255,255,255,0.88);
+      --muted: rgba(255,255,255,0.52);
+      --faint: rgba(255,255,255,0.32);
+      --red:   #8c2828;
+      --line:  rgba(255,255,255,0.10);
+      --clay:  #a36936;
+      --maxw:  1080px;
+    }
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #111; }
+    html { scroll-behavior: smooth; }
     body {
+      width: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Georgia', serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; }
+
+    /* ── HERO (the relaunch hero, now a scrollable section) ──────────────── */
+    #hero {
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
       background-image: url('assets/images/Underroot_website_background.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
     }
     @media (max-width: 600px) {
-      body { background-image: url('assets/images/Underroot_website_background_mobile.png'); }
+      #hero { background-image: url('assets/images/Underroot_website_background_mobile.png'); }
     }
-    canvas { position: absolute; top: 0; left: 0; }
+    #hero canvas { position: absolute; top: 0; left: 0; }
 
-    /* ── Primary Play CTA ───────────────────────────────────────────────── */
     #play-cta {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 5;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(140,40,40,0.85);
-      border: 1px solid rgba(255,255,255,0.32);
-      border-radius: 2px;
-      padding: 13px clamp(22px, 4vw, 34px);
-      color: #fff;
-      font-family: 'Georgia', serif;
-      font-size: clamp(12px, 1.6vw, 15px);
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      text-decoration: none;
-      white-space: nowrap;
-      user-select: none;
+      position: absolute; left: 50%; transform: translateX(-50%); z-index: 5;
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(140,40,40,0.85); border: 1px solid rgba(255,255,255,0.32); border-radius: 2px;
+      padding: 13px clamp(22px, 4vw, 34px); color: #fff;
+      font-size: clamp(12px, 1.6vw, 15px); letter-spacing: 0.14em; text-transform: uppercase;
+      text-decoration: none; white-space: nowrap; user-select: none;
       box-shadow: 0 0 26px rgba(140,40,40,0.5);
       transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
     }
-    #play-cta:hover { background: rgba(160,46,46,0.95); box-shadow: 0 0 34px rgba(140,40,40,0.7); }
+    #play-cta:hover  { background: rgba(160,46,46,0.95); box-shadow: 0 0 34px rgba(140,40,40,0.7); }
     #play-cta:active { transform: translateX(-50%) translateY(1px); }
     #play-cta svg { flex-shrink: 0; }
 
-    /* ── Secondary link row ─────────────────────────────────────────────── */
     #cta-btns {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 5;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-      width: min(680px, 94vw);
+      position: absolute; left: 50%; transform: translateX(-50%); z-index: 5;
+      display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: min(680px, 94vw);
     }
     #cta-btns a {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0,0,0,0.45);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 2px;
-      padding: 9px 18px;
-      color: rgba(255,255,255,0.8);
-      font-family: 'Georgia', serif;
-      font-size: 12px;
-      letter-spacing: 0.1em;
-      text-decoration: none;
-      text-transform: uppercase;
-      user-select: none;
-      white-space: nowrap;
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.25); border-radius: 2px;
+      padding: 9px 18px; color: rgba(255,255,255,0.8); font-size: 12px; letter-spacing: 0.1em;
+      text-decoration: none; text-transform: uppercase; user-select: none; white-space: nowrap;
       transition: background 0.2s, color 0.2s, border-color 0.2s;
     }
     #cta-btns a:hover { background: rgba(0,0,0,0.7); color: #fff; border-color: rgba(255,255,255,0.5); }
-    #cta-btns a.soon {
-      color: rgba(255,255,255,0.4);
-      border-style: dashed;
-      border-color: rgba(255,255,255,0.18);
-      cursor: default;
-    }
-    #cta-btns a.soon:hover { background: rgba(0,0,0,0.45); color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.18); }
+    #cta-btns a.soon  { color: rgba(255,255,255,0.4); border-style: dashed; border-color: rgba(255,255,255,0.18); cursor: default; }
+    #cta-btns a.soon:hover  { background: rgba(0,0,0,0.45); color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.18); }
     #cta-btns a.soon::after { content: '· soon'; opacity: 0.55; }
     #cta-btns svg { flex-shrink: 0; }
 
-    /* ── Bug / feedback form ────────────────────────────────────────────── */
     #bug-section {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      z-index: 5;
-      width: min(420px, 88vw);
+      position: absolute; left: 50%; transform: translateX(-50%); z-index: 5;
+      display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(420px, 88vw);
     }
-    #bug-section p {
-      font-family: 'Georgia', serif;
-      font-size: clamp(10px, 1.8vw, 12px);
-      letter-spacing: 0.18em;
-      color: rgba(255,255,255,0.45);
-      text-transform: uppercase;
-    }
-    #bug-form {
-      display: flex;
-      gap: 8px;
-      width: 100%;
-    }
+    #bug-section p { font-size: clamp(10px, 1.8vw, 12px); letter-spacing: 0.18em; color: rgba(255,255,255,0.45); text-transform: uppercase; }
+    #bug-form { display: flex; gap: 8px; width: 100%; }
     #bug-input {
-      flex: 1;
-      background: rgba(0,0,0,0.45);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 2px;
-      padding: 9px 18px;
-      color: rgba(255,255,255,0.85);
-      font-family: 'Georgia', serif;
-      font-size: 13px;
-      letter-spacing: 0.04em;
-      outline: none;
-      transition: border-color 0.2s;
-      min-width: 0;
+      flex: 1; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.18); border-radius: 2px;
+      padding: 9px 18px; color: rgba(255,255,255,0.85); font-family: 'Georgia', serif; font-size: 13px;
+      letter-spacing: 0.04em; outline: none; transition: border-color 0.2s; min-width: 0;
     }
     #bug-input::placeholder { color: rgba(255,255,255,0.28); }
     #bug-input:focus { border-color: rgba(255,255,255,0.4); }
     #bug-submit {
-      background: rgba(0,0,0,0.45);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 2px;
-      padding: 9px 20px;
-      color: rgba(255,255,255,0.85);
-      font-family: 'Georgia', serif;
-      font-size: 13px;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.2s, color 0.2s;
+      background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.18); border-radius: 2px;
+      padding: 9px 20px; color: rgba(255,255,255,0.85); font-family: 'Georgia', serif; font-size: 13px;
+      letter-spacing: 0.08em; cursor: pointer; white-space: nowrap; transition: background 0.2s, color 0.2s;
     }
     #bug-submit:hover { background: rgba(0,0,0,0.7); color: #fff; }
-    #bug-msg {
-      font-family: 'Georgia', serif;
-      font-size: 12px;
-      letter-spacing: 0.1em;
-      color: rgba(255,255,255,0.5);
-      min-height: 18px;
-      text-align: center;
+    #bug-msg { font-size: 12px; letter-spacing: 0.1em; color: rgba(255,255,255,0.5); min-height: 18px; text-align: center; }
+
+    /* scroll cue */
+    #scroll-cue {
+      position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 5;
+      display: flex; flex-direction: column; align-items: center; gap: 5px; text-decoration: none;
+      color: rgba(255,255,255,0.55); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      animation: cueBob 2.2s ease-in-out infinite;
+    }
+    #scroll-cue:hover { color: #fff; }
+    #scroll-cue svg { width: 18px; height: 18px; }
+    @keyframes cueBob { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(5px); } }
+
+    /* ── Persistent music toggle ────────────────────────────────────────── */
+    #mute-btn {
+      position: fixed; bottom: 18px; right: 18px; z-index: 60;
+      background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.18); border-radius: 2px;
+      padding: 8px 16px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+      color: rgba(255,255,255,0.75); font-family: 'Georgia', serif; font-size: 12px; letter-spacing: 0.08em;
+      user-select: none; transition: background 0.2s, color 0.2s; backdrop-filter: blur(2px);
+    }
+    #mute-btn:hover { background: rgba(0,0,0,0.75); color: #fff; }
+    #mute-btn svg { flex-shrink: 0; }
+
+    /* ── Shared section scaffolding ─────────────────────────────────────── */
+    section { padding: clamp(56px, 9vw, 120px) clamp(20px, 5vw, 48px); }
+    .wrap { max-width: var(--maxw); margin: 0 auto; }
+    .kicker {
+      font-family: 'Press Start 2P', monospace; font-size: 10px; letter-spacing: 0.12em;
+      color: var(--red); text-transform: uppercase; margin-bottom: 16px;
+    }
+    .kicker.center { text-align: center; }
+    h2.title { font-size: clamp(1.7rem, 4vw, 2.7rem); font-weight: normal; line-height: 1.15; letter-spacing: 0.01em; }
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal { opacity: 1; transform: none; transition: none; }
+      #scroll-cue { animation: none; }
     }
 
-    /* ── Mute button ────────────────────────────────────────────────────── */
-    #mute-btn {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10;
-      background: rgba(0,0,0,0.45);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 2px;
-      padding: 8px 22px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: rgba(255,255,255,0.75);
-      font-family: 'Georgia', serif;
-      font-size: 13px;
-      letter-spacing: 0.08em;
-      user-select: none;
-      transition: background 0.2s, color 0.2s;
+    /* ── About / pitch ──────────────────────────────────────────────────── */
+    #about { background: linear-gradient(180deg, #100c08, var(--bg)); text-align: center; }
+    #about .pitch {
+      max-width: 760px; margin: 0 auto; font-size: clamp(1rem, 1.9vw, 1.22rem); line-height: 1.85; color: rgba(255,255,255,0.82);
     }
-    #mute-btn:hover { background: rgba(0,0,0,0.65); color: #fff; }
-    #mute-btn svg   { flex-shrink: 0; }
+    #about .pitch .tag { color: var(--clay); font-style: italic; }
+
+    /* ── Feature pillars ────────────────────────────────────────────────── */
+    #features { display: flex; flex-direction: column; gap: clamp(48px, 8vw, 104px); }
+    .pillar { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(22px, 4vw, 56px); align-items: center; max-width: var(--maxw); margin: 0 auto; width: 100%; }
+    .pillar-media { position: relative; aspect-ratio: 16 / 10; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; box-shadow: 0 18px 50px rgba(0,0,0,0.45); }
+    .pillar-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .pillar.flip .pillar-media { order: 2; }
+    .pillar-num { font-family: 'Press Start 2P', monospace; font-size: 12px; color: var(--red); margin-bottom: 14px; }
+    .pillar h3 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: normal; line-height: 1.2; margin-bottom: 16px; }
+    .pillar p { font-size: clamp(0.98rem, 1.6vw, 1.1rem); line-height: 1.8; color: rgba(255,255,255,0.74); }
+    .features-close { max-width: 720px; margin: clamp(40px, 6vw, 72px) auto 0; text-align: center; font-size: clamp(1rem, 1.7vw, 1.16rem); line-height: 1.8; color: rgba(255,255,255,0.6); font-style: italic; }
+    @media (max-width: 760px) {
+      .pillar { grid-template-columns: 1fr; gap: 20px; }
+      .pillar.flip .pillar-media { order: 0; }
+    }
+
+    /* ── Gallery ────────────────────────────────────────────────────────── */
+    #gallery { background: linear-gradient(180deg, var(--bg), #100c08); }
+    #gallery .head { text-align: center; margin-bottom: clamp(32px, 5vw, 56px); }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: var(--maxw); margin: 0 auto; }
+    .shot {
+      position: relative; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 3px; overflow: hidden;
+      background: #0c0907; cursor: pointer; transition: border-color 0.2s, transform 0.2s;
+    }
+    .shot:hover { border-color: rgba(255,255,255,0.35); transform: translateY(-2px); }
+    .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .shot .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px;
+      color: var(--faint); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+    .shot.missing { cursor: default; }
+    .shot.missing img { display: none; }
+    .shot:not(.missing) .ph { display: none; }
+    @media (max-width: 900px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .gallery-grid { grid-template-columns: 1fr; } }
+
+    #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: none; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 95%; max-height: 92%; border: 1px solid rgba(255,255,255,0.2); border-radius: 2px; }
+    #lightbox .close { position: absolute; top: 18px; right: 22px; color: rgba(255,255,255,0.7); font-size: 30px; cursor: pointer; line-height: 1; }
+    #lightbox .close:hover { color: #fff; }
+
+    /* ── Story & Music ──────────────────────────────────────────────────── */
+    #more { background: var(--bg); }
+    #more .head { text-align: center; margin-bottom: clamp(32px, 5vw, 52px); }
+    .more-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 880px; margin: 0 auto; }
+    .more-card { position: relative; display: block; aspect-ratio: 16 / 10; border: 1px solid var(--line); border-radius: 3px; overflow: hidden;
+      text-decoration: none; box-shadow: 0 14px 40px rgba(0,0,0,0.4); transition: border-color 0.2s, transform 0.2s; }
+    .more-card:hover { border-color: rgba(255,255,255,0.35); transform: translateY(-2px); }
+    .more-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .more-card .music-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 35%, #2a211a, #0c0907); display: flex; align-items: center; justify-content: center; }
+    .more-card .music-bg svg { width: 30%; height: 30%; color: rgba(163,105,54,0.5); }
+    .more-card .cap { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 22px;
+      background: linear-gradient(transparent 40%, rgba(0,0,0,0.82)); }
+    .more-card .cap h3 { font-size: 1.4rem; font-weight: normal; }
+    .more-card .cap p { font-size: 0.92rem; color: rgba(255,255,255,0.66); margin-top: 6px; letter-spacing: 0.04em; }
+    .more-card .cap .go { margin-top: 12px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--clay); }
+    @media (max-width: 640px) { .more-grid { grid-template-columns: 1fr; } }
+
+    /* ── Footer ─────────────────────────────────────────────────────────── */
+    footer { background: #0c0907; border-top: 1px solid var(--line); padding: clamp(48px, 7vw, 80px) clamp(20px, 5vw, 48px) 40px; text-align: center; }
+    footer .foot-play {
+      display: inline-flex; align-items: center; gap: 10px; background: rgba(140,40,40,0.9); border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 2px; padding: 13px 30px; color: #fff; text-decoration: none; letter-spacing: 0.14em; text-transform: uppercase;
+      font-size: 14px; box-shadow: 0 0 24px rgba(140,40,40,0.45); transition: background 0.2s, box-shadow 0.2s;
+    }
+    footer .foot-play:hover { background: rgba(160,46,46,1); box-shadow: 0 0 32px rgba(140,40,40,0.65); }
+    footer .foot-links { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin: 30px 0 26px; }
+    footer .foot-links a { color: var(--muted); text-decoration: none; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; transition: color 0.2s; }
+    footer .foot-links a:hover { color: #fff; }
+    footer .legal { color: var(--faint); font-size: 12px; letter-spacing: 0.06em; line-height: 1.8; }
   </style>
 </head>
 <body>
-  <canvas id="c"></canvas>
 
   <audio id="bgm" src="assets/music/Underroot.mp3" loop preload="auto"></audio>
 
-  <!-- Primary CTA -->
-  <a id="play-cta" href="https://play.underroot.se">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-      <polygon points="6 4 20 12 6 20 6 4"/>
-    </svg>
-    Play Free in Browser
-  </a>
+  <!-- ════════════ HERO ════════════ -->
+  <section id="hero">
+    <canvas id="c"></canvas>
 
-  <!-- Secondary links -->
-  <div id="cta-btns">
-    <a id="story-btn" href="story.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="5 3 19 12 5 21 5 3"/>
-      </svg>
-      Watch The Story
+    <a id="play-cta" href="https://play.underroot.se">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+      Play Free in Browser
     </a>
-    <a id="music-btn" href="music.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-      </svg>
-      Music
+
+    <div id="cta-btns">
+      <a id="story-btn" href="story.html">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Watch The Story
+      </a>
+      <a id="music-btn" href="music.html">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        Music
+      </a>
+      <a class="soon" aria-disabled="true">itch.io</a>
+      <a class="soon" aria-disabled="true">Downloads</a>
+    </div>
+
+    <div id="bug-section">
+      <p>Found a bug?</p>
+      <form id="bug-form" action="https://formspree.io/f/mgoqyvqp" method="POST">
+        <input id="bug-input" type="text" name="message" placeholder="Tell us what broke…" required />
+        <button id="bug-submit" type="submit">Send</button>
+      </form>
+      <span id="bug-msg"></span>
+    </div>
+
+    <a id="scroll-cue" href="#about" aria-label="Scroll for more">
+      <span>Scroll</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </a>
-    <a class="soon" aria-disabled="true">itch.io</a>
-    <a class="soon" aria-disabled="true">Downloads</a>
-  </div>
+  </section>
 
-  <!-- Bug / feedback -->
-  <div id="bug-section">
-    <p>Found a bug?</p>
-    <form id="bug-form" action="https://formspree.io/f/mgoqyvqp" method="POST">
-      <input id="bug-input" type="text" name="message" placeholder="Tell us what broke…" required />
-      <button id="bug-submit" type="submit">Send</button>
-    </form>
-    <span id="bug-msg"></span>
-  </div>
+  <!-- ════════════ ABOUT / PITCH ════════════ -->
+  <section id="about">
+    <div class="wrap reveal">
+      <div class="kicker center">What is Underroot?</div>
+      <p class="pitch">
+        Underroot is an idle survival-digger. A creature called the Maw is coming from the east
+        devouring everything in its way — it can't be killed, only slowed. Alone with a shovel, you
+        begin digging down through shifting layers of rock, smelting what you find into better tools
+        and machines. As you forage food, water, fulfill villager tasks and build a stronger wall to
+        stop the Maw, your village grows from a mere 47 souls to a mighty fortress! But beware, the
+        Maw grows hungrier by the day, learning from what it consumes… What materials will you create,
+        what mysteries will you uncover, and how long will you last?
+        <span class="tag">Every layer buys time!</span>
+      </p>
+    </div>
+  </section>
 
-  <button id="mute-btn" class="pill-btn" aria-label="Toggle music">
+  <!-- ════════════ FEATURE PILLARS ════════════ -->
+  <section id="features">
+    <div class="pillar reveal">
+      <div class="pillar-media"><img src="assets/images/Underground.png" alt="Digging deep underground through layers of rock" loading="lazy"></div>
+      <div class="pillar-text">
+        <div class="pillar-num">01</div>
+        <h3>Dig &amp; refine</h3>
+        <p>Carve down through stone, coal, iron, copper and quartz — and rarer veins still. Fuel drills and excavators on coal, oil or ethanol, and smelt raw ore into bars, alloys, glass and cement. Keep an eye out for glowing tiles — water pockets, gold caches, fossils, and the exotic materials the deep keeps hidden.</p>
+      </div>
+    </div>
+
+    <div class="pillar flip reveal">
+      <div class="pillar-media"><img src="assets/images/The_Village.png" alt="A thriving village at sunset" loading="lazy"></div>
+      <div class="pillar-text">
+        <div class="pillar-num">02</div>
+        <h3>Raise a village</h3>
+        <p>Turn ore into a home. Keep food and water flowing — wells, pumps and caches against the drain — while your elders judge food, shelter and safety each morning. Keep them happy and people arrive; every 50 souls is a milestone, grow your village enough and they will sing of your greatness! The Village scout will visit to trade, deal in gold, and wager on rare finds.</p>
+      </div>
+    </div>
+
+    <div class="pillar reveal">
+      <div class="pillar-media"><img src="assets/images/The_Maw.png" alt="The Maw, a colossal devouring creature" loading="lazy"></div>
+      <div class="pillar-text">
+        <div class="pillar-num">03</div>
+        <h3>Hold back the Maw</h3>
+        <p>You can't kill the Maw — only slow it. It chews faster every day and learns the walls you raise, so stack and mix your defenses, from dirt and stone up to steel, glass and vault block. Strange roots are said to also have mystical effects. And should your digger die, your bloodline can dig on — generation after generation.</p>
+      </div>
+    </div>
+
+    <p class="features-close reveal">Weather storms, dare the Terrestrial Astrolabe to reseed the world with exotic materials at a terrible price, and pick up right where you left off.</p>
+  </section>
+
+  <!-- ════════════ GALLERY ════════════ -->
+  <section id="gallery">
+    <div class="head reveal">
+      <div class="kicker center">From the deep</div>
+      <h2 class="title">Screenshots</h2>
+    </div>
+    <div class="gallery-grid reveal" id="gallery-grid">
+      <div class="shot"><img src="assets/images/shots/shot_world.jpg"   alt="The surface village above the mine shaft, the Maw breaching on the right" loading="lazy"><div class="ph">Surface to the deep</div></div>
+      <div class="shot"><img src="assets/images/shots/shot_dig.jpg"     alt="Deep underground among colourful ore layers and finds" loading="lazy"><div class="ph">Deep digging</div></div>
+      <div class="shot"><img src="assets/images/shots/shot_dig2.jpg"    alt="Sinking a shaft straight down through the rock" loading="lazy"><div class="ph">Sinking the shaft</div></div>
+      <div class="shot"><img src="assets/images/shots/shot_village.jpg" alt="A thriving daytime village of timber houses and a windmill" loading="lazy"><div class="ph">The village grows</div></div>
+      <div class="shot"><img src="assets/images/shots/shot_craft.jpg"   alt="Processing machines and the smelting menu" loading="lazy"><div class="ph">Smelt &amp; refine</div></div>
+      <div class="shot"><img src="assets/images/shots/shot_rain.jpg"    alt="The village weathering a storm at night" loading="lazy"><div class="ph">Weather the storms</div></div>
+    </div>
+  </section>
+
+  <!-- ════════════ STORY & MUSIC ════════════ -->
+  <section id="more">
+    <div class="head reveal">
+      <div class="kicker center">Go deeper</div>
+      <h2 class="title">Story &amp; Music</h2>
+    </div>
+    <div class="more-grid reveal">
+      <a class="more-card" href="story.html">
+        <img src="assets/images/underroot_story_2.png" alt="A panel from the Underroot story" loading="lazy">
+        <div class="cap">
+          <h3>The Story</h3>
+          <p>How the horizon moved, and why we dug.</p>
+          <div class="go">Watch ▷</div>
+        </div>
+      </a>
+      <a class="more-card" href="music.html">
+        <div class="music-bg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        </div>
+        <div class="cap">
+          <h3>The Music</h3>
+          <p>Three full tracks from the score.</p>
+          <div class="go">Listen ♪</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ════════════ FOOTER ════════════ -->
+  <footer>
+    <a class="foot-play" href="https://play.underroot.se">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+      Play Free in Browser
+    </a>
+    <div class="foot-links">
+      <a href="story.html">Story</a>
+      <a href="music.html">Music</a>
+      <a href="eula.html">EULA</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+    <p class="legal">A Swavvy AB game · © 2026 Swavvy AB. All rights reserved.</p>
+  </footer>
+
+  <!-- Persistent music toggle -->
+  <button id="mute-btn" aria-label="Toggle music">
     <svg id="icon-sound" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
     </svg>
     <svg id="icon-mute" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-      <line x1="23" y1="9" x2="17" y2="15"/>
-      <line x1="17" y1="9" x2="23" y2="15"/>
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
     </svg>
     <span id="btn-label">Music</span>
   </button>
 
+  <!-- Lightbox -->
+  <div id="lightbox" aria-hidden="true"><span class="close" aria-label="Close">×</span><img alt=""></div>
+
   <script>
+    const hero   = document.getElementById('hero');
     const canvas = document.getElementById('c');
     const ctx    = canvas.getContext('2d');
 
@@ -345,8 +490,8 @@
     }
 
     function resize() {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width  = hero.clientWidth;
+      canvas.height = hero.clientHeight;
       const lines    = getLines();
       const maxTiles = Math.max(...lines.map(l => l.length * (5 + CHAR_GAP) - CHAR_GAP));
       TW = Math.max(6, Math.floor(canvas.width * 0.92 / maxTiles));
@@ -495,6 +640,47 @@
       iconMute.style.display  = muted ? ''     : 'none';
       btnLabel.textContent    = muted ? 'Unmute' : 'Music';
     });
+
+    // ── Gallery: probe each shot; placeholder for missing, lightbox for present.
+    //    If NONE of the screenshots exist yet, hide the whole section so the live
+    //    page never shows empty boxes — it reappears once shots are added. ──────
+    const lightbox    = document.getElementById('lightbox');
+    const lightboxImg = lightbox.querySelector('img');
+    const shots = [...document.querySelectorAll('#gallery-grid .shot')];
+    let settled = 0, found = 0;
+    shots.forEach(shot => {
+      const img = shot.querySelector('img');
+      const finish = ok => {
+        settled++;
+        if (ok) found++; else shot.classList.add('missing');
+        if (settled === shots.length && found === 0) {
+          document.getElementById('gallery').style.display = 'none';
+        }
+      };
+      const probe = new Image();
+      probe.onload  = () => finish(true);
+      probe.onerror = () => finish(false);
+      probe.src = img.getAttribute('src');
+      shot.addEventListener('click', () => {
+        if (shot.classList.contains('missing')) return;
+        lightboxImg.src = img.src;
+        lightbox.classList.add('open');
+      });
+    });
+    function closeLightbox() { lightbox.classList.remove('open'); lightboxImg.src = ''; }
+    lightbox.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    // ── Reveal on scroll ───────────────────────────────────────────────────────
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+    } else {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+      }, { threshold: 0.15 });
+      document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+    }
 
     // ── Init ─────────────────────────────────────────────────────────────────
     let resizeTimer;
