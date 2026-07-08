@@ -11,6 +11,8 @@ export const LIMITS = {
   MAX_DEPTH_TILES: 392,
   MAX_DAYS: 3650,
   MAX_GEN: 50,
+  GEN_PER_DAY_MAX: 4,
+  GEN_GRACE: 8,
   PEAK_CEILING: 1_000_000,
 };
 
@@ -22,6 +24,7 @@ export function checkPlausibility(run) {
   if (run.gen > L.MAX_GEN) reasons.push('generation beyond cap');
   if (run.depth > L.MAX_DEPTH_TILES) reasons.push('depth beyond world bottom');
   if (run.blocks > run.days * L.BLOCKS_PER_DAY_MAX + L.BLOCKS_GRACE) reasons.push('mining rate impossible');
+  if (run.gen > run.days * L.GEN_PER_DAY_MAX + L.GEN_GRACE) reasons.push('generation churn impossible');
   if (run.villager_deaths > Math.max(1, run.peak_population) * Math.max(1, run.days)) {
     reasons.push('villager deaths impossible');
   }
@@ -30,7 +33,9 @@ export function checkPlausibility(run) {
     if (amt > L.PEAK_CEILING) { reasons.push(`peak ${mat} impossible`); break; }
   }
 
-  // Lineage: gen/days non-decreasing; final entry must agree with run totals.
+  // Lineage: gen strictly increasing, days non-decreasing. The game client
+  // always appends the fallen digger as the FINAL lineage entry built from
+  // the same run fields, so honest submissions agree exactly with run totals.
   const lin = run.lineage ?? [];
   for (let i = 1; i < lin.length; i++) {
     if (lin[i].gen <= lin[i - 1].gen || lin[i].days < lin[i - 1].days) {
@@ -40,16 +45,16 @@ export function checkPlausibility(run) {
   }
   if (lin.length > 0) {
     const last = lin[lin.length - 1];
-    if (last.days > run.days || last.gen > run.gen || last.depth > run.depth) {
-      reasons.push('lineage exceeds run totals');
+    if (last.gen !== run.gen || last.days !== run.days || last.depth !== run.depth || last.cause !== run.cause) {
+      reasons.push('lineage disagrees with run');
     }
   }
 
   // History: day strictly increasing; depth/blocks/souls non-decreasing;
-  // nothing above the run's final totals.
+  // nothing above the run's final totals (population bounded by peak).
   const hist = run.history ?? [];
   for (let i = 0; i < hist.length; i++) {
-    const [day, depth, blocks, , souls] = hist[i];
+    const [day, depth, blocks, pop, souls] = hist[i];
     if (i > 0) {
       const [pd, pdepth, pblocks, , psouls] = hist[i - 1];
       if (day <= pd || depth < pdepth || blocks < pblocks || souls < psouls) {
@@ -57,7 +62,7 @@ export function checkPlausibility(run) {
         break;
       }
     }
-    if (day > run.days || depth > run.depth || blocks > run.blocks || souls > run.villager_deaths) {
+    if (day > run.days || depth > run.depth || blocks > run.blocks || pop > run.peak_population || souls > run.villager_deaths) {
       reasons.push('history exceeds run totals');
       break;
     }
