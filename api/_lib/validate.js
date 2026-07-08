@@ -38,7 +38,7 @@ function isInt(v) {
 
 export function sanitizeName(raw) {
   let s = String(raw ?? '');
-  if (s.length > 256) s = s.slice(0, 256); // cheap pre-gate before regex work
+  if (s.length > 256) s = s.slice(0, 256).replace(/[\uD800-\uDBFF]$/, '');
   s = s.replace(/[\u0000-\u001f\u007f]/g, '').trim();
   s = [...s].slice(0, NAME_MAX).join(''); // code-point slice: never splits surrogate pairs
   return s.length > 0 ? s : 'Unnamed Digger';

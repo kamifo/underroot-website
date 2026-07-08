@@ -139,3 +139,12 @@ test('output collections are copies, not references', () => {
   assert.notEqual(r.value.history, p.history);
   assert.notEqual(r.value.peaks, p.peaks);
 });
+
+test('pre-gate slice never leaves a lone surrogate', () => {
+  const p = goodPayload();
+  p.digger_name = ' '.repeat(255) + '😀'.repeat(10);
+  const r = validateRun(p);
+  assert.equal(r.ok, true);
+  const name = r.value.digger_name;
+  assert.equal(Buffer.from(name, 'utf8').toString('utf8'), name);
+});
