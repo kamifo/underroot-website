@@ -47,9 +47,11 @@ export default async function handler(req, res) {
         (SELECT max(gen)::int FROM runs WHERE NOT quarantined) AS max_gen`;
 
     // Survival curve: share of runs alive at day N, on a fixed grid.
-    const dayRows = await sql`SELECT days FROM runs WHERE NOT quarantined`;
-    const allDays = dayRows.map((r) => r.days);
-    const maxDay = Math.max(0, ...allDays);
+    // One scan serves both the day series (survival, runLenHist) and depthHist.
+    const dayDepthRows = await sql`SELECT days, depth FROM runs WHERE NOT quarantined`;
+    const allDays = dayDepthRows.map((r) => r.days);
+    // reduce, not Math.max(...spread) — spread blows the call stack past ~130k rows.
+    const maxDay = allDays.reduce((m, x) => (x > m ? x : m), 0);
     const survival = [];
     for (let d = 0; d <= maxDay; d += Math.max(1, Math.ceil(maxDay / 60))) {
       survival.push([d, allDays.length ? allDays.filter((x) => x >= d).length / allDays.length : 0]);
@@ -64,9 +66,8 @@ export default async function handler(req, res) {
       }
       return Object.entries(out).map(([b, n]) => [Number(b), n]).sort((a, z) => a[0] - z[0]);
     };
-    const depthRows = await sql`SELECT depth FROM runs WHERE NOT quarantined`;
     const runLenHist = histogram(allDays, 10);
-    const depthHist = histogram(depthRows.map((r) => r.depth), 25);
+    const depthHist = histogram(dayDepthRows.map((r) => r.depth), 25);
 
     // Depth progression percentiles from history curves (25/50/75 per day).
     const histRows = await sql`
