@@ -1,0 +1,12 @@
+{
+  "name": "underroot-website",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test api/_lib/"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.0"
+  }
+}
