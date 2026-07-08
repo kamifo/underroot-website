@@ -15,7 +15,7 @@ const ORIGIN_ALLOW = [
   /^https:\/\/(www\.)?underroot\.se$/,
   /^https:\/\/[a-z0-9-]+\.itch\.zone$/,      // itch.io game embeds
   /^https:\/\/[a-z0-9-]+\.ssl\.hwcdn\.net$/, // itch.io CDN embeds
-  /^https:\/\/[a-z0-9-]+\.vercel\.app$/,     // playtest deploys
+  /^https:\/\/underroot-playtest[a-z0-9-]*\.vercel\.app$/,  // playtest deploys (scoped to our project)
   /^http:\/\/localhost(:\d+)?$/,             // local dev / Godot editor
 ];
 
@@ -24,14 +24,18 @@ export function corsHeaders(origin) {
     'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400',
+    // Unconditional: GET responses are edge-cached (s-maxage). Without Vary
+    // on every response, a cached response computed for one Origin would be
+    // replayed to a different Origin.
+    'Vary': 'Origin',
   };
   if (origin && ORIGIN_ALLOW.some((re) => re.test(origin))) {
     headers['Access-Control-Allow-Origin'] = origin;
-    headers['Vary'] = 'Origin';
   }
   return headers;
 }
 
 export function hashIp(ip, salt) {
+  if (!salt) throw new Error('hashIp: salt is required (set IP_SALT)');
   return createHash('sha256').update(`${salt}:${ip}`).digest('hex').slice(0, 32);
 }

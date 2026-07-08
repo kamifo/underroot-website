@@ -15,7 +15,26 @@ test('cors allows known origins and rejects others', () => {
   assert.equal(corsHeaders('https://underroot.se')['Access-Control-Allow-Origin'], 'https://underroot.se');
   assert.equal(corsHeaders('https://html.itch.zone')['Access-Control-Allow-Origin'], 'https://html.itch.zone');
   assert.equal(corsHeaders('http://localhost:8060')['Access-Control-Allow-Origin'], 'http://localhost:8060');
+  assert.equal(corsHeaders('https://underroot-playtest-abc123.vercel.app')['Access-Control-Allow-Origin'], 'https://underroot-playtest-abc123.vercel.app');
+  assert.equal(corsHeaders('https://evil-site.vercel.app')['Access-Control-Allow-Origin'], undefined);
   assert.equal(corsHeaders('https://evil.example')['Access-Control-Allow-Origin'], undefined);
+});
+
+test('vary is always set (cache safety)', () => {
+  assert.equal(corsHeaders('https://underroot.se')['Vary'], 'Origin');
+  assert.equal(corsHeaders('https://evil.example')['Vary'], 'Origin');
+  assert.equal(corsHeaders(undefined)['Vary'], 'Origin');
+});
+
+test('missing origin gets base headers only', () => {
+  const h = corsHeaders(undefined);
+  assert.equal(h['Access-Control-Allow-Origin'], undefined);
+  assert.equal(h['Access-Control-Allow-Methods'], 'POST, GET, OPTIONS');
+});
+
+test('hashIp requires a salt', () => {
+  assert.throws(() => hashIp('1.2.3.4', ''));
+  assert.throws(() => hashIp('1.2.3.4', undefined));
 });
 
 test('hashIp is stable and does not contain the ip', () => {
