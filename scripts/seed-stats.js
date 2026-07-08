@@ -4,6 +4,13 @@
 const COUNT = Number(process.argv[2] ?? 40);
 const ENDPOINT = process.argv[3] ?? 'http://localhost:3000/api/submit-run';
 
+const url = new URL(ENDPOINT);
+const isLocal = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+if (!isLocal && !process.argv.includes('--allow-remote')) {
+  console.error(`Refusing to seed non-local endpoint ${url.origin} — this injects FAKE runs. Pass --allow-remote if you really mean it.`);
+  process.exit(1);
+}
+
 const CAUSES = ['maw_breach', 'starvation', 'dehydration_away', 'starvation_dehydration_away', 'abandoned'];
 const NAMES = ['Odin', 'Frigg', 'Baldr', 'Heimdall', 'Ullr', 'Eir', 'Vidar', 'Njord', 'Gefjon', 'Sif'];
 const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
@@ -59,11 +66,18 @@ function fakeRun() {
 
 let failed = 0;
 for (let i = 0; i < COUNT; i++) {
-  const r = await fetch(ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(fakeRun()),
-  });
+  let r;
+  try {
+    r = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fakeRun()),
+    });
+  } catch {
+    console.error(`seed ${i}: cannot reach ${ENDPOINT} — is the dev server running?`);
+    failed++;
+    continue;
+  }
   if (!r.ok) { failed++; console.error(`seed ${i}: HTTP ${r.status}`); }
 }
 console.log(`seeded ${COUNT - failed}/${COUNT} runs -> ${ENDPOINT}`);
