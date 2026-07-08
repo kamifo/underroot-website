@@ -48,6 +48,11 @@ function renderBoard(table, rows, cols) {
   table.append(tbody);
 }
 
+function showError() {
+  document.getElementById('stats-error').style.display = 'block';
+  document.getElementById('stats-content').style.display = 'none';
+}
+
 async function main() {
   let data;
   try {
@@ -55,10 +60,19 @@ async function main() {
     if (!res.ok) throw new Error(String(res.status));
     data = await res.json();
   } catch {
-    document.getElementById('stats-error').style.display = 'block';
-    document.getElementById('stats-content').style.display = 'none';
+    showError();
     return;
   }
+  // Render failures (API shape drift, Chart.js missing) must not half-render silently.
+  try {
+    render(data);
+  } catch (err) {
+    console.error('stats render failed:', err);
+    showError();
+  }
+}
+
+function render(data) {
   const { totals, causes, boards, superlatives, charts } = data;
 
   // ---- Empty state: production launches with zero shared runs ----

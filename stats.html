@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="assets/images/underroot_favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" integrity="sha384-JUh163oCRItcbPme8pYnROHQMC6fNKTBWtRG3I3I0erJkzNgL7uxKlNwcrcFKeqF" crossorigin="anonymous" defer></script>
   <script src="/assets/stats.js" defer></script>
   <style>
     :root {
@@ -129,19 +129,19 @@
       <section id="section-survival">
         <h2>Survival</h2>
         <div class="chart-grid">
-          <div class="chart-box"><canvas id="chart-survival"></canvas></div>
-          <div class="chart-box"><canvas id="chart-runlen"></canvas></div>
-          <div class="chart-box"><canvas id="chart-causes"></canvas></div>
-          <div class="chart-box"><canvas id="chart-causes-gen"></canvas></div>
+          <div class="chart-box"><canvas id="chart-survival" role="img" aria-label="Survival curve: share of runs still alive by day"></canvas></div>
+          <div class="chart-box"><canvas id="chart-runlen" role="img" aria-label="Runs by length"></canvas></div>
+          <div class="chart-box"><canvas id="chart-causes" role="img" aria-label="Deaths by cause"></canvas></div>
+          <div class="chart-box"><canvas id="chart-causes-gen" role="img" aria-label="Deaths by cause per generation"></canvas></div>
         </div>
       </section>
 
       <section id="section-dig">
         <h2>The Dig</h2>
         <div class="chart-grid">
-          <div class="chart-box"><canvas id="chart-progression"></canvas></div>
-          <div class="chart-box"><canvas id="chart-depth-hist"></canvas></div>
-          <div class="chart-box"><canvas id="chart-scatter"></canvas></div>
+          <div class="chart-box"><canvas id="chart-progression" role="img" aria-label="Community depth progression: median and quartile band by day"></canvas></div>
+          <div class="chart-box"><canvas id="chart-depth-hist" role="img" aria-label="Runs by final depth"></canvas></div>
+          <div class="chart-box"><canvas id="chart-scatter" role="img" aria-label="Depth versus days survived, one dot per run"></canvas></div>
         </div>
       </section>
     </div>
