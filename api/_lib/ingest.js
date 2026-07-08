@@ -1,0 +1,37 @@
+// Ingest helpers shared by the API routes. Pure module (crypto only).
+import { createHash } from 'node:crypto';
+
+// lineage[0] = the original digger's death — feeds the Original Digger board.
+export function deriveFirstDeath(lineage) {
+  if (!Array.isArray(lineage) || lineage.length === 0) {
+    return { first_death_days: null, first_death_depth: null };
+  }
+  return { first_death_days: lineage[0].days, first_death_depth: lineage[0].depth };
+}
+
+// CORS is a courtesy, not security (validation is the gate) — but keep an
+// allowlist so random sites don't embed the endpoint.
+const ORIGIN_ALLOW = [
+  /^https:\/\/(www\.)?underroot\.se$/,
+  /^https:\/\/[a-z0-9-]+\.itch\.zone$/,      // itch.io game embeds
+  /^https:\/\/[a-z0-9-]+\.ssl\.hwcdn\.net$/, // itch.io CDN embeds
+  /^https:\/\/[a-z0-9-]+\.vercel\.app$/,     // playtest deploys
+  /^http:\/\/localhost(:\d+)?$/,             // local dev / Godot editor
+];
+
+export function corsHeaders(origin) {
+  const headers = {
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+  };
+  if (origin && ORIGIN_ALLOW.some((re) => re.test(origin))) {
+    headers['Access-Control-Allow-Origin'] = origin;
+    headers['Vary'] = 'Origin';
+  }
+  return headers;
+}
+
+export function hashIp(ip, salt) {
+  return createHash('sha256').update(`${salt}:${ip}`).digest('hex').slice(0, 32);
+}
