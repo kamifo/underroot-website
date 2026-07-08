@@ -47,11 +47,19 @@ test('all enum causes are accepted', () => {
 
 test('strips control chars and caps digger_name at 24 chars', () => {
   const p = goodPayload();
-  p.digger_name = 'A BC' + 'x'.repeat(50);
+  p.digger_name = 'A\u0000B\u0007C' + 'x'.repeat(50);
   const r = validateRun(p);
   assert.equal(r.ok, true);
   assert.equal(r.value.digger_name.length, 24);
-  assert.ok(!/[ -]/.test(r.value.digger_name));
+  assert.ok(!/[\u0000-\u001f\u007f]/.test(r.value.digger_name));
+});
+
+test('keeps spaces and # in digger names', () => {
+  const p = goodPayload();
+  p.digger_name = 'Villager #2';
+  const r = validateRun(p);
+  assert.equal(r.ok, true);
+  assert.equal(r.value.digger_name, 'Villager #2');
 });
 
 test('rejects out-of-range numbers', () => {

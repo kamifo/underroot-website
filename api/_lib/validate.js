@@ -38,7 +38,7 @@ function isInt(v) {
 
 export function sanitizeName(raw) {
   const s = String(raw ?? '')
-    .replace(/[ -]/g, '')
+    .replace(/[\u0000-\u001f\u007f]/g, '')
     .trim()
     .slice(0, NAME_MAX);
   return s.length > 0 ? s : 'Unnamed Digger';
