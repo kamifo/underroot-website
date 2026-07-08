@@ -112,3 +112,30 @@ test('missing optional groups are tolerated (old-save submits)', () => {
   assert.deepEqual(r.value.peaks, {});
   assert.deepEqual(r.value.history, []);
 });
+
+test('never splits surrogate pairs when truncating names', () => {
+  const p = goodPayload();
+  p.digger_name = 'A' + '😀'.repeat(30);
+  const r = validateRun(p);
+  assert.equal(r.ok, true);
+  // round-trips through UTF-8 intact (no lone surrogates)
+  const name = r.value.digger_name;
+  assert.equal(Buffer.from(name, 'utf8').toString('utf8'), name);
+  assert.ok([...name].length <= 24);
+});
+
+test('strips unvalidated extra fields from lineage entries', () => {
+  const p = goodPayload();
+  p.lineage[0].junk = 'x'.repeat(5000);
+  const r = validateRun(p);
+  assert.equal(r.ok, true);
+  assert.deepEqual(Object.keys(r.value.lineage[0]).sort(), ['cause', 'days', 'depth', 'gen']);
+});
+
+test('output collections are copies, not references', () => {
+  const p = goodPayload();
+  const r = validateRun(p);
+  assert.notEqual(r.value.lineage, p.lineage);
+  assert.notEqual(r.value.history, p.history);
+  assert.notEqual(r.value.peaks, p.peaks);
+});

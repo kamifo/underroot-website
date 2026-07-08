@@ -37,10 +37,10 @@ function isInt(v) {
 }
 
 export function sanitizeName(raw) {
-  const s = String(raw ?? '')
-    .replace(/[\u0000-\u001f\u007f]/g, '')
-    .trim()
-    .slice(0, NAME_MAX);
+  let s = String(raw ?? '');
+  if (s.length > 256) s = s.slice(0, 256); // cheap pre-gate before regex work
+  s = s.replace(/[\u0000-\u001f\u007f]/g, '').trim();
+  s = [...s].slice(0, NAME_MAX).join(''); // code-point slice: never splits surrogate pairs
   return s.length > 0 ? s : 'Unnamed Digger';
 }
 
@@ -51,7 +51,7 @@ export function validateRun(p) {
   }
   if (p.v !== 1) errors.push('unsupported version');
   if (typeof p.run_uuid !== 'string' || !UUID_RE.test(p.run_uuid)) errors.push('bad run_uuid');
-  if (typeof p.game_version !== 'string' || p.game_version.length > 16) errors.push('bad game_version');
+  if (typeof p.game_version !== 'string' || !/^[0-9A-Za-z.+_-]{1,16}$/.test(p.game_version)) errors.push('bad game_version');
   if (!CAUSES.includes(p.cause)) errors.push('unknown cause');
 
   for (const [k, [lo, hi]] of Object.entries(INT_FIELDS)) {
@@ -131,7 +131,11 @@ export function validateRun(p) {
       wall_hp: p.wall_hp, machines_built: p.machines_built,
       astrolabe_uses: p.astrolabe_uses,
       tasks_fulfilled: p.tasks_fulfilled, tasks_denied: p.tasks_denied,
-      challenges, peaks, lineage, history, cosmetics,
+      challenges: [...challenges],
+      peaks: Object.fromEntries(Object.entries(peaks)),
+      lineage: lineage.map((e) => ({ gen: e.gen, days: e.days, depth: e.depth, cause: e.cause })),
+      history: history.map((row) => [...row]),
+      cosmetics: Object.fromEntries(Object.entries(cosmetics)),
     },
   };
 }
