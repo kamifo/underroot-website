@@ -499,7 +499,8 @@
       canvas.height = hero.clientHeight;
       const lines    = getLines();
       const maxTiles = Math.max(...lines.map(l => l.length * (5 + CHAR_GAP) - CHAR_GAP));
-      TW = Math.max(6, Math.floor(canvas.width * 0.92 / maxTiles));
+      // Cap tile size so the pixel text doesn't dominate wide screens
+      TW = Math.max(6, Math.min(16, Math.floor(canvas.width * 0.92 / maxTiles)));
       TH = TW;
       const lineH  = 5 * TH;
       const totalH = lines.length * lineH + (lines.length - 1) * LINE_GAP * TH;
