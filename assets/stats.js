@@ -84,14 +84,14 @@ async function main() {
     { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
     { label: 'Gen', num: true, fmt: (r) => String(r.gen) },
     { label: 'Fate', fmt: (r) => CAUSE_LABELS[r.cause] ?? r.cause },
-    { label: 'Date', fmt: (r) => r.date },
+    { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
   ]);
 
   renderBoard(document.getElementById('board-unbroken'), boards.unbroken, [
     { label: 'Digger', fmt: (r) => r.digger_name },
     { label: 'Days undying', num: true, fmt: (r) => num(r.days) },
     { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
-    { label: 'Date', fmt: (r) => r.date },
+    { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
   ]);
 
   // ---- Superlatives ----
