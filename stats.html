@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community Stats — Underroot</title>
+  <meta name="description" content="Every run shared from Underroot's death screen — longest lineages, deepest digs, and how villages meet their end. The Maw sees all." />
+  <link rel="icon" type="image/png" href="assets/images/underroot_favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+  <script src="/assets/stats.js" defer></script>
+  <style>
+    :root {
+      --bg:    #14100c;
+      --panel: #1b1611;
+      --ink:   rgba(255,255,255,0.88);
+      --muted: rgba(255,255,255,0.52);
+      --faint: rgba(255,255,255,0.32);
+      --red:   #8c2828;
+      --line:  rgba(255,255,255,0.10);
+      --clay:  #a36936;
+      --maxw:  1080px;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Georgia', serif;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+
+    .doc { max-width: var(--maxw); margin: 0 auto; padding: clamp(40px, 8vw, 90px) clamp(20px, 5vw, 40px) 90px; }
+    .back { display: inline-block; margin-bottom: 34px; color: rgba(255,255,255,0.5); text-decoration: none; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; transition: color 0.2s; }
+    .back:hover { color: #fff; }
+
+    .kicker { font-family: 'Press Start 2P', monospace; font-size: 10px; letter-spacing: 0.12em; color: var(--red); text-transform: uppercase; margin-bottom: 16px; }
+    h1 { font-family: 'Press Start 2P', monospace; font-size: clamp(15px, 3vw, 20px); line-height: 1.5; color: #fff; margin-bottom: 14px; }
+    p.lede { color: rgba(255,255,255,0.66); font-size: 1.05rem; max-width: 640px; margin-bottom: 40px; }
+
+    #stats-error, #empty-state {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 3px;
+      margin: 24px 0 40px;
+      font-size: 0.98rem;
+    }
+
+    section { margin-top: 56px; }
+    section h2 { font-size: 1.35rem; font-weight: normal; letter-spacing: 0.02em; color: rgba(255,255,255,0.95); margin-bottom: 10px; }
+    section p.sub { color: var(--muted); font-size: 0.95rem; font-style: italic; margin-bottom: 18px; max-width: 560px; }
+
+    /* ── Tile rows (hero + superlatives) ─────────────────────────────────── */
+    .tile-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+    .hero-tile {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 3px;
+      padding: 22px 16px; text-align: center; transition: border-color 0.2s;
+    }
+    .hero-tile:hover { border-color: rgba(255,255,255,0.25); }
+    .hero-tile .num {
+      font-family: 'Press Start 2P', monospace; font-size: clamp(0.85rem, 2vw, 1.15rem);
+      color: var(--clay); line-height: 1.5; margin-bottom: 10px; word-break: break-word;
+    }
+    .hero-tile .lbl { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+    /* ── Boards ───────────────────────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 3px; background: var(--panel); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td { padding: 11px 16px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    th { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: normal; background: rgba(255,255,255,0.03); }
+    td { color: rgba(255,255,255,0.82); }
+    tr:last-child td { border-bottom: none; }
+    th.num, td.num { text-align: right; }
+    tbody tr:hover td { background: rgba(255,255,255,0.025); }
+
+    /* ── Charts ───────────────────────────────────────────────────────────── */
+    .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px; margin-top: 22px; }
+    .chart-box {
+      position: relative; height: 320px; padding: 16px;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 3px;
+    }
+
+    /* ── Footer (matches index.html) ─────────────────────────────────────── */
+    footer { background: #0c0907; border-top: 1px solid var(--line); padding: clamp(48px, 7vw, 80px) clamp(20px, 5vw, 48px) 40px; text-align: center; }
+    footer .foot-play {
+      display: inline-flex; align-items: center; gap: 10px; background: rgba(140,40,40,0.9); border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 2px; padding: 13px 30px; color: #fff; text-decoration: none; letter-spacing: 0.14em; text-transform: uppercase;
+      font-size: 14px; box-shadow: 0 0 24px rgba(140,40,40,0.45); transition: background 0.2s, box-shadow 0.2s;
+    }
+    footer .foot-play:hover { background: rgba(160,46,46,1); box-shadow: 0 0 32px rgba(140,40,40,0.65); }
+    footer .foot-links { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin: 30px 0 26px; }
+    footer .foot-links a { color: var(--muted); text-decoration: none; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; transition: color 0.2s; }
+    footer .foot-links a:hover { color: #fff; }
+    footer .legal { color: var(--faint); font-size: 12px; letter-spacing: 0.06em; line-height: 1.8; }
+  </style>
+</head>
+<body>
+
+  <article class="doc">
+    <a class="back" href="index.html">← Back to Underroot</a>
+    <div class="kicker">Community Archive</div>
+    <h1>Community Stats</h1>
+    <p class="lede">Every run below was shared by a player from the death screen. The Maw sees all.</p>
+
+    <div id="stats-error">The village archive is unreachable right now — try again soon.</div>
+    <div id="empty-state">No runs shared yet — be the first: share your run from the death screen.</div>
+
+    <div id="stats-content">
+      <section class="tile-row" id="hero"></section>
+
+      <section id="section-lineage">
+        <h2>Longest Lineages</h2>
+        <div class="table-wrap"><table id="board-lineage"></table></div>
+      </section>
+
+      <section id="section-unbroken">
+        <h2>The Unbroken — longest without a single death</h2>
+        <p class="sub">How far the <em>original</em> digger got before the village first mourned.</p>
+        <div class="table-wrap"><table id="board-unbroken"></table></div>
+      </section>
+
+      <section class="tile-row" id="superlatives"></section>
+
+      <section id="section-survival">
+        <h2>Survival</h2>
+        <div class="chart-grid">
+          <div class="chart-box"><canvas id="chart-survival"></canvas></div>
+          <div class="chart-box"><canvas id="chart-runlen"></canvas></div>
+          <div class="chart-box"><canvas id="chart-causes"></canvas></div>
+          <div class="chart-box"><canvas id="chart-causes-gen"></canvas></div>
+        </div>
+      </section>
+
+      <section id="section-dig">
+        <h2>The Dig</h2>
+        <div class="chart-grid">
+          <div class="chart-box"><canvas id="chart-progression"></canvas></div>
+          <div class="chart-box"><canvas id="chart-depth-hist"></canvas></div>
+          <div class="chart-box"><canvas id="chart-scatter"></canvas></div>
+        </div>
+      </section>
+    </div>
+  </article>
+
+  <footer>
+    <a class="foot-play" href="https://play.underroot.se">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+      Play Free in Browser
+    </a>
+    <div class="foot-links">
+      <a href="story.html">Story</a>
+      <a href="music.html">Music</a>
+      <a href="stats.html">Stats</a>
+      <a href="eula.html">EULA</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+    <p class="legal">A Swavvy AB game · © 2026 Swavvy AB. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
