@@ -1,0 +1,20 @@
+{
+  "v": 1,
+  "run_uuid": "3b9f2a44-1c9e-4c7a-9d1e-2f6a8b0c4d5e",
+  "game_version": "1.0",
+  "digger_name": "Heimdall",
+  "gen": 8, "days": 85, "depth": 324, "blocks": 6601,
+  "cause": "maw_breach",
+  "discoveries": 61, "discovery_pct": 76.0,
+  "villager_deaths": 210, "peak_population": 342,
+  "wall_hp": 123150, "machines_built": 21,
+  "astrolabe_uses": 1, "tasks_fulfilled": 149, "tasks_denied": 67,
+  "challenges": [],
+  "peaks": { "gold": 4034, "coal": 270 },
+  "lineage": [
+    { "gen": 1, "days": 0, "depth": 3, "cause": "maw_breach" },
+    { "gen": 8, "days": 85, "depth": 324, "cause": "maw_breach" }
+  ],
+  "history": [[1, 12, 80, 6, 0], [40, 200, 3000, 100, 50], [85, 324, 6601, 342, 210]],
+  "cosmetics": { "headwear": "head_crown", "tunic_dye": "slate" }
+}
