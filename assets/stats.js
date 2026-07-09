@@ -1,6 +1,6 @@
 // Renders /api/stats onto stats.html. All player-provided strings go through
-// textContent (via el()) — never innerHTML. totals.souls / totals.blocks arrive
-// as JSON strings (bigint serialization from Postgres) — always Number() them.
+// textContent (via el()) — never innerHTML. bigint aggregates (e.g. totals.souls)
+// arrive as JSON strings (Postgres serialization) — always Number() them.
 import { drawDigger } from './digger.js';
 
 // A leaderboard name cell: a small digger canvas + the digger name. The canvas
