@@ -45,6 +45,9 @@ const CSS = `
   opacity:0; transition:opacity 0.22s ease;
 }
 .pc-backdrop.pc-open { opacity:1; }
+/* Author-level display:flex above beats the UA [hidden] rule, so hiding must be
+   explicit — otherwise a closed backdrop lingers at opacity:0 and eats clicks. */
+.pc-backdrop[hidden] { display:none; }
 
 /* ── the card ─────────────────────────────────────────────────────────── */
 .pc-card {
@@ -105,12 +108,12 @@ const CSS = `
 
 /* ── trigger affordance on the name cells ─────────────────────────────── */
 .pc-trigger { cursor:pointer; }
-.pc-trigger .avatar-canvas { transition:box-shadow 0.18s, transform 0.18s; }
+.pc-trigger .avatar-canvas, .pc-trigger span { transition:box-shadow 0.18s, transform 0.18s, color 0.18s; }
 .pc-trigger:hover .avatar-canvas, .pc-trigger:focus-visible .avatar-canvas {
-  box-shadow:0 0 0 1px var(--clay, #a36936), 0 0 12px rgba(163,105,54,0.55); transform:translateY(-1px);
+  box-shadow:0 0 0 1.5px var(--clay, #a36936), 0 0 16px rgba(163,105,54,0.75); transform:translateY(-1px) scale(1.08);
 }
+.pc-trigger:hover span, .pc-trigger:focus-visible span { color:var(--clay, #a36936); text-decoration:underline; text-underline-offset:3px; }
 .pc-trigger:focus-visible { outline:none; }
-.pc-trigger:focus-visible span { text-decoration:underline; text-underline-offset:3px; }
 
 @media (prefers-reduced-motion: reduce) {
   .pc-backdrop, .pc-card { transition:none; }
@@ -220,6 +223,7 @@ export function attachCard(cell, run) {
   cell.classList.add('pc-trigger');
   cell.setAttribute('role', 'button');
   cell.tabIndex = 0;
+  cell.title = 'View card';
   cell.setAttribute('aria-label', `View ${run.digger_name ?? run.name ?? 'digger'}'s card`);
   const normalized = {
     name: run.digger_name ?? run.name,
