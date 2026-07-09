@@ -109,16 +109,445 @@ function _tunic_collar(ci, deep) {
   ci.draw_colored_polygon([V(-3.0, -39.0), V(3.0, -39.0), V(1.6, -36.0), V(0.0, -34.8), V(-1.6, -36.0)], deep);
 }
 
-// Temporary minimal stubs so drawFull runs end-to-end in Task 1; each is REPLACED
-// by its full port in Task 2/3.
-function _draw_boots() {}
-function _draw_legs() {}
-function _draw_tunic(ci, loadout) { const base = _tunic_dye(loadout); ci.draw_rect(Rect2(-7.0, -39.0, 14.0, 14.0), base); _tunic_collar(ci, Color(base.r * 0.58, base.g * 0.58, base.b * 0.58)); }
-function _draw_extra_back() {}
-function _draw_arms() {}
-function _draw_lantern() {}
-function _draw_beard() {}
-function _draw_hair() {}
+function _draw_boots(ci, loadout, low_perf) {
+  // Shared uppers, a shaft highlight and a darker sole give the boots weight;
+  // the cuff / toe-plate / strap then varies per style.
+  ci.draw_rect(Rect2(-6.0, -9.0, 5.0, 9.0), Color(0.31, 0.22, 0.13));   // left upper
+  ci.draw_rect(Rect2(1.0, -9.0, 5.0, 9.0), Color(0.26, 0.18, 0.11));    // right upper
+  ci.draw_rect(Rect2(-6.0, -9.0, 5.0, 1.6), Color(0.39, 0.29, 0.18));   // shaft highlight
+  ci.draw_rect(Rect2(1.0, -9.0, 5.0, 1.6), Color(0.33, 0.24, 0.14));
+  ci.draw_rect(Rect2(-6.6, -2.2, 6.1, 2.2), Color(0.15, 0.10, 0.06));   // left sole
+  ci.draw_rect(Rect2(0.5, -2.2, 6.1, 2.2), Color(0.12, 0.08, 0.05));    // right sole
+  switch (String(loadout.boots ?? 'boots_plain')) {
+    case 'boots_furcuff':
+      ci.draw_rect(Rect2(-6.5, -11.0, 6.0, 2.5), Color(0.79, 0.74, 0.64));
+      ci.draw_rect(Rect2(0.5, -11.0, 6.0, 2.5), Color(0.70, 0.65, 0.55));
+      if (!low_perf) {
+        ci.draw_circle(V(-3.5, -10.0), 0.9, Color(0.86, 0.82, 0.72));
+        ci.draw_circle(V(3.5, -10.0), 0.9, Color(0.78, 0.74, 0.64));
+      }
+      break;
+    case 'boots_ironshod':
+      ci.draw_rect(Rect2(-6.5, -3.4, 6.0, 3.4), Color(0.55, 0.58, 0.61));  // toe cap
+      ci.draw_rect(Rect2(0.5, -3.4, 6.0, 3.4), Color(0.50, 0.53, 0.56));
+      if (!low_perf) {
+        ci.draw_circle(V(-3.5, -1.4), 0.6, Color(0.72, 0.74, 0.77));  // rivets
+        ci.draw_circle(V(3.5, -1.4), 0.6, Color(0.66, 0.68, 0.71));
+      }
+      break;
+    case 'boots_laced':
+      ci.draw_rect(Rect2(-4.6, -9.0, 2.2, 8.0), Color(0.38, 0.28, 0.18));  // tongues
+      ci.draw_rect(Rect2(2.4, -9.0, 2.2, 8.0), Color(0.33, 0.24, 0.15));
+      if (!low_perf) {
+        const lc = Color(0.74, 0.65, 0.46);
+        for (let i = 0; i < 3; i++) {
+          const yl = -7.6 + i * 2.4;
+          ci.draw_line(V(-5.0, yl), V(-2.0, yl - 1.2), lc, 0.6);          // left X-laces
+          ci.draw_line(V(-5.0, yl - 1.2), V(-2.0, yl), lc, 0.6);
+          ci.draw_line(V(2.0, yl), V(5.0, yl - 1.2), lc, 0.6);            // right X-laces
+          ci.draw_line(V(2.0, yl - 1.2), V(5.0, yl), lc, 0.6);
+        }
+      }
+      break;
+    case 'boots_tall':
+      ci.draw_rect(Rect2(-6.0, -13.5, 5.0, 5.0), Color(0.31, 0.22, 0.13));  // taller shaft
+      ci.draw_rect(Rect2(1.0, -13.5, 5.0, 5.0), Color(0.26, 0.18, 0.11));
+      ci.draw_rect(Rect2(-6.6, -13.8, 6.1, 2.2), Color(0.39, 0.28, 0.17));  // fold-over cuff
+      ci.draw_rect(Rect2(0.5, -13.8, 6.1, 2.2), Color(0.34, 0.24, 0.15));
+      break;
+    case 'boots_warmarch':
+      // Violet plate greaves over the shared uppers, glowing cuff studs — the
+      // Two Fronts mastery trophy.
+      ci.draw_rect(Rect2(-6.0, -9.0, 5.0, 9.0), Color(0.37, 0.26, 0.53));   // left plate
+      ci.draw_rect(Rect2(1.0, -9.0, 5.0, 9.0), Color(0.31, 0.21, 0.45));    // right plate
+      ci.draw_rect(Rect2(-6.0, -9.0, 5.0, 1.4), Color(0.60, 0.47, 0.77));   // shaft highlights
+      ci.draw_rect(Rect2(1.0, -9.0, 5.0, 1.4), Color(0.52, 0.40, 0.68));
+      ci.draw_rect(Rect2(-6.4, -13.0, 5.4, 2.2), Color(0.21, 0.14, 0.31));  // left cuff
+      ci.draw_rect(Rect2(0.6, -13.0, 5.4, 2.2), Color(0.18, 0.12, 0.27));   // right cuff
+      ci.draw_rect(Rect2(-6.2, -6.6, 5.4, 1.3), Color(0.21, 0.14, 0.31));   // straps
+      ci.draw_rect(Rect2(0.8, -6.6, 5.4, 1.3), Color(0.18, 0.12, 0.27));
+      if (!low_perf) {
+        ci.draw_circle(V(-3.4, -11.9), 1.1, Color(0.79, 0.65, 0.94, 0.30));  // stud glow
+        ci.draw_circle(V(3.6, -11.9), 1.1, Color(0.79, 0.65, 0.94, 0.30));
+        ci.draw_circle(V(-3.4, -11.9), 0.6, Color(0.94, 0.89, 1.0));         // studs
+        ci.draw_circle(V(3.6, -11.9), 0.6, Color(0.94, 0.89, 1.0));
+      }
+      break;
+    default: // boots_plain (default) — buckle strap
+      ci.draw_rect(Rect2(-6.2, -6.6, 5.4, 1.3), Color(0.20, 0.14, 0.09));
+      ci.draw_rect(Rect2(0.8, -6.6, 5.4, 1.3), Color(0.18, 0.12, 0.08));
+      if (!low_perf) {
+        ci.draw_rect(Rect2(-2.4, -6.8, 1.4, 1.7), Color(0.62, 0.49, 0.16));  // buckles
+        ci.draw_rect(Rect2(2.6, -6.8, 1.4, 1.7), Color(0.56, 0.44, 0.14));
+      }
+      break;
+  }
+}
+
+function _draw_legs(ci, _loadout, _low_perf) {
+  ci.draw_rect(Rect2(-5.0, -23.0, 4.0, 14.0), Color(0.36, 0.29, 0.21));
+  ci.draw_rect(Rect2(1.0, -23.0, 4.0, 14.0), Color(0.31, 0.25, 0.19));
+}
+
+function _draw_tunic(ci, loadout, low_perf) {
+  const base = _tunic_dye(loadout);
+  const dark = Color(base.r * 0.82, base.g * 0.82, base.b * 0.82);
+  const deep = Color(base.r * 0.58, base.g * 0.58, base.b * 0.58);
+  const lite = Color(Math.min(base.r * 1.20, 1.0), Math.min(base.g * 1.18, 1.0), Math.min(base.b * 1.16, 1.0));
+  switch (String(loadout.tunic ?? 'tunic_plain')) {
+    case 'tunic_furtrim':
+      ci.draw_rect(Rect2(-7.0, -39.0, 7.0, 14.0), base);
+      ci.draw_rect(Rect2(0.0, -39.0, 7.0, 14.0), dark);
+      ci.draw_rect(Rect2(-7.5, -27.2, 15.0, 2.6), Color(0.79, 0.74, 0.64));  // fur hem
+      if (!low_perf) {
+        for (const fx of [-6.0, -3.6, -1.2, 1.2, 3.6, 6.0]) {
+          ci.draw_circle(V(fx, -26.0), 1.0, Color(0.86, 0.82, 0.72));
+        }
+      }
+      _tunic_torso_detail(ci, deep, lite, low_perf);
+      break;
+    case 'tunic_robe':
+      ci.draw_rect(Rect2(-8.0, -39.0, 16.0, 17.0), base);
+      ci.draw_rect(Rect2(0.0, -39.0, 8.0, 17.0), dark);
+      ci.draw_rect(Rect2(-1.0, -39.0, 2.0, 17.0), deep);              // center fold
+      ci.draw_rect(Rect2(-8.0, -30.0, 16.0, 1.6), deep);              // waist sash
+      if (!low_perf) {
+        ci.draw_rect(Rect2(-8.0, -23.8, 16.0, 1.4), Color(0.69, 0.54, 0.18, 0.85));  // hem braid
+      }
+      _tunic_collar(ci, deep);
+      break;
+    case 'tunic_jerkin': {
+      ci.draw_rect(Rect2(-7.0, -39.0, 7.0, 14.0), base);   // dyed undershirt
+      ci.draw_rect(Rect2(0.0, -39.0, 7.0, 14.0), dark);
+      const lth = Color(0.34, 0.24, 0.15);
+      const lthd = Color(0.28, 0.19, 0.11);
+      ci.draw_colored_polygon([  // left leather panel, laced V-opening
+        V(-7.0, -39.0), V(-1.5, -39.0), V(-0.5, -31.0),
+        V(-1.0, -25.0), V(-7.0, -25.0),
+      ], lth);
+      ci.draw_colored_polygon([  // right leather panel
+        V(7.0, -39.0), V(1.5, -39.0), V(0.5, -31.0),
+        V(1.0, -25.0), V(7.0, -25.0),
+      ], lthd);
+      if (!low_perf) {
+        ci.draw_rect(Rect2(-1.5, -37.0, 3.0, 0.7), Color(0.72, 0.62, 0.42));  // laces
+        ci.draw_rect(Rect2(-1.2, -34.5, 2.4, 0.7), Color(0.72, 0.62, 0.42));
+        ci.draw_rect(Rect2(-0.9, -32.0, 1.8, 0.7), Color(0.72, 0.62, 0.42));
+      }
+      ci.draw_rect(Rect2(-7.0, -26.4, 14.0, 1.3), lthd);  // hem
+      break;
+    }
+    case 'tunic_gambeson':
+      ci.draw_rect(Rect2(-7.0, -39.0, 7.0, 14.0), base);
+      ci.draw_rect(Rect2(0.0, -39.0, 7.0, 14.0), dark);
+      ci.draw_rect(Rect2(-3.5, -41.0, 7.0, 2.6), deep);    // standing collar
+      if (!low_perf) {
+        for (const qy of [-36.0, -33.0, -30.0, -27.5]) {
+          ci.draw_rect(Rect2(-7.0, qy, 14.0, 0.7), deep);   // quilt rows
+        }
+        ci.draw_rect(Rect2(-3.7, -37.0, 0.7, 11.0), deep);    // quilt columns
+        ci.draw_rect(Rect2(3.0, -37.0, 0.7, 11.0), deep);
+      }
+      ci.draw_rect(Rect2(-7.0, -39.0, 1.4, 14.0), lite);   // left light edge
+      ci.draw_rect(Rect2(-7.0, -26.4, 14.0, 1.3), deep);   // hem shadow
+      break;
+    case 'tunic_oilskin':
+      // Storm-blue oilskin — Eye of the Storm mastery trophy. Own blue palette
+      // (ignores the dye), a shoulder mantle over the arm-tops, a glowing collar
+      // clasp, and rain running off.
+      ci.draw_rect(Rect2(-7.0, -39.0, 7.0, 14.0), Color(0.23, 0.32, 0.49));   // left body
+      ci.draw_rect(Rect2(0.0, -39.0, 7.0, 14.0), Color(0.16, 0.24, 0.38));    // right body
+      ci.draw_rect(Rect2(-7.0, -39.0, 1.4, 14.0), Color(0.37, 0.52, 0.72));   // left light edge
+      ci.draw_rect(Rect2(-7.0, -26.4, 14.0, 1.3), Color(0.09, 0.15, 0.25));   // hem shadow
+      ci.draw_colored_polygon([   // shoulder mantle over arm-tops
+        V(-8.5, -39.0), V(8.5, -39.0), V(8.5, -35.0),
+        V(5.0, -33.0), V(0.0, -34.5), V(-5.0, -33.0), V(-8.5, -35.0),
+      ], Color(0.19, 0.28, 0.43));
+      ci.draw_colored_polygon([   // collar
+        V(-3.0, -39.0), V(3.0, -39.0), V(1.6, -36.0),
+        V(0.0, -34.8), V(-1.6, -36.0),
+      ], Color(0.11, 0.19, 0.31));
+      if (!low_perf) {
+        ci.draw_circle(V(0.0, -37.3), 1.8, Color(0.68, 0.88, 1.0, 0.30));   // clasp glow
+        ci.draw_line(V(-6.0, -30.0), V(-6.6, -26.0), Color(0.62, 0.75, 0.91, 0.8), 0.5);
+        ci.draw_line(V(5.5, -31.0), V(4.9, -27.0), Color(0.62, 0.75, 0.91, 0.8), 0.5);
+      }
+      ci.draw_circle(V(0.0, -37.3), 0.9, Color(0.89, 0.96, 1.0));            // clasp
+      break;
+    default: // tunic_plain (default)
+      ci.draw_rect(Rect2(-7.0, -39.0, 7.0, 14.0), base);
+      ci.draw_rect(Rect2(0.0, -39.0, 7.0, 14.0), dark);
+      _tunic_torso_detail(ci, deep, lite, low_perf);
+      break;
+  }
+}
+
+// Shared torso shading: a light front edge, a center seam, a hem shadow, the
+// collar, and lacing rungs — keeps the plain/fur-trim tunic from reading flat.
+function _tunic_torso_detail(ci, deep, lite, low_perf) {
+  ci.draw_rect(Rect2(-7.0, -39.0, 1.4, 14.0), lite);   // left light edge
+  ci.draw_rect(Rect2(-0.6, -39.0, 1.2, 13.0), deep);   // center seam
+  ci.draw_rect(Rect2(-7.0, -26.4, 14.0, 1.3), deep);   // hem shadow
+  _tunic_collar(ci, deep);
+  if (!low_perf) {
+    ci.draw_rect(Rect2(-1.9, -37.2, 3.8, 0.7), lite);  // lacing rungs
+    ci.draw_rect(Rect2(-1.9, -35.2, 3.8, 0.7), lite);
+    ci.draw_rect(Rect2(-1.9, -33.2, 3.8, 0.7), lite);
+  }
+}
+
+function _draw_extra_back(ci, loadout, low_perf) {
+  switch (String(loadout.extra ?? 'extra_none')) {
+    case 'extra_amulet':
+      // A cord around the neck with a gem pendant on the chest — the wager prize.
+      ci.draw_line(V(-3.0, -38.5), V(0.0, -33.5), Color(0.55, 0.45, 0.28), 0.8);
+      ci.draw_line(V(3.0, -38.5), V(0.0, -33.5), Color(0.45, 0.36, 0.22), 0.8);
+      ci.draw_circle(V(0.0, -32.8), 1.9, Color(0.80, 0.66, 0.22));   // gold setting
+      ci.draw_circle(V(0.0, -32.8), 1.1, Color(0.45, 0.86, 0.90));   // gem
+      if (!low_perf) {
+        ci.draw_circle(V(-0.5, -33.3), 0.4, Color(0.92, 0.98, 1.0));  // glint
+      }
+      break;
+    case 'extra_mantle':
+      if (low_perf) {
+        ci.draw_rect(Rect2(-8.0, -41.0, 16.0, 4.5), Color(0.82, 0.78, 0.68));
+      } else {
+        ci.draw_colored_polygon([
+          V(-8.0, -41.0), V(8.0, -41.0), V(8.0, -37.0),
+          V(6.0, -34.5), V(4.0, -37.0), V(2.0, -34.5),
+          V(0.0, -37.0), V(-2.0, -34.5), V(-4.0, -37.0),
+          V(-6.0, -34.5), V(-8.0, -37.0),
+        ], Color(0.82, 0.78, 0.68));
+      }
+      break;
+    case 'extra_sash':
+      // Diagonal gold mourning sash with a small candle pin — The Lone Villager
+      // mastery trophy. Carries the memory of the village that's gone.
+      ci.draw_colored_polygon([
+        V(-7.0, -39.0), V(-4.6, -39.0), V(6.0, -26.0), V(3.6, -26.0),
+      ], Color(0.74, 0.60, 0.24));
+      ci.draw_line(V(-7.0, -39.0), V(3.6, -26.0), Color(0.12, 0.10, 0.07), 0.5);
+      ci.draw_line(V(-4.6, -39.0), V(6.0, -26.0), Color(0.12, 0.10, 0.07), 0.5);
+      if (!low_perf) {
+        ci.draw_circle(V(-0.2, -32.6), 1.6, Color(1.0, 0.82, 0.36, 0.28));  // flame glow
+      }
+      ci.draw_rect(Rect2(-0.7, -33.0, 1.4, 2.4), Color(0.90, 0.86, 0.74));          // candle
+      ci.draw_circle(V(0.0, -33.4), 0.7, Color(1.0, 0.78, 0.30));            // flame
+      break;
+    default: // none (default) — nothing
+      break;
+  }
+}
+
+function _draw_arms(ci, loadout, _low_perf) {
+  const base = _tunic_dye(loadout);
+  const dark = Color(base.r * 0.82, base.g * 0.82, base.b * 0.82);
+  ci.draw_rect(Rect2(-12.0, -38.0, 5.0, 12.0), base);  // left
+  ci.draw_rect(Rect2(7.0, -38.0, 5.0, 12.0), dark);    // right
+  // shoulder seams (lighter) + wrist cuffs (darker) so the sleeves read
+  ci.draw_rect(Rect2(-12.0, -38.0, 5.0, 1.4), Color(Math.min(base.r * 1.18, 1.0), Math.min(base.g * 1.16, 1.0), Math.min(base.b * 1.14, 1.0)));
+  ci.draw_rect(Rect2(7.0, -38.0, 5.0, 1.4), Color(Math.min(dark.r * 1.15, 1.0), Math.min(dark.g * 1.13, 1.0), Math.min(dark.b * 1.12, 1.0)));
+  ci.draw_rect(Rect2(-12.0, -28.0, 5.0, 2.0), Color(base.r * 0.62, base.g * 0.62, base.b * 0.62));
+  ci.draw_rect(Rect2(7.0, -28.0, 5.0, 2.0), Color(dark.r * 0.68, dark.g * 0.68, dark.b * 0.68));
+}
+
+function _draw_lantern(ci) {
+  ci.draw_circle(V(-12.5, -29.0), 8.0, Color(1.0, 0.85, 0.30, 0.28));
+  ci.draw_rect(Rect2(-15.0, -33.0, 5.0, 8.0), Color(0.58, 0.44, 0.14));
+  ci.draw_rect(Rect2(-15.0, -33.0, 5.0, 2.0), Color(0.72, 0.56, 0.22));
+}
+
+function _draw_beard(ci, loadout, low_perf) {
+  // Beards sit on the lower face (top edge <= -43, below the eye line at -46.5)
+  // so they never crowd the eyes regardless of colour.
+  const col = Color.html(String(loadout.beard_color ?? '#9a6a40'));
+  const dark = Color(col.r * 0.80, col.g * 0.78, col.b * 0.74);
+  const lite = Color(Math.min(col.r * 1.20, 1.0), Math.min(col.g * 1.16, 1.0), Math.min(col.b * 1.12, 1.0));
+  switch (String(loadout.beard ?? 'beard_stubble')) {
+    case 'beard_clean':
+      break;
+    case 'beard_goatee':
+      ci.draw_colored_polygon([  // moustache
+        V(-3.0, -43.6), V(3.0, -43.6), V(2.2, -41.9),
+        V(0.0, -42.4), V(-2.2, -41.9),
+      ], col);
+      ci.draw_colored_polygon([  // chin tuft
+        V(-2.3, -41.2), V(2.3, -41.2), V(1.8, -37.0),
+        V(0.0, -35.6), V(-1.8, -37.0),
+      ], col);
+      if (!low_perf) {
+        ci.draw_rect(Rect2(-0.5, -40.5, 1.0, 3.6), dark);
+      }
+      break;
+    case 'beard_braided':
+      ci.draw_colored_polygon([
+        V(-5.0, -43.5), V(5.0, -43.5), V(4.5, -40.0),
+        V(3.0, -37.5), V(0.0, -36.5), V(-3.0, -37.5),
+        V(-4.5, -40.0),
+      ], col);
+      ci.draw_colored_polygon([  // left braid
+        V(-3.2, -38.0), V(-0.6, -38.0), V(-0.9, -32.0),
+        V(-1.9, -30.5), V(-2.9, -32.0),
+      ], col);
+      ci.draw_colored_polygon([  // right braid
+        V(0.6, -38.0), V(3.2, -38.0), V(2.9, -32.0),
+        V(1.9, -30.5), V(0.9, -32.0),
+      ], col);
+      if (!low_perf) {
+        ci.draw_rect(Rect2(-3.0, -34.6, 2.2, 1.4), lite);  // binding rings
+        ci.draw_rect(Rect2(0.8, -34.6, 2.2, 1.4), lite);
+      }
+      break;
+    case 'beard_bushy':
+      ci.draw_colored_polygon([
+        V(-6.5, -44.5), V(6.5, -44.5), V(6.2, -39.0),
+        V(4.0, -34.0), V(0.0, -32.5), V(-4.0, -34.0),
+        V(-6.2, -39.0),
+      ], col);
+      if (!low_perf) {
+        ci.draw_colored_polygon([  // moustache shadow
+          V(-4.0, -44.0), V(4.0, -44.0), V(3.0, -42.2),
+          V(0.0, -43.0), V(-3.0, -42.2),
+        ], dark);
+        ci.draw_rect(Rect2(-0.7, -43.0, 1.4, 8.5), Color(lite.r, lite.g, lite.b, 0.45));
+      }
+      break;
+    case 'beard_long':
+      ci.draw_colored_polygon([  // full mass
+        V(-6.0, -44.0), V(6.0, -44.0), V(5.5, -39.5),
+        V(3.5, -35.5), V(-3.5, -35.5), V(-5.5, -39.5),
+      ], col);
+      ci.draw_colored_polygon([  // long tapering braid
+        V(-3.5, -35.5), V(3.5, -35.5), V(2.5, -30.0),
+        V(0.0, -26.0), V(-2.5, -30.0),
+      ], col);
+      if (!low_perf) {
+        ci.draw_rect(Rect2(-3.0, -34.6, 6.0, 1.2), dark);
+        ci.draw_rect(Rect2(-2.2, -30.6, 4.4, 1.1), lite);
+      }
+      break;
+    default: { // stubble (default) — faint jaw shadow + a hint of moustache
+      const faint = Color(col.r, col.g, col.b, 0.5);
+      ci.draw_colored_polygon([
+        V(-5.5, -43.3), V(5.5, -43.3), V(5.0, -40.5),
+        V(3.0, -38.6), V(0.0, -38.0), V(-3.0, -38.6),
+        V(-5.0, -40.5),
+      ], faint);
+      ci.draw_rect(Rect2(-2.6, -43.4, 5.2, 1.1), faint);
+      break;
+    }
+  }
+}
+
+function _draw_hair(ci, loadout, low_perf) {
+  // The hairline across the forehead stays at/above y=-49 — clear of the eyes at
+  // -46.5 — so the face always reads. Side-locks and sideburns frame it without
+  // crossing the eye line; the crown still covers the scalp so no skin shows on top.
+  const col = Color.html(String(loadout.hair_color ?? '#6b4a2e'));
+  const dark = Color(col.r * 0.78, col.g * 0.76, col.b * 0.72);
+  const lite = Color(Math.min(col.r * 1.28, 1.0), Math.min(col.g * 1.24, 1.0), Math.min(col.b * 1.18, 1.0));
+  switch (String(loadout.hair ?? 'hair_short')) {
+    case 'hair_bald':
+      break;
+    case 'hair_long':
+      ci.draw_colored_polygon([  // left lock (behind face)
+        V(-7.4, -51.0), V(-9.2, -48.0), V(-9.0, -40.0),
+        V(-8.0, -33.0), V(-6.5, -31.0), V(-5.0, -33.0),
+        V(-5.2, -40.0), V(-6.2, -47.0), V(-7.0, -49.5),
+      ], dark);
+      ci.draw_colored_polygon([  // right lock
+        V(7.4, -51.0), V(9.2, -48.0), V(9.0, -40.0),
+        V(8.0, -33.0), V(6.5, -31.0), V(5.0, -33.0),
+        V(5.2, -40.0), V(6.2, -47.0), V(7.0, -49.5),
+      ], dark);
+      ci.draw_colored_polygon([  // crown over the top
+        V(-7.2, -49.0), V(-7.4, -51.5), V(-4.5, -53.6),
+        V(0.0, -54.4), V(4.5, -53.6), V(7.4, -51.5),
+        V(7.2, -49.0), V(4.8, -49.4), V(0.0, -49.6),
+        V(-4.8, -49.4),
+      ], col);
+      if (!low_perf) {
+        ci.draw_line(V(-3.0, -53.0), V(-1.0, -50.0), lite, 0.7);
+        ci.draw_line(V(2.5, -53.0), V(1.0, -50.0), lite, 0.7);
+      }
+      break;
+    case 'hair_topknot':
+      ci.draw_colored_polygon([  // tight pulled-back crown
+        V(-6.5, -50.0), V(-6.0, -52.0), V(-3.0, -53.6),
+        V(0.0, -54.0), V(3.0, -53.6), V(6.0, -52.0),
+        V(6.5, -50.0), V(3.5, -50.4), V(0.0, -50.6),
+        V(-3.5, -50.4),
+      ], col);
+      ci.draw_rect(Rect2(-1.0, -57.0, 2.0, 4.0), col);   // stalk
+      ci.draw_circle(V(0.0, -57.6), 2.8, col);            // bun
+      if (!low_perf) {
+        ci.draw_circle(V(0.9, -58.3), 1.1, lite);
+      }
+      break;
+    case 'hair_ponytail':
+      ci.draw_colored_polygon([  // tail (behind, to one side)
+        V(6.8, -52.0), V(9.2, -51.0), V(9.6, -45.0),
+        V(9.0, -38.0), V(7.8, -35.5), V(6.8, -37.5),
+        V(7.2, -44.0), V(6.0, -50.0),
+      ], dark);
+      ci.draw_colored_polygon([  // crown, open face
+        V(-7.0, -49.0), V(-7.3, -51.5), V(-4.5, -53.4),
+        V(0.0, -54.2), V(4.5, -53.4), V(7.3, -51.5),
+        V(7.0, -49.0), V(4.5, -49.4), V(0.0, -49.6),
+        V(-4.5, -49.4),
+      ], col);
+      if (!low_perf) {
+        ci.draw_rect(Rect2(6.4, -46.2, 2.6, 1.4), lite);  // tie band
+      }
+      break;
+    case 'hair_mohawk':
+      ci.draw_colored_polygon([  // central fin, bare sides
+        V(-2.5, -50.0), V(-2.2, -55.0), V(-1.0, -58.5),
+        V(0.2, -59.0), V(1.2, -57.5), V(2.0, -54.0),
+        V(2.5, -50.0),
+      ], col);
+      if (!low_perf) {
+        ci.draw_line(V(0.0, -57.5), V(0.0, -51.0), lite, 0.7);
+      }
+      break;
+    default: // short (default) — neat crop with sideburns, open face
+      ci.draw_colored_polygon([
+        V(-7.0, -49.0), V(-7.3, -51.5), V(-4.5, -53.4),
+        V(0.0, -54.2), V(4.5, -53.4), V(7.3, -51.5),
+        V(7.0, -49.0), V(7.0, -44.5), V(5.6, -44.8),
+        V(5.3, -48.6), V(0.0, -49.3), V(-5.3, -48.6),
+        V(-5.6, -44.8), V(-7.0, -44.5),
+      ], col);
+      if (!low_perf) {
+        ci.draw_line(V(-3.0, -52.5), V(-1.0, -50.0), lite, 0.7);
+        ci.draw_line(V(2.5, -52.5), V(1.0, -50.0), lite, 0.7);
+      }
+      break;
+  }
+}
+
+function _draw_extra_hands(ci, loadout, low_perf) {
+  switch (String(loadout.extra ?? 'extra_none')) {
+    case 'extra_gloves':
+      // Enchanted work gloves: a red glow marks them as the one cosmetic that
+      // carries a gameplay effect (+60% berry picking). Glow draws first so the
+      // leather and ember rim sit crisply on top; halo skipped in low-perf.
+      if (!low_perf) {
+        ci.draw_circle(V(-12.0, -26.0), 5.0, Color(0.95, 0.25, 0.15, 0.18));  // left halo
+        ci.draw_circle(V(11.0, -26.0), 5.0, Color(0.95, 0.25, 0.15, 0.18));   // right halo
+        ci.draw_circle(V(-12.0, -26.0), 2.6, Color(1.0, 0.40, 0.22, 0.35));   // left core
+        ci.draw_circle(V(11.0, -26.0), 2.6, Color(1.0, 0.40, 0.22, 0.35));
+      }
+      ci.draw_rect(Rect2(-14.5, -27.5, 5.0, 3.0), Color(0.26, 0.13, 0.11));   // dark leather
+      ci.draw_rect(Rect2(8.5, -27.5, 5.0, 3.0), Color(0.26, 0.13, 0.11));
+      ci.draw_rect(Rect2(-14.5, -27.5, 5.0, 0.9), Color(1.0, 0.42, 0.24));    // ember rim
+      ci.draw_rect(Rect2(8.5, -27.5, 5.0, 0.9), Color(1.0, 0.42, 0.24));
+      break;
+    default:
+      break;
+  }
+}
+
+// Temporary minimal stubs — headwear and the maweaten form are Task 3.
 function _draw_headwear() {}
-function _draw_extra_hands() {}
 function _draw_maweaten() {}
