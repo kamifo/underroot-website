@@ -81,6 +81,31 @@ test('flags impossible generation churn', () => {
   assert.equal(checkPlausibility(run).plausible, false);
 });
 
+test('high-gen run with a capped, non-contiguous lineage is plausible', () => {
+  // The client caps lineage at 60 entries (lineage[0] + most recent 59), so
+  // gens jump — but a subsequence of a strictly-increasing sequence stays
+  // strictly increasing, so the monotonicity check still passes.
+  const run = goodRun();
+  run.gen = 500; run.days = 200; run.depth = 324; run.blocks = 6601;
+  run.lineage = [
+    { gen: 1, days: 0, depth: 3, cause: 'maw_breach' },
+    { gen: 442, days: 120, depth: 300, cause: 'dehydration_away' }, // big jump from gen 1
+    { gen: 500, days: 200, depth: 324, cause: 'maw_breach' },
+  ];
+  run.history = [];
+  assert.deepEqual(checkPlausibility(run).reasons, []);
+});
+
+test('generation past the flat backstop is quarantined', () => {
+  const run = goodRun();
+  run.gen = 501; run.days = 200; // churn is fine (501 <= 200*4+8); the flat cap trips
+  run.lineage = [{ gen: 501, days: 200, depth: 324, cause: 'maw_breach' }];
+  run.history = [];
+  const r = checkPlausibility(run);
+  assert.equal(r.plausible, false);
+  assert.ok(r.reasons.includes('generation beyond cap'));
+});
+
 test('exact cap values are plausible, one past is not', () => {
   const atCap = goodRun();
   atCap.depth = 392;

@@ -63,11 +63,28 @@ test('keeps spaces and # in digger names', () => {
 });
 
 test('rejects out-of-range numbers', () => {
-  for (const [k, v] of [['days', -1], ['days', 4000], ['gen', 0], ['gen', 99], ['depth', 20000], ['discovery_pct', 101]]) {
+  for (const [k, v] of [['days', -1], ['days', 4000], ['gen', 0], ['gen', 501], ['depth', 20000], ['discovery_pct', 101]]) {
     const p = goodPayload();
     p[k] = v;
     assert.equal(validateRun(p).ok, false, `${k}=${v}`);
   }
+});
+
+test('accepts generations up to the raised cap, rejects past it', () => {
+  // gen 50 was the old cap; honest long runs go well past it. Cap is now 500,
+  // applied to both the top-level gen and every lineage entry's gen.
+  const atCap = goodPayload();
+  atCap.gen = 500;
+  atCap.lineage.at(-1).gen = 500;
+  assert.equal(validateRun(atCap).ok, true, JSON.stringify(validateRun(atCap).errors));
+
+  const overTop = goodPayload();
+  overTop.gen = 501;
+  assert.equal(validateRun(overTop).ok, false, 'top-level gen 501');
+
+  const overLineage = goodPayload();
+  overLineage.lineage.at(-1).gen = 501;
+  assert.equal(validateRun(overLineage).ok, false, 'lineage entry gen 501');
 });
 
 test('rejects non-integer where int expected', () => {
