@@ -1,6 +1,25 @@
 // Renders /api/stats onto stats.html. All player-provided strings go through
-// textContent (via el()) — never innerHTML. totals.souls / totals.blocks arrive
-// as JSON strings (bigint serialization from Postgres) — always Number() them.
+// textContent (via el()) — never innerHTML. bigint aggregates (e.g. totals.souls)
+// arrive as JSON strings (Postgres serialization) — always Number() them.
+import { drawDigger } from './digger.js';
+
+// A leaderboard name cell: a small digger canvas + the digger name. The canvas
+// is drawn at 2× CSS pixels for crispness. cosmetics may be null/partial on old
+// runs — drawDigger defaults every missing slot.
+function diggerCell(name, cosmetics) {
+  const td = document.createElement('td');
+  const cv = document.createElement('canvas');
+  const CSS = 28, PX = CSS * 2;
+  cv.width = PX; cv.height = PX;
+  cv.style.width = `${CSS}px`; cv.style.height = `${CSS}px`;
+  cv.className = 'avatar-canvas';
+  drawDigger(cv, cosmetics || {});
+  const span = el('span', name); // el() = existing XSS-safe helper
+  td.className = 'name-cell';
+  td.append(cv, span);
+  return td;
+}
+
 const CAUSE_LABELS = {
   maw_breach: 'The Maw breached the base',
   starvation: 'Starvation',
@@ -29,11 +48,13 @@ function heroTile(label, value) {
   return t;
 }
 
-function renderBoard(table, rows, cols) {
+// Like a plain leaderboard render, but the first column is a digger avatar + name. `cols` here
+// excludes the digger column (added automatically as the first data column).
+function renderBoardWithAvatars(table, rows, cols) {
   table.replaceChildren();
   const thead = document.createElement('thead');
   const head = document.createElement('tr');
-  head.append(el('th', '#'));
+  head.append(el('th', '#'), el('th', 'Digger'));
   for (const c of cols) head.append(el('th', c.label, c.num ? 'num' : ''));
   thead.append(head);
   table.append(thead);
@@ -42,6 +63,7 @@ function renderBoard(table, rows, cols) {
   rows.forEach((r, i) => {
     const tr = document.createElement('tr');
     tr.append(el('td', String(i + 1)));
+    tr.append(diggerCell(r.digger_name, r.cosmetics));
     for (const c of cols) tr.append(el('td', c.fmt(r), c.num ? 'num' : ''));
     tbody.append(tr);
   });
@@ -85,15 +107,21 @@ function render(data) {
   // ---- Hero ----
   document.getElementById('hero').append(
     heroTile('souls claimed by the Maw', num(totals.souls)),
-    heroTile('blocks mined worldwide', num(totals.blocks)),
-    heroTile('runs shared', num(totals.runs)),
-    heroTile('longest survival', `${num(totals.longest)} days`),
-    heroTile('deepest dig', metres(totals.deepest)),
+    heroTile('villages fallen', num(totals.runs)),
+    heroTile('deepest anyone dared', metres(totals.deepest)),
+    heroTile('longest a village held', `${num(totals.longest)} days`),
   );
 
+  // Beat copy — derived from the data so the story stays true to the numbers.
+  const runs = Number(totals.runs);
+  document.getElementById('beat-shovel-copy').textContent =
+    `${num(runs)} villages have taken up the shovel. Most never saw day ten. A rare few saw a hundred — none saw the end.`;
+  const topCause = causes[0] ? (CAUSE_LABELS[causes[0].cause] ?? causes[0].cause) : 'the dark';
+  document.getElementById('beat-fall-copy').textContent =
+    `The most common fate is ${topCause.toLowerCase()}. You dig too greedily, or you simply forget to eat.`;
+
   // ---- Boards ----
-  renderBoard(document.getElementById('board-lineage'), boards.lineage, [
-    { label: 'Digger', fmt: (r) => r.digger_name },
+  renderBoardWithAvatars(document.getElementById('board-lineage'), boards.lineage, [
     { label: 'Days', num: true, fmt: (r) => num(r.days) },
     { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
     { label: 'Gen', num: true, fmt: (r) => String(r.gen) },
@@ -101,12 +129,28 @@ function render(data) {
     { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
   ]);
 
-  renderBoard(document.getElementById('board-unbroken'), boards.unbroken, [
-    { label: 'Digger', fmt: (r) => r.digger_name },
+  renderBoardWithAvatars(document.getElementById('board-unbroken'), boards.unbroken, [
     { label: 'Days undying', num: true, fmt: (r) => num(r.days) },
     { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
     { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
   ]);
+
+  // ---- Hall of Fools ----
+  function foolTile(medal, award, who) {
+    const d = el('div', undefined, 'fool');
+    d.append(el('div', medal, 'medal'), el('div', award, 'award'), el('div', who, 'who'));
+    return d;
+  }
+  const foolsEl = document.getElementById('fools');
+  const f = data.fools ?? {};
+  const tiles = [];
+  if (f.speedrun > 0) tiles.push(foolTile('🥇', 'Speedrun to Oblivion', `${num(f.speedrun)} villages died on day zero.`));
+  if (f.hoarder) tiles.push(foolTile('💰', 'Hoarder of Nothing', `${f.hoarder.digger_name} lasted ${num(f.hoarder.days)} days holding not one gold.`));
+  if (f.overconfident) tiles.push(foolTile('⚰️', 'The Overconfident', `${f.overconfident.digger_name} reached ${metres(f.overconfident.depth)} — dead by day ${num(f.overconfident.days)}.`));
+  if (f.groundhog) tiles.push(foolTile('🔁', 'Groundhog Village', `${f.groundhog.digger_name} lost ${num(f.groundhog.mx)} generations in a single day.`));
+  if (f.scratched) tiles.push(foolTile('🕳️', 'Scratched the Surface', `${f.scratched.digger_name} survived ${num(f.scratched.days)} days, only ${metres(f.scratched.depth)} deep.`));
+  if (tiles.length) foolsEl.append(...tiles);
+  else document.getElementById('section-fools').style.display = 'none';
 
   // ---- Superlatives ----
   const day0pct = superlatives.first_deaths
@@ -174,17 +218,21 @@ function render(data) {
     options: { maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } },
   });
 
-  new Chart(document.getElementById('chart-progression'), {
-    type: 'line',
-    data: {
-      datasets: [
-        { label: '75th percentile depth', data: charts.progression.map(([d, , , p75]) => ({ x: d, y: p75 * 1.5 })), borderColor: dim, pointRadius: 0, fill: '+1', backgroundColor: 'rgba(163,105,54,0.15)' },
-        { label: 'median depth', data: charts.progression.map(([d, , p50]) => ({ x: d, y: p50 * 1.5 })), borderColor: clay, pointRadius: 0 },
-        { label: '25th percentile depth', data: charts.progression.map(([d, p25]) => ({ x: d, y: p25 * 1.5 })), borderColor: dim, pointRadius: 0 },
-      ],
-    },
-    options: { maintainAspectRatio: false, scales: { x: { type: 'linear', title: { display: true, text: 'day' } }, y: { title: { display: true, text: 'depth (m)' } } } },
-  });
+  if (!charts.progression.length) {
+    document.getElementById('chart-progression').closest('.chart-box').style.display = 'none';
+  } else {
+    new Chart(document.getElementById('chart-progression'), {
+      type: 'line',
+      data: {
+        datasets: [
+          { label: '75th percentile depth', data: charts.progression.map(([d, , , p75]) => ({ x: d, y: p75 * 1.5 })), borderColor: dim, pointRadius: 0, fill: '+1', backgroundColor: 'rgba(163,105,54,0.15)' },
+          { label: 'median depth', data: charts.progression.map(([d, , p50]) => ({ x: d, y: p50 * 1.5 })), borderColor: clay, pointRadius: 0 },
+          { label: '25th percentile depth', data: charts.progression.map(([d, p25]) => ({ x: d, y: p25 * 1.5 })), borderColor: dim, pointRadius: 0 },
+        ],
+      },
+      options: { maintainAspectRatio: false, scales: { x: { type: 'linear', title: { display: true, text: 'day' } }, y: { title: { display: true, text: 'depth (m)' } } } },
+    });
+  }
 
   new Chart(document.getElementById('chart-depth-hist'), {
     type: 'bar',

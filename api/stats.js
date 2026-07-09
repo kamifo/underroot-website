@@ -102,12 +102,46 @@ export default async function handler(req, res) {
       WHERE NOT quarantined AND (e->>'gen')::int <= 20
       GROUP BY 1, 2 ORDER BY 1`;
 
+    // ---- Hall of Fools: dubious honours (each null when no run qualifies) ----
+    const [hoarder] = await sql`
+      SELECT digger_name, days FROM runs
+      WHERE NOT quarantined AND NOT (payload->'peaks' ? 'gold')
+      ORDER BY days DESC LIMIT 1`;
+    const [overconfident] = await sql`
+      SELECT digger_name, depth, days FROM runs
+      WHERE NOT quarantined AND days <= 15
+      ORDER BY depth DESC LIMIT 1`;
+    const [scratched] = await sql`
+      SELECT digger_name, days, depth FROM runs
+      WHERE NOT quarantined AND days >= 20
+      ORDER BY depth ASC, days DESC LIMIT 1`;
+    const [groundhog] = await sql`
+      SELECT digger_name, mx FROM (
+        SELECT digger_name, (
+          SELECT max(cnt)::int FROM (
+            SELECT count(*)::int AS cnt
+            FROM jsonb_array_elements(payload->'lineage') AS e
+            GROUP BY (e->>'days')
+          ) g
+        ) AS mx
+        FROM runs WHERE NOT quarantined
+      ) s WHERE mx >= 2 ORDER BY mx DESC LIMIT 1`;
+
+    const fools = {
+      speedrun: superlatives.day0_deaths ?? 0,        // count; reuse existing superlative
+      hoarder: hoarder ?? null,                        // { digger_name, days }
+      overconfident: overconfident ?? null,            // { digger_name, depth, days }
+      scratched: scratched ?? null,                    // { digger_name, days, depth }
+      groundhog: groundhog ?? null,                    // { digger_name, mx }
+    };
+
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
     return res.status(200).json({
       totals,
       causes,
       boards: { lineage: lineageBoard, unbroken: unbrokenBoard },
       superlatives,
+      fools,
       charts: { survival, runLenHist, depthHist, progression, scatter, causesByGen },
     });
   } catch (err) {
