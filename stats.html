@@ -102,9 +102,26 @@
 
     /* ── Hero band ────────────────────────────────────────────────────────── */
     .hero { position: relative; min-height: 92vh; display: flex; flex-direction: column; justify-content: flex-end;
-      background: url('assets/images/The_Maw.png') center/cover no-repeat; }
+      background: url('assets/images/The_Maw.png') center/cover no-repeat; overflow: hidden; }
     .hero::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(20,16,12,.5),rgba(20,16,12,.1) 40%,var(--bg) 100%); }
     .hero-inner { position:relative; z-index:2; max-width:var(--maxw); margin:0 auto; width:100%; padding:0 clamp(20px,5vw,40px) 46px; }
+
+    /* ── Embers — dim ash drifting off the Maw (hero only) ───────────────────── */
+    .embers { position:absolute; inset:0; z-index:1; overflow:hidden; pointer-events:none; }
+    .embers span {
+      position:absolute; bottom:-12px; left:var(--x);
+      width:var(--s); height:var(--s); border-radius:50%;
+      background:radial-gradient(circle, rgba(214,146,78,0.85), rgba(163,105,54,0.18) 55%, transparent 72%);
+      opacity:0; will-change:transform, opacity;
+      animation:ember var(--d) linear var(--delay) infinite;
+    }
+    @keyframes ember {
+      0%   { transform:translate(0,0) scale(0.7); opacity:0; }
+      12%  { opacity:0.6; }
+      70%  { opacity:0.4; }
+      100% { transform:translate(var(--drift),-94vh) scale(1.1); opacity:0; }
+    }
+    @media (prefers-reduced-motion: reduce) { .embers { display:none; } }
     .hero h1 { text-shadow:0 2px 20px rgba(0,0,0,.8); }
     .hero .lede { text-shadow:0 1px 8px rgba(0,0,0,.8); }
     .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:30px; }
@@ -137,6 +154,22 @@
 <body>
 
   <div class="hero" id="hero-band">
+    <div class="embers" aria-hidden="true">
+      <span style="--x:6%;  --s:2px; --d:15s; --delay:-2s;  --drift:22px;"></span>
+      <span style="--x:13%; --s:3px; --d:19s; --delay:-9s;  --drift:-14px;"></span>
+      <span style="--x:20%; --s:2px; --d:13s; --delay:-5s;  --drift:30px;"></span>
+      <span style="--x:27%; --s:3px; --d:21s; --delay:-14s; --drift:-24px;"></span>
+      <span style="--x:34%; --s:2px; --d:17s; --delay:-1s;  --drift:12px;"></span>
+      <span style="--x:41%; --s:4px; --d:23s; --delay:-11s; --drift:-32px;"></span>
+      <span style="--x:48%; --s:2px; --d:14s; --delay:-7s;  --drift:18px;"></span>
+      <span style="--x:55%; --s:3px; --d:20s; --delay:-3s;  --drift:-16px;"></span>
+      <span style="--x:62%; --s:2px; --d:16s; --delay:-13s; --drift:26px;"></span>
+      <span style="--x:69%; --s:3px; --d:22s; --delay:-6s;  --drift:-20px;"></span>
+      <span style="--x:76%; --s:2px; --d:12s; --delay:-10s; --drift:34px;"></span>
+      <span style="--x:83%; --s:4px; --d:24s; --delay:-4s;  --drift:-28px;"></span>
+      <span style="--x:90%; --s:2px; --d:18s; --delay:-15s; --drift:14px;"></span>
+      <span style="--x:96%; --s:3px; --d:20s; --delay:-8s;  --drift:-18px;"></span>
+    </div>
     <div class="hero-inner">
       <a class="back" href="index.html">← Back to Underroot</a>
       <div class="kicker">The Community Archive</div>
