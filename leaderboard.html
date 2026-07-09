@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Full Leaderboard — Underroot</title>
+  <link rel="icon" type="image/png" href="assets/images/underroot_favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:    #14100c;
+      --panel: #1b1611;
+      --ink:   rgba(255,255,255,0.88);
+      --muted: rgba(255,255,255,0.52);
+      --faint: rgba(255,255,255,0.32);
+      --red:   #8c2828;
+      --line:  rgba(255,255,255,0.10);
+      --clay:  #a36936;
+      --maxw:  1080px;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Georgia', serif;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+
+    .doc { max-width: var(--maxw); margin: 0 auto; padding: clamp(40px, 8vw, 90px) clamp(20px, 5vw, 40px) 90px; }
+    .back { display: inline-block; margin-bottom: 34px; color: rgba(255,255,255,0.5); text-decoration: none; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; transition: color 0.2s; }
+    .back:hover { color: #fff; }
+
+    h1 { font-family: 'Press Start 2P', monospace; font-size: clamp(15px, 3vw, 20px); line-height: 1.5; color: #fff; margin-bottom: 14px; }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 3px; background: var(--panel); margin-top: 24px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td { padding: 11px 16px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    th { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: normal; background: rgba(255,255,255,0.03); }
+    td { color: rgba(255,255,255,0.82); }
+    tr:last-child td { border-bottom: none; }
+    th.num, td.num { text-align: right; }
+    tbody tr:hover td { background: rgba(255,255,255,0.025); }
+    .name-cell { display: flex; align-items: center; gap: 10px; }
+    .avatar-canvas { flex: none; image-rendering: auto; background: rgba(255,255,255,0.02); border-radius: 3px; }
+
+    footer { background: #0c0907; border-top: 1px solid var(--line); padding: clamp(48px, 7vw, 80px) clamp(20px, 5vw, 48px) 40px; text-align: center; }
+    footer .foot-play {
+      display: inline-flex; align-items: center; gap: 10px; background: rgba(140,40,40,0.9); border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 2px; padding: 13px 30px; color: #fff; text-decoration: none; letter-spacing: 0.14em; text-transform: uppercase;
+      font-size: 14px; box-shadow: 0 0 24px rgba(140,40,40,0.45); transition: background 0.2s, box-shadow 0.2s;
+    }
+    footer .foot-play:hover { background: rgba(160,46,46,1); box-shadow: 0 0 32px rgba(140,40,40,0.65); }
+    footer .foot-links { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin: 30px 0 26px; }
+    footer .foot-links a { color: var(--muted); text-decoration: none; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; transition: color 0.2s; }
+    footer .foot-links a:hover { color: #fff; }
+    footer .legal { color: var(--faint); font-size: 12px; letter-spacing: 0.06em; line-height: 1.8; }
+
+    #lb-error { display: none; text-align: center; padding: 40px 20px; color: var(--muted); border: 1px dashed var(--line); border-radius: 3px; margin: 24px 0 40px; font-size: 0.98rem; }
+
+    .lb-more { margin-top: 22px; background: var(--panel); border: 1px solid var(--line); color: var(--ink); padding: 11px 22px; border-radius: 3px; cursor: pointer; font-size: 13px; letter-spacing: .06em; }
+    .lb-more:hover { border-color: var(--clay); }
+  </style>
+  <script type="module" src="/assets/leaderboard.js"></script>
+</head>
+<body>
+  <article class="doc">
+    <a class="back" href="stats.html">← Back to the Ledger</a>
+    <h1 id="lb-title">Longest Lineages</h1>
+    <div id="lb-error" style="display:none">The archive is unreachable — try again soon.</div>
+    <div class="table-wrap"><table id="lb-table"></table></div>
+    <button id="lb-more" class="lb-more" style="display:none">Load more</button>
+  </article>
+</body>
+</html>
