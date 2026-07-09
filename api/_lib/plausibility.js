@@ -10,7 +10,11 @@ export const LIMITS = {
   BLOCKS_GRACE: 1000,
   MAX_DEPTH_TILES: 392,
   MAX_DAYS: 3650,
-  MAX_GEN: 50,
+  // Flat backstop — keep in sync with validate.js GEN_MAX. Raised from 50 (which
+  // 422-rejected honest long runs). GEN_PER_DAY_MAX below is the meaningful bound:
+  // it quarantines runs whose generation count is implausibly high FOR THEIR DAYS,
+  // which is the real anti-forgery guard regardless of this flat ceiling.
+  MAX_GEN: 500,
   GEN_PER_DAY_MAX: 4,
   GEN_GRACE: 8,
   PEAK_CEILING: 1_000_000,

@@ -17,8 +17,15 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const ID_RE = /^[a-z0-9_#]{1,32}$/i;
 const NAME_MAX = 24;
 
+// Generous ceiling — a struggling player racks up generations fast (the game
+// expects up to GEN_PER_DAY_MAX=4 deaths/day), so 50 was far too low and
+// 422-rejected honest long runs. The real anti-nonsense bound is the gen-churn
+// check in plausibility.js (quarantines, not rejects); keep GEN_MAX here and
+// LIMITS.MAX_GEN there in sync. Used for BOTH top-level gen and lineage entries.
+const GEN_MAX = 500;
+
 const INT_FIELDS = {
-  gen: [1, 50],
+  gen: [1, GEN_MAX],
   days: [0, 3650],
   depth: [0, 10000],
   blocks: [0, 5_000_000],
@@ -84,7 +91,7 @@ export function validateRun(p) {
   } else {
     for (const e of lineage) {
       if (typeof e !== 'object' || e === null) { errors.push('bad lineage entry'); break; }
-      if (!isInt(e.gen) || e.gen < 1 || e.gen > 50 || !isInt(e.days) || e.days < 0 || e.days > 3650 ||
+      if (!isInt(e.gen) || e.gen < 1 || e.gen > GEN_MAX || !isInt(e.days) || e.days < 0 || e.days > 3650 ||
           !isInt(e.depth) || e.depth < 0 || e.depth > 10000 || !CAUSES.includes(e.cause)) {
         errors.push('bad lineage entry');
         break;

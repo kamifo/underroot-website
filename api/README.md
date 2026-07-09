@@ -18,6 +18,13 @@ screen POSTs run summaries; the stats page reads one cached aggregate blob.
 (deepest layer bottom 342 tiles + 50 grace). If the game ever adds a deeper
 layer, update it here or honest deep runs will be quarantined.
 
+**`MAX_GEN` (500) is a generous flat backstop, not the real bound.** The game
+has no generation cap and a struggling player racks up deaths fast, so this is
+set high to avoid 422-rejecting honest long runs. The meaningful anti-nonsense
+guard is `GEN_PER_DAY_MAX` (gen churn relative to days), which *quarantines*
+rather than rejects. If you raise it, keep `_lib/validate.js` → `GEN_MAX` in
+sync (it caps both the top-level gen and every lineage entry).
+
 ## Quarantine moderation
 
 Implausible submissions are stored with `quarantined = true` (the client still
@@ -44,7 +51,7 @@ SQL editor (plain Run, not Explain). Keep `db/schema.sql` as the source of truth
 node scripts/dev-server.mjs 3000     # loads .env.development.local + vercel dev
 node scripts/seed-stats.js 40        # fake plausible runs (localhost only by default)
 node db/check-schema.mjs             # sanity: table + indexes exist
-npm test                             # 33 unit tests over _lib/
+npm test                             # 36 unit tests over _lib/
 curl -s -X POST localhost:3000/api/submit-run -H "Content-Type: application/json" --data-binary @db/sample-run.json
 ```
 
