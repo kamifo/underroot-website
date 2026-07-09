@@ -1,4 +1,5 @@
 import { drawDigger } from './digger.js';
+import { attachCard } from './player-card.js';
 
 const num = (n) => Number(n).toLocaleString('en-US');
 const metres = (t) => `${num(Math.round(Number(t) * 1.5))} m`;
@@ -10,11 +11,12 @@ let offset = 0;
 const rows = [];
 
 function el(tag, text, cls) { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (cls) e.className = cls; return e; }
-function nameCell(name, cosmetics) {
+function nameCell(r) {
   const td = el('td', undefined, 'name-cell');
   const cv = document.createElement('canvas'); cv.width = 56; cv.height = 56; cv.style.width = '28px'; cv.style.height = '28px'; cv.className = 'avatar-canvas';
-  drawDigger(cv, cosmetics || {});
-  td.append(cv, el('span', name));
+  drawDigger(cv, r.cosmetics || {});
+  td.append(cv, el('span', r.digger_name));
+  attachCard(td, r);
   return td;
 }
 
@@ -32,7 +34,7 @@ function appendRows(newRows) {
   newRows.forEach((r) => {
     const i = rows.indexOf(r);
     const tr = document.createElement('tr');
-    tr.append(el('td', String(i + 1)), nameCell(r.digger_name, r.cosmetics), el('td', num(r.days), 'num'), el('td', metres(r.depth), 'num'));
+    tr.append(el('td', String(i + 1)), nameCell(r), el('td', num(r.days), 'num'), el('td', metres(r.depth), 'num'));
     if (board === 'lineage') tr.append(el('td', String(r.gen), 'num'), el('td', CAUSE_LABELS[r.cause] ?? r.cause));
     tbody.append(tr);
   });

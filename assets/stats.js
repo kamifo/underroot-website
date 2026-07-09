@@ -2,21 +2,24 @@
 // textContent (via el()) — never innerHTML. bigint aggregates (e.g. totals.souls)
 // arrive as JSON strings (Postgres serialization) — always Number() them.
 import { drawDigger } from './digger.js';
+import { attachCard } from './player-card.js';
 
 // A leaderboard name cell: a small digger canvas + the digger name. The canvas
 // is drawn at 2× CSS pixels for crispness. cosmetics may be null/partial on old
-// runs — drawDigger defaults every missing slot.
-function diggerCell(name, cosmetics) {
+// runs — drawDigger defaults every missing slot. Clicking the cell raises the
+// full player card (attachCard).
+function diggerCell(r) {
   const td = document.createElement('td');
   const cv = document.createElement('canvas');
   const CSS = 28, PX = CSS * 2;
   cv.width = PX; cv.height = PX;
   cv.style.width = `${CSS}px`; cv.style.height = `${CSS}px`;
   cv.className = 'avatar-canvas';
-  drawDigger(cv, cosmetics || {});
-  const span = el('span', name); // el() = existing XSS-safe helper
+  drawDigger(cv, r.cosmetics || {});
+  const span = el('span', r.digger_name); // el() = existing XSS-safe helper
   td.className = 'name-cell';
   td.append(cv, span);
+  attachCard(td, r);
   return td;
 }
 
@@ -63,7 +66,7 @@ function renderBoardWithAvatars(table, rows, cols) {
   rows.forEach((r, i) => {
     const tr = document.createElement('tr');
     tr.append(el('td', String(i + 1)));
-    tr.append(diggerCell(r.digger_name, r.cosmetics));
+    tr.append(diggerCell(r));
     for (const c of cols) tr.append(el('td', c.fmt(r), c.num ? 'num' : ''));
     tbody.append(tr);
   });
