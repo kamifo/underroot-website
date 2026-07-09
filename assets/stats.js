@@ -1,6 +1,25 @@
 // Renders /api/stats onto stats.html. All player-provided strings go through
 // textContent (via el()) — never innerHTML. totals.souls / totals.blocks arrive
 // as JSON strings (bigint serialization from Postgres) — always Number() them.
+import { drawDigger } from './digger.js';
+
+// A leaderboard name cell: a small digger canvas + the digger name. The canvas
+// is drawn at 2× CSS pixels for crispness. cosmetics may be null/partial on old
+// runs — drawDigger defaults every missing slot.
+function diggerCell(name, cosmetics) {
+  const td = document.createElement('td');
+  const cv = document.createElement('canvas');
+  const CSS = 28, PX = CSS * 2;
+  cv.width = PX; cv.height = PX;
+  cv.style.width = `${CSS}px`; cv.style.height = `${CSS}px`;
+  cv.className = 'avatar-canvas';
+  drawDigger(cv, cosmetics || {});
+  const span = el('span', name); // el() = existing XSS-safe helper
+  td.className = 'name-cell';
+  td.append(cv, span);
+  return td;
+}
+
 const CAUSE_LABELS = {
   maw_breach: 'The Maw breached the base',
   starvation: 'Starvation',
@@ -42,6 +61,28 @@ function renderBoard(table, rows, cols) {
   rows.forEach((r, i) => {
     const tr = document.createElement('tr');
     tr.append(el('td', String(i + 1)));
+    for (const c of cols) tr.append(el('td', c.fmt(r), c.num ? 'num' : ''));
+    tbody.append(tr);
+  });
+  table.append(tbody);
+}
+
+// Like renderBoard, but the first column is a digger avatar + name. `cols` here
+// excludes the digger column (added automatically as the first data column).
+function renderBoardWithAvatars(table, rows, cols) {
+  table.replaceChildren();
+  const thead = document.createElement('thead');
+  const head = document.createElement('tr');
+  head.append(el('th', '#'), el('th', 'Digger'));
+  for (const c of cols) head.append(el('th', c.label, c.num ? 'num' : ''));
+  thead.append(head);
+  table.append(thead);
+
+  const tbody = document.createElement('tbody');
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.append(el('td', String(i + 1)));
+    tr.append(diggerCell(r.digger_name, r.cosmetics));
     for (const c of cols) tr.append(el('td', c.fmt(r), c.num ? 'num' : ''));
     tbody.append(tr);
   });
@@ -92,8 +133,7 @@ function render(data) {
   );
 
   // ---- Boards ----
-  renderBoard(document.getElementById('board-lineage'), boards.lineage, [
-    { label: 'Digger', fmt: (r) => r.digger_name },
+  renderBoardWithAvatars(document.getElementById('board-lineage'), boards.lineage, [
     { label: 'Days', num: true, fmt: (r) => num(r.days) },
     { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
     { label: 'Gen', num: true, fmt: (r) => String(r.gen) },
@@ -101,8 +141,7 @@ function render(data) {
     { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
   ]);
 
-  renderBoard(document.getElementById('board-unbroken'), boards.unbroken, [
-    { label: 'Digger', fmt: (r) => r.digger_name },
+  renderBoardWithAvatars(document.getElementById('board-unbroken'), boards.unbroken, [
     { label: 'Days undying', num: true, fmt: (r) => num(r.days) },
     { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
     { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
