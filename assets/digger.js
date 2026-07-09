@@ -548,6 +548,368 @@ function _draw_extra_hands(ci, loadout, low_perf) {
   }
 }
 
-// Temporary minimal stubs — headwear and the maweaten form are Task 3.
-function _draw_headwear() {}
-function _draw_maweaten() {}
+function _draw_headwear(ci, loadout, low_perf) {
+  switch (String(loadout.headwear ?? 'head_bare')) {
+    case 'head_clothcap':
+      // Dome covers the scalp; the brow band sits at -50…-47.8 so the eyes
+      // (-46.5) stay clear — the cap reads as worn on the head, not over the face.
+      ci.draw_colored_polygon([
+        V(-7.0, -49.0), V(-6.5, -52.0), V(-3.5, -54.6),
+        V(0.0, -55.6), V(3.5, -54.6), V(6.5, -52.0), V(7.0, -49.0),
+      ], Color(0.36, 0.42, 0.25));
+      ci.draw_rect(Rect2(-7.6, -50.0, 15.2, 2.2), Color(0.28, 0.33, 0.19));
+      if (!low_perf) ci.draw_circle(V(0.0, -55.8), 1.3, Color(0.46, 0.52, 0.32));  // top button
+      break;
+    case 'head_ironhelm':
+      _draw_helm_dome(ci, low_perf);
+      break;
+    case 'head_horned':
+      _draw_helm_dome(ci, low_perf);
+      _draw_horns(ci, low_perf);
+      break;
+    case 'head_crown':
+      _draw_crown(ci, low_perf);
+      break;
+    case 'head_diadem':
+      _draw_crown_jeweled(ci, low_perf);
+      break;
+    case 'head_ravenous':
+      _draw_crown_ravenous(ci, low_perf);
+      break;
+    case 'head_crackhelm':
+      _draw_helm_cracked(ci, low_perf);
+      break;
+    case 'head_plaguemask':
+      _draw_plague_mask(ci, low_perf);
+      break;
+    case 'head_propeller':
+      _draw_propeller(ci, low_perf);
+      break;
+    case 'head_birthday':
+      _draw_partyhat(ci, low_perf);
+      break;
+    default: // bare (default) — nothing
+      break;
+  }
+}
+
+function _draw_helm_dome(ci, low_perf) {
+  // Dome bottom at -48; brow band at -49.5…-47.2 clears the eyes (-46.5). A thin
+  // nasal guard drops between the eyes (x∈[-0.7,0.7], both eyes are further out).
+  ci.draw_colored_polygon([
+    V(-7.0, -48.0), V(-7.0, -51.0), V(-5.0, -54.5),
+    V(-2.0, -56.0), V(2.0, -56.0), V(5.0, -54.5),
+    V(7.0, -51.0), V(7.0, -48.0),
+  ], Color(0.55, 0.58, 0.61));
+  if (!low_perf) {
+    ci.draw_colored_polygon([
+      V(-7.0, -48.0), V(-7.0, -51.0), V(-5.0, -54.5),
+      V(-2.0, -56.0), V(0.0, -56.0), V(0.0, -48.0),
+    ], Color(0.62, 0.65, 0.68));
+  }
+  ci.draw_rect(Rect2(-7.5, -49.5, 15.0, 2.3), Color(0.44, 0.47, 0.50));  // brow band
+  ci.draw_rect(Rect2(-0.7, -49.0, 1.4, 6.0), Color(0.50, 0.53, 0.56));  // nasal guard
+  if (!low_perf) {
+    ci.draw_circle(V(0.0, -49.4), 1.3, Color(0.62, 0.65, 0.68));  // brow boss
+  }
+}
+
+function _draw_horns(ci, low_perf) {
+  // Bases seat on the raised helm dome's sides (~-51) and sweep up and out.
+  if (low_perf) {
+    ci.draw_colored_polygon([
+      V(-6.5, -51.0), V(-12.0, -62.0), V(-6.5, -53.5)], Color(0.91, 0.88, 0.81));
+    ci.draw_colored_polygon([
+      V(6.5, -51.0), V(12.0, -62.0), V(6.5, -53.5)], Color(0.91, 0.88, 0.81));
+  } else {
+    ci.draw_colored_polygon([
+      V(-6.5, -51.0), V(-9.5, -56.5), V(-12.0, -62.5),
+      V(-10.5, -61.5), V(-8.8, -56.5), V(-6.5, -53.5)], Color(0.91, 0.88, 0.81));
+    ci.draw_colored_polygon([
+      V(6.5, -51.0), V(9.5, -56.5), V(12.0, -62.5),
+      V(10.5, -61.5), V(8.8, -56.5), V(6.5, -53.5)], Color(0.91, 0.88, 0.81));
+  }
+}
+
+function _draw_crown(ci, low_perf) {
+  // Gold band with three points and a small gem — the marquee Astrolabe reward.
+  // Band bottom at -49.5 sits above the eyes (-46.5); points rise to -58.5.
+  ci.draw_colored_polygon([
+    V(-7.0, -49.5), V(-7.0, -53.5), V(-4.0, -56.5),
+    V(-2.5, -53.5), V(0.0, -58.5), V(2.5, -53.5),
+    V(4.0, -56.5), V(7.0, -53.5), V(7.0, -49.5),
+  ], Color(0.85, 0.71, 0.29));
+  if (!low_perf) {
+    ci.draw_rect(Rect2(-7.0, -50.6, 14.0, 1.4), Color(0.97, 0.86, 0.45));
+  }
+  ci.draw_circle(V(0.0, -54.5), 1.6, Color(0.50, 0.84, 0.88));
+}
+
+function _draw_crown_jeweled(ci, low_perf) {
+  // Taller five-point gold crown, gem-studded — the 3rd-ritual Astrolabe Diadem.
+  // Band bottom at -49.5 stays above the eyes (-46.5); centre point rises to -63.2.
+  const gold = Color(0.79, 0.63, 0.23);
+  const gold_pt = Color(0.85, 0.70, 0.29);
+  const gold_mid = Color(0.90, 0.75, 0.34);
+  const cyan = Color(0.31, 0.82, 0.88);
+  const red = Color(0.88, 0.33, 0.42);
+  const green = Color(0.44, 0.88, 0.63);
+  ci.draw_colored_polygon([  // band
+    V(-7.5, -49.5), V(7.5, -49.5),
+    V(7.5, -53.0), V(-7.5, -53.0),
+  ], gold);
+  ci.draw_colored_polygon([  // five points, centre tallest
+    V(-7.5, -53.0), V(-6.0, -59.0), V(-4.5, -53.0)], gold_pt);
+  ci.draw_colored_polygon([
+    V(-4.0, -53.0), V(-2.3, -60.5), V(-0.6, -53.0)], gold_pt);
+  ci.draw_colored_polygon([
+    V(-1.0, -53.0), V(0.0, -63.2), V(1.0, -53.0)], gold_mid);
+  ci.draw_colored_polygon([
+    V(0.6, -53.0), V(2.3, -60.5), V(4.0, -53.0)], gold_pt);
+  ci.draw_colored_polygon([
+    V(4.5, -53.0), V(6.0, -59.0), V(7.5, -53.0)], gold_pt);
+  if (!low_perf) {
+    ci.draw_rect(Rect2(-7.5, -50.8, 15.0, 1.3), Color(0.97, 0.86, 0.45));  // band highlight
+    ci.draw_circle(V(-6.0, -58.6), 1.0, cyan);   // tip gems
+    ci.draw_circle(V(-2.3, -60.1), 1.0, red);
+    ci.draw_circle(V(2.3, -60.1), 1.0, red);
+    ci.draw_circle(V(6.0, -58.6), 1.0, cyan);
+    ci.draw_circle(V(0.0, -62.6), 1.5, green);
+  }
+  // Band centre gem — kept in low-perf so the crown still reads as the Diadem.
+  ci.draw_circle(V(0.0, -51.3), 1.5, cyan);
+}
+
+function _draw_crown_ravenous(ci, low_perf) {
+  // Blackened-crimson spiked crown — The Ravenous Maw mastery trophy. A single
+  // glowing red gem is the only ornament. Spikes carry a lit/shadow face each.
+  const dark = Color(0.27, 0.07, 0.07);
+  const mid = Color(0.42, 0.11, 0.11);
+  const lite = Color(0.66, 0.20, 0.18);
+  // Five jagged spikes (baseL, apex, baseR) + a darker right-hand shadow face.
+  const spikes = [
+    [V(-7.5, -53.0), V(-7.6, -61.5), V(-5.0, -53.0)],
+    [V(-4.6, -53.0), V(-3.2, -63.0), V(-1.8, -53.0)],
+    [V(-1.1, -53.0), V(0.0, -66.0), V(1.1, -53.0)],
+    [V(1.8, -53.0), V(3.2, -63.0), V(4.6, -53.0)],
+    [V(5.0, -53.0), V(7.6, -61.5), V(7.5, -53.0)],
+  ];
+  for (const s of spikes) {
+    const bl = s[0];
+    const ap = s[1];
+    const br = s[2];
+    const bm = V((bl.x + br.x) * 0.5, -53.0);
+    ci.draw_colored_polygon([bl, ap, br], mid);
+    ci.draw_colored_polygon([bm, ap, br], dark);
+    if (!low_perf) {
+      ci.draw_line(bl, ap, lite, 0.4);
+    }
+  }
+  // Band.
+  ci.draw_colored_polygon([
+    V(-7.5, -49.0), V(7.5, -49.0), V(7.5, -53.0), V(-7.5, -53.0)], mid);
+  if (!low_perf) {
+    ci.draw_rect(Rect2(-7.5, -49.7, 15.0, 0.7), lite);   // top highlight
+  }
+  ci.draw_rect(Rect2(-7.5, -52.4, 15.0, 0.6), dark);       // bottom shadow
+  // Glowing gem.
+  if (!low_perf) {
+    ci.draw_circle(V(0.0, -51.0), 3.0, Color(1.0, 0.23, 0.18, 0.30));   // glow halo
+  }
+  ci.draw_circle(V(0.0, -51.0), 1.8, Color(0.95, 0.18, 0.14));            // gem
+  ci.draw_circle(V(-0.6, -51.5), 0.6, Color(1.0, 0.90, 0.86));           // specular
+}
+
+function _draw_helm_cracked(ci, low_perf) {
+  // Battered steel dome — Brittle World mastery trophy, deliberately the humblest
+  // (no gem). Damage reads as a dark gouge, not a cut-out (no fixed backdrop).
+  const dark = Color(0.24, 0.29, 0.35);
+  const mid = Color(0.44, 0.50, 0.58);
+  const lite = Color(0.66, 0.74, 0.81);
+  ci.draw_colored_polygon([
+    V(-8.0, -48.5), V(-7.4, -54.5), V(-4.5, -58.4),
+    V(0.0, -59.2), V(4.5, -58.4), V(7.4, -54.5), V(8.0, -48.5),
+  ], mid);
+  if (!low_perf) {
+    ci.draw_colored_polygon([   // left highlight facet
+      V(-6.6, -49.0), V(-4.5, -57.4), V(-1.2, -58.6), V(-4.0, -55.5),
+    ], lite);
+  }
+  ci.draw_rect(Rect2(-8.0, -50.0, 16.0, 2.2), dark);            // brow band
+  ci.draw_rect(Rect2(-1.0, -49.8, 2.0, 6.6), Color(0.30, 0.36, 0.43));  // nasal guard
+  ci.draw_line(V(0.0, -59.0), V(0.0, -50.0), dark, 0.5);    // comb ridge
+  ci.draw_colored_polygon([   // dark gouge / missing chunk on the rim
+    V(5.4, -53.5), V(7.6, -49.0), V(6.2, -54.6)], dark);
+  if (!low_perf) {
+    ci.draw_line(V(-3.6, -57.5), V(-1.8, -52.5), Color(0.16, 0.20, 0.25), 0.7);
+    ci.draw_line(V(-1.8, -52.5), V(-4.2, -50.0), Color(0.16, 0.20, 0.25), 0.7);
+  }
+}
+
+function _draw_plague_mask(ci, low_perf) {
+  // Beaked plague-doctor mask — The Black Rot mastery trophy. Bold silhouette;
+  // the only fine touch is a faint green glow in the lenses.
+  const hood = Color(0.18, 0.23, 0.13);
+  const plate = Color(0.49, 0.59, 0.31);
+  const beak = Color(0.36, 0.42, 0.24);
+  const beakd = Color(0.27, 0.32, 0.18);
+  ci.draw_colored_polygon([   // hood over the scalp
+    V(-8.5, -47.0), V(-8.0, -54.0), V(-4.0, -58.0),
+    V(0.0, -58.6), V(4.0, -58.0), V(8.0, -54.0), V(8.5, -47.0),
+  ], hood);
+  ci.draw_colored_polygon([   // face plate (covers the eyes)
+    V(-7.0, -49.0), V(-7.4, -44.0), V(0.0, -40.0),
+    V(7.4, -44.0), V(7.0, -49.0),
+  ], plate);
+  ci.draw_colored_polygon([   // beak
+    V(-2.4, -44.0), V(0.0, -33.0), V(2.4, -44.0)], beak);
+  ci.draw_colored_polygon([   // beak shadow face
+    V(0.0, -33.0), V(2.4, -44.0), V(0.6, -44.0)], beakd);
+  for (const lx of [-3.0, 3.0]) {
+    if (!low_perf) {
+      ci.draw_circle(V(lx, -46.5), 2.0, Color(0.48, 0.82, 0.42, 0.45));  // lens glow
+    }
+    ci.draw_circle(V(lx, -46.5), 1.6, Color(0.11, 0.14, 0.09));            // lens
+    if (!low_perf) {
+      ci.draw_circle(V(lx + 0.5, -47.0), 0.5, Color(0.73, 0.91, 0.62));  // glint
+    }
+  }
+}
+
+function _draw_maweaten(ci, low_perf) {
+  // The Maw-Eaten — the apex reskin. Survive 30 days holding all six Challenges,
+  // then fall, and rise remade: charred obsidian body, a molten chest-core
+  // bleeding magma cracks, coal eyes, clawed hands, a crown of the Maw's fangs.
+  const char_a = Color(0.11, 0.08, 0.10);   // darkest plate (right/shadow side)
+  const char_c = Color(0.16, 0.11, 0.13);   // mid plate (left/lit side)
+  const warm = Color(0.23, 0.14, 0.13);   // warm edge highlight
+  const magma = Color(1.0, 0.35, 0.14);
+  const ember = Color(1.0, 0.54, 0.23);
+  const hot = Color(1.0, 0.94, 0.82);
+  if (!low_perf) {
+    ci.draw_circle(V(0.0, -30.0), 18.0, Color(1.0, 0.23, 0.08, 0.07));   // ember aura
+  }
+  // Boots + soles.
+  ci.draw_rect(Rect2(-6.0, -9.0, 5.0, 7.0), char_c);
+  ci.draw_rect(Rect2(1.0, -9.0, 5.0, 7.0), char_a);
+  ci.draw_rect(Rect2(-6.6, -2.4, 6.2, 2.4), Color(0.05, 0.03, 0.04));
+  ci.draw_rect(Rect2(0.4, -2.4, 6.2, 2.4), Color(0.04, 0.02, 0.03));
+  // Legs.
+  ci.draw_rect(Rect2(-5.0, -23.0, 4.0, 14.0), char_c);
+  ci.draw_rect(Rect2(1.0, -23.0, 4.0, 14.0), char_a);
+  // Tattered tunic (jagged hem) + shadow half + warm left edge.
+  ci.draw_colored_polygon([
+    V(-8.0, -39.0), V(8.0, -39.0), V(7.0, -25.0), V(5.0, -27.0),
+    V(3.0, -25.0), V(1.0, -27.0), V(-1.0, -25.0), V(-3.0, -27.0),
+    V(-5.0, -25.0), V(-7.0, -27.0)], char_c);
+  ci.draw_colored_polygon([
+    V(0.0, -39.0), V(8.0, -39.0), V(7.0, -25.0), V(5.0, -27.0),
+    V(3.0, -25.0), V(1.0, -27.0), V(0.0, -25.5)], char_a);
+  ci.draw_rect(Rect2(-8.0, -39.0, 1.6, 13.0), warm);
+  // Obsidian shoulder shards.
+  ci.draw_colored_polygon([V(-8.0, -39.0), V(-11.5, -47.0), V(-6.0, -40.5)], char_c);
+  ci.draw_colored_polygon([V(8.0, -39.0), V(11.5, -47.0), V(6.0, -40.5)], char_a);
+  // Arms.
+  ci.draw_rect(Rect2(-12.0, -38.0, 5.0, 11.0), char_c);
+  ci.draw_rect(Rect2(7.0, -38.0, 5.0, 11.0), char_a);
+  // Claws (three talons per hand).
+  ci.draw_colored_polygon([V(-12.0, -27.0), V(-12.6, -22.8), V(-11.2, -26.6)], char_c);
+  ci.draw_colored_polygon([V(-10.4, -27.0), V(-10.4, -22.4), V(-9.2, -26.6)], char_c);
+  ci.draw_colored_polygon([V(-8.6, -27.0), V(-8.0, -22.8), V(-7.4, -26.8)], char_c);
+  ci.draw_colored_polygon([V(11.6, -27.0), V(12.2, -22.8), V(11.0, -26.6)], char_a);
+  ci.draw_colored_polygon([V(10.0, -27.0), V(10.0, -22.4), V(8.8, -26.6)], char_a);
+  ci.draw_colored_polygon([V(8.4, -27.0), V(7.8, -22.8), V(7.2, -26.8)], char_a);
+  // Magma cracks radiating from the core.
+  if (!low_perf) {
+    ci.draw_polyline([V(0.0, -38.0), V(-3.0, -33.0), V(-1.0, -29.0), V(-3.0, -25.0)], magma, 0.8);
+    ci.draw_polyline([V(0.0, -36.0), V(3.0, -32.0), V(2.0, -27.0)], magma, 0.8);
+    ci.draw_polyline([V(-8.0, -36.0), V(-6.0, -31.0)], magma, 0.7);
+    ci.draw_polyline([V(8.0, -35.0), V(6.0, -30.0)], magma, 0.7);
+    ci.draw_polyline([V(-4.0, -21.0), V(-3.0, -14.0)], magma, 0.7);
+    ci.draw_polyline([V(3.0, -20.0), V(4.0, -13.0)], magma, 0.7);
+  }
+  // Molten chest core.
+  if (!low_perf) {
+    ci.draw_circle(V(0.0, -34.0), 4.2, Color(1.0, 0.45, 0.16, 0.45));
+  }
+  ci.draw_circle(V(0.0, -34.0), 2.4, ember);
+  ci.draw_circle(V(0.0, -34.0), 1.3, hot);
+  // Head.
+  ci.draw_circle(V(0.0, -46.0), 7.5, char_c);
+  ci.draw_circle(V(2.4, -44.6), 4.0, Color(0.05, 0.03, 0.04, 0.5));
+  if (!low_perf) {
+    ci.draw_polyline([V(-4.0, -49.0), V(-2.5, -46.0), V(-3.6, -43.0)], magma, 0.6);
+    ci.draw_polyline([V(3.6, -49.5), V(2.2, -45.5)], magma, 0.6);
+    ci.draw_circle(V(-2.6, -46.5), 2.2, Color(1.0, 0.40, 0.16, 0.5));   // eye glow
+    ci.draw_circle(V(1.6, -46.5), 2.2, Color(1.0, 0.40, 0.16, 0.5));
+  }
+  ci.draw_circle(V(-2.6, -46.5), 1.4, ember);
+  ci.draw_circle(V(1.6, -46.5), 1.4, ember);
+  ci.draw_circle(V(-2.6, -46.7), 0.55, hot);
+  ci.draw_circle(V(1.6, -46.7), 0.55, hot);
+  // Crown of the Maw's fangs.
+  ci.draw_rect(Rect2(-7.5, -52.6, 15.0, 1.6), Color(0.16, 0.05, 0.05));   // gum band
+  const tooth = Color(0.91, 0.86, 0.77);
+  const toothd = Color(0.70, 0.64, 0.52);
+  ci.draw_colored_polygon([V(-7.5, -52.0), V(-6.0, -59.0), V(-4.4, -52.0)], tooth);
+  ci.draw_colored_polygon([V(-4.2, -52.0), V(-2.4, -61.0), V(-0.6, -52.0)], toothd);
+  ci.draw_colored_polygon([V(-0.4, -52.0), V(0.6, -62.5), V(1.6, -52.0)], tooth);
+  ci.draw_colored_polygon([V(1.8, -52.0), V(3.6, -60.0), V(5.0, -52.0)], toothd);
+  ci.draw_colored_polygon([V(5.2, -52.0), V(6.6, -58.0), V(7.5, -52.0)], tooth);
+}
+
+// Easter-egg beanie: a blue cap, a stalk, and four rainbow propeller blades.
+// Unlocked only via a secret code (see data/codes.json). Drawn static — a
+// spinning version would force a per-frame redraw, which we avoid here.
+function _draw_propeller(ci, low_perf) {
+  // Cap dome + brow band, raised so the brim (-50…-48) clears the eyes (-46.5);
+  // the propeller rides on top.
+  ci.draw_colored_polygon([
+    V(-7.0, -49.0), V(-6.5, -52.0), V(-3.5, -54.6),
+    V(0.0, -56.0), V(3.5, -54.6), V(6.5, -52.0), V(7.0, -49.0),
+  ], Color(0.20, 0.45, 0.85));
+  ci.draw_rect(Rect2(-7.6, -50.0, 15.2, 2.0), Color(0.15, 0.34, 0.70));
+  // Stalk up to the propeller hub.
+  ci.draw_rect(Rect2(-0.8, -60.5, 1.6, 4.5), Color(0.30, 0.30, 0.32));
+  // Four rainbow blades pinwheeling around the hub at (0, -60.5).
+  ci.draw_colored_polygon([
+    V(0.0, -60.5), V(-9.0, -63.0), V(-1.0, -59.5)], Color(0.92, 0.22, 0.22));  // red
+  ci.draw_colored_polygon([
+    V(0.0, -60.5), V(9.0, -63.0), V(1.0, -59.5)], Color(0.96, 0.80, 0.20));   // yellow
+  ci.draw_colored_polygon([
+    V(0.0, -60.5), V(-9.0, -58.0), V(-1.0, -61.5)], Color(0.22, 0.74, 0.34));  // green
+  ci.draw_colored_polygon([
+    V(0.0, -60.5), V(9.0, -58.0), V(1.0, -61.5)], Color(0.26, 0.52, 0.95));   // blue
+  if (!low_perf) {
+    ci.draw_circle(V(0.0, -56.2), 1.4, Color(0.97, 0.86, 0.45));  // cap button
+  }
+  ci.draw_circle(V(0.0, -60.5), 1.3, Color(0.30, 0.30, 0.32));      // hub
+}
+
+function _draw_partyhat(ci, low_perf) {
+  // Festive striped cone topped with a pom-pom — the HAPPYBIRTHDAY secret hat.
+  // Base band bottom at -49.5 clears the eyes (-46.5); the tip rises to -64.
+  const pink = Color(0.93, 0.40, 0.60);
+  const teal = Color(0.30, 0.78, 0.80);
+  const yellow = Color(0.97, 0.83, 0.34);
+  const purple = Color(0.62, 0.40, 0.82);
+  // Four colour bands stacked up the cone; the x extents track the tapering edge.
+  ci.draw_colored_polygon([
+    V(-6.5, -49.5), V(6.5, -49.5), V(4.71, -53.5), V(-4.71, -53.5)], pink);
+  ci.draw_colored_polygon([
+    V(-4.71, -53.5), V(4.71, -53.5), V(2.91, -57.5), V(-2.91, -57.5)], teal);
+  ci.draw_colored_polygon([
+    V(-2.91, -57.5), V(2.91, -57.5), V(1.345, -61.0), V(-1.345, -61.0)], yellow);
+  ci.draw_colored_polygon([
+    V(-1.345, -61.0), V(1.345, -61.0), V(0.0, -64.0)], purple);
+  if (!low_perf) {
+    // Soft highlight down the left face gives the cone some volume.
+    ci.draw_colored_polygon([
+      V(-6.5, -49.5), V(-2.5, -49.5), V(0.0, -64.0)], Color(1.0, 1.0, 1.0, 0.12));
+  }
+  // Fluffy cream pom-pom crowning the tip (kept in low-perf — it's the signature).
+  ci.draw_circle(V(0.0, -64.6), 1.9, Color(0.97, 0.95, 0.88));
+  if (!low_perf) {
+    ci.draw_circle(V(-0.7, -65.1), 0.7, Color(1.0, 1.0, 0.97));  // pom-pom sheen
+  }
+}

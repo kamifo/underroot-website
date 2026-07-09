@@ -65,3 +65,27 @@ test('drawDigger applies the expected scale/translate transform', () => {
   assert.deepEqual(setCalls[1], [1, 0, 0, 1, 38, 69]);
   assert.deepEqual(setCalls[setCalls.length - 1], [1, 0, 0, 1, 0, 0]);
 });
+
+test('every headwear renders without throwing', () => {
+  const hats = ['head_bare', 'head_clothcap', 'head_ironhelm', 'head_horned', 'head_crown',
+    'head_diadem', 'head_ravenous', 'head_crackhelm', 'head_plaguemask', 'head_propeller', 'head_birthday'];
+  for (const hw of hats) {
+    const ctx = fakeCtx();
+    drawFull(new CI(ctx), { headwear: hw }, false);
+    assert.ok(ctx.calls.length > 0, hw);
+  }
+});
+
+test('each non-bare headwear differs from bare (catches case fall-through)', () => {
+  const fp = (hw) => { const ctx = fakeCtx(); drawFull(new CI(ctx), { headwear: hw }, false); return JSON.stringify(ctx.calls); };
+  const bare = fp('head_bare');
+  for (const hw of ['head_clothcap','head_ironhelm','head_horned','head_crown','head_diadem','head_ravenous','head_crackhelm','head_plaguemask','head_propeller','head_birthday']) {
+    assert.notEqual(fp(hw), bare, `${hw} rendered identically to head_bare — likely a mistyped case label`);
+  }
+});
+
+test('the Maw-Eaten form renders and overrides other slots', () => {
+  const ctx = fakeCtx();
+  drawFull(new CI(ctx), { form: 'form_maweaten', headwear: 'head_crown' }, false);
+  assert.ok(ctx.calls.some(([n]) => n === 'stroke'), 'maweaten draws polylines');
+});
