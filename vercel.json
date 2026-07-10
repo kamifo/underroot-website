@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/r/:id", "destination": "/api/card?id=:id" }
+  ],
+  "functions": {
+    "api/og.js": { "includeFiles": "api/_lib/**" },
+    "api/card.js": { "includeFiles": "api/_lib/**" }
+  }
+}
