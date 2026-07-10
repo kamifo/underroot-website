@@ -37,6 +37,26 @@ function heroTile(label, value) {
   return t;
 }
 
+// Like heroTile, but attributed: a value + label + a small avatar/name line,
+// and the whole tile opens the holder's player card (reuses attachCard, exactly
+// like the leaderboard name cells). `holder` carries { digger_name, cosmetics,
+// share_id, days, depth, gen, cause, date } — the card degrades if fields are absent.
+function recordTile(label, valueText, holder) {
+  const t = el('div', undefined, 'hero-tile record-tile');
+  t.append(el('div', valueText, 'num'), el('div', label, 'lbl'));
+  const who = el('div', undefined, 'record-who');
+  const cv = document.createElement('canvas');
+  const CSS = 22, PX = CSS * 2;
+  cv.width = PX; cv.height = PX;
+  cv.style.width = `${CSS}px`; cv.style.height = `${CSS}px`;
+  cv.className = 'avatar-canvas';
+  drawDigger(cv, holder.cosmetics || {});
+  who.append(cv, el('span', holder.digger_name));
+  t.append(who);
+  attachCard(t, holder);
+  return t;
+}
+
 // Like a plain leaderboard render, but the first column is a digger avatar + name. `cols` here
 // excludes the digger column (added automatically as the first data column).
 function renderBoardWithAvatars(table, rows, cols) {
@@ -97,7 +117,7 @@ function render(data) {
   document.getElementById('hero').append(
     heroTile('souls claimed by the Maw', num(totals.souls)),
     heroTile('villages fallen', num(totals.runs)),
-    heroTile('deepest anyone dared', metres(totals.deepest)),
+    heroTile('tiles clawed from the earth', num(totals.blocks)),
     heroTile('longest a village held', `${num(totals.longest)} days`),
   );
 
@@ -144,12 +164,17 @@ function render(data) {
   // ---- Superlatives ----
   const day0pct = superlatives.first_deaths
     ? Math.round((100 * superlatives.day0_deaths) / superlatives.first_deaths) : 0;
-  document.getElementById('superlatives').append(
-    heroTile('Day-0 Death Club', `${day0pct}% of first diggers`),
-    heroTile('greatest hoard', `${num(superlatives.max_gold ?? 0)} gold`),
-    heroTile('most souls lost in one village', num(superlatives.max_souls ?? 0)),
-    heroTile('longest lineage', `${num(superlatives.max_gen ?? 0)} generations`),
-  );
+  const supEl = document.getElementById('superlatives');
+  supEl.append(heroTile('Day-0 Death Club', `${day0pct}% of first diggers`));
+  if (superlatives.hoard) {
+    supEl.append(recordTile('greatest hoard', `${num(superlatives.hoard.gold)} gold`, superlatives.hoard));
+  }
+  if (superlatives.souls) {
+    supEl.append(recordTile('most souls lost in one village', num(superlatives.souls.villager_deaths), superlatives.souls));
+  }
+  if (superlatives.lineage) {
+    supEl.append(recordTile('longest lineage', `${num(superlatives.lineage.gen)} generations`, superlatives.lineage));
+  }
 
   // ---- Charts (Chart.js) — palette matches the site's clay/red accents ----
   const clay = '#a36936', red = '#8c2828', dim = 'rgba(255,255,255,0.35)', ink = 'rgba(255,255,255,0.75)';
