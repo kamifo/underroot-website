@@ -32,10 +32,17 @@ test('renderCardHtml escapes a hostile name in meta and body', () => {
   assert.ok(html.includes('&lt;script&gt;'));
 });
 
-test('renderCardHtml inlines run JSON with < escaped', () => {
-  const html = renderCardHtml(RUN, OPTS);
-  assert.ok(html.includes('id="run-data"'));
-  assert.ok(!/<script[^>]*id="run-data"[^>]*>[^<]*<script/.test(html), 'no raw </script> break-out');
+test('renderCardHtml inlines run JSON with < escaped (no </script> breakout)', () => {
+  const html = renderCardHtml({ ...RUN, digger_name: '</script><script>alert(1)</script>' }, OPTS);
+  // The run JSON sits between the run-data opening tag and its closing </script>.
+  const open = html.indexOf('<script type="application/json" id="run-data">');
+  assert.ok(open !== -1, 'run-data block present');
+  const jsonStart = html.indexOf('>', open) + 1;
+  const jsonEnd = html.indexOf('</script>', jsonStart);      // the FIRST </script> after the block opens
+  const inlined = html.slice(jsonStart, jsonEnd);
+  // The hostile name must NOT have introduced a literal "<" (which could close the tag early).
+  assert.ok(!inlined.includes('<'), 'no literal < inside the inlined JSON');
+  assert.ok(inlined.includes('\\u003c/script>'), 'the injected </script> was neutralized to \\u003c');
 });
 
 test('renderNotFoundHtml is a themed 404 doc', () => {
