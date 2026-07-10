@@ -13,6 +13,8 @@ screen POSTs run summaries; the stats page reads one cached aggregate blob.
 | Leaderboard size / history sample | `stats.js` → `LEADER_N`, `HISTORY_SAMPLE` |
 | CORS origin allowlist | `_lib/ingest.js` → `ORIGIN_ALLOW` |
 | Payload schema (field ranges, cause enum, name cap) | `_lib/validate.js` |
+| `share_id` format | `db/schema.sql` |
+| OG image layout / fonts | `api/_lib/og-card.js`, `api/_lib/fonts/` |
 
 **`MAX_DEPTH_TILES` (392) is derived from the game's `data/layers.json`**
 (deepest layer bottom 342 tiles + 50 grace). If the game ever adds a deeper
@@ -39,6 +41,29 @@ FROM runs WHERE quarantined ORDER BY received_at DESC LIMIT 50;
 Delete garbage rows outright; un-quarantine a false positive with
 `UPDATE runs SET quarantined = false WHERE run_uuid = '...'` (then consider
 loosening the tripped limit in `plausibility.js`).
+
+## Shareable run cards
+
+Each run gets a `share_id`: a public, listable id (12 hex chars) that's
+DISTINCT from the private `run_uuid` write key used to upsert the row. The
+boards expose `share_id` freely — unlike `run_uuid`, it can't be used to
+overwrite a run, so it's safe to publish.
+
+`submit-run` now returns `{ ok, url }` where `url` is
+`<origin>/r/<share_id>` — the game's death screen links straight to this as
+the "share your run" URL.
+
+- `/r/:id` — rewritten to `/api/card?id=` (see `vercel.json`). Server-renders
+  an HTML card with per-run OpenGraph/Twitter meta so the link unfurls nicely
+  in chat apps and socials. 404s on unknown or quarantined ids.
+- `/api/og?id=<share_id>` — the 1200×630 PNG used as the unfurl image,
+  rendered via `@resvg/resvg-wasm` from `api/_lib/og-card.js` (fonts bundled
+  in `api/_lib/fonts/`). Falls back to `api/_lib/og-fallback.png` on any
+  rendering error.
+
+`SITE_ORIGIN` optionally overrides the request-derived origin used to build
+these absolute URLs (useful if the function ever runs behind a proxy that
+mangles `Host`).
 
 ## Schema changes
 

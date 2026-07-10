@@ -65,6 +65,7 @@ function fakeRun() {
 }
 
 let failed = 0;
+let sampleUrl = null;
 for (let i = 0; i < COUNT; i++) {
   let r;
   try {
@@ -79,6 +80,8 @@ for (let i = 0; i < COUNT; i++) {
     continue;
   }
   if (!r.ok) { failed++; console.error(`seed ${i}: HTTP ${r.status}`); }
+  else { try { sampleUrl = (await r.json()).url ?? sampleUrl; } catch { /* older API */ } }
 }
 console.log(`seeded ${COUNT - failed}/${COUNT} runs -> ${ENDPOINT}`);
+if (sampleUrl) console.log(`sample card: ${sampleUrl}`);
 if (failed > 0) process.exit(1);
