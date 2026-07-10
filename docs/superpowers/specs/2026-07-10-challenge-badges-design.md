@@ -88,6 +88,26 @@ its own roomier variant (emoji + visible name) from the same registry.
    - `assets/leaderboard.js` row render (~`:31`): same emoji cluster, same
      name-cell placement as the Ledger.
 
+### Legend
+
+Emoji-only clusters are not self-explanatory, and the `title` hover doesn't exist on
+touch devices — so a visible legend is required wherever the emoji-only clusters
+appear (the Ledger and the leaderboard). The player-card page needs no legend: its
+badges already show the name beside each emoji.
+
+- A shared `renderChallengeLegend() -> HTMLElement` helper builds a compact key from
+  the **full** `CHALLENGES` registry: every challenge as `emoji + name`, in the
+  registry's (game grid) order. Static — it lists all six regardless of what's in the
+  current run set, so players learn the whole vocabulary.
+- **Stats page:** render it once inside the Ledger section (`stats.html`), under the
+  section's `<p class="sub">` intro, so the key sits right where the emoji clusters
+  first appear. Style as a small, muted inline row of `emoji name` items — a caption,
+  not a feature block.
+- **Leaderboard page:** render it once near the top of the boards (`leaderboard.html`),
+  same helper, same styling.
+- It reads only from the registry (our own constants) — no player input, no API
+  dependency, so it renders even before any run carries challenges.
+
 ## Data flow
 
 ```
@@ -145,11 +165,15 @@ comment pointing at `ChallengeManager.gd` as the upstream source.
 - `api/_lib/db.js` — add `challenges` to `getRunByShareId`.
 - `api/stats.js` — add `challenges` to the ledger query.
 - `api/leaderboard.js` — add `challenges` to the board SELECTs.
-- `assets/stats.js` — badge cluster in `renderLedger` name cell.
-- `assets/leaderboard.js` — badge cluster in the row render.
+- `assets/stats.js` — badge cluster in `renderLedger` name cell; render the legend in
+  the Ledger section.
+- `assets/leaderboard.js` — badge cluster in the row render; render the legend near
+  the boards.
 - `assets/card-page.js` — named badge row on the card page.
-- (shared badge renderer — new tiny module or co-located helper imported by the
-  ledger + leaderboard.)
+- `stats.html` / `leaderboard.html` — a container element for the legend, plus small
+  muted caption styling.
+- (shared badge + legend renderers — a new tiny module or co-located helpers imported
+  by the ledger + leaderboard.)
 
 ## Testing
 
@@ -159,3 +183,6 @@ comment pointing at `ChallengeManager.gd` as the upstream source.
   shows the challenge name, runs without challenges show no cluster, and the card
   page shows the named "played under" row. Assert on rendered DOM / hover title, not
   internal state.
+- Legend: on both the stats and leaderboard pages, the legend lists all six
+  challenges (emoji + name) in registry order, and renders even against a run set
+  with zero challenges (registry-driven, no data dependency).
