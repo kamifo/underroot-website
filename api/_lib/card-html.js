@@ -53,6 +53,7 @@ export function renderCardHtml(run, { origin, id }) {
   const context = [];
   if (run.villager_deaths != null) context.push(row('Souls lost', num(run.villager_deaths)));
   if (run.blocks != null) context.push(row('Blocks mined', num(run.blocks)));
+  if (run.discoveries != null) context.push(row('Discoveries', num(run.discoveries)));
   if (run.peak_population != null) context.push(row('Peak village', num(run.peak_population)));
   if (run.gold != null) context.push(row('Greatest hoard', `${num(run.gold)} gold`));
 

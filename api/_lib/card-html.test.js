@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { renderCardHtml, renderNotFoundHtml, escapeHtml } from './card-html.js';
 
 const RUN = { digger_name: 'Heimdall', gen: 8, days: 85, depth: 324, cause: 'maw_breach',
-  villager_deaths: 210, blocks: 6601, peak_population: 342, gold: 4034,
+  villager_deaths: 210, blocks: 6601, discoveries: 61, peak_population: 342, gold: 4034,
   cosmetics: { headwear: 'head_crown' }, date: '2026-07-08' };
 const OPTS = { origin: 'https://underroot.se', id: 'a3f9c2d81e04' };
 
@@ -24,6 +24,12 @@ test('renderCardHtml puts the run details in title and body', () => {
   assert.ok(html.includes('Heimdall'));
   assert.ok(html.includes('day 85'));
   assert.ok(html.includes('486 m'));
+});
+
+test('renderCardHtml shows the discoveries count in the context ledger', () => {
+  const html = renderCardHtml(RUN, OPTS);
+  assert.ok(html.includes('Discoveries'));
+  assert.ok(html.includes('61'));
 });
 
 test('renderCardHtml escapes a hostile name in meta and body', () => {

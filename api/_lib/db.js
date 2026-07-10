@@ -62,7 +62,7 @@ export async function submissionsInLastHour(sql, ipHash) {
 export async function getRunByShareId(sql, id) {
   const rows = await sql`
     SELECT digger_name, gen, days, depth, cause,
-           villager_deaths, blocks, peak_population,
+           villager_deaths, blocks, discoveries, peak_population,
            payload->'cosmetics' AS cosmetics,
            (payload->'peaks'->>'gold')::int AS gold,
            received_at::date AS date
