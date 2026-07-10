@@ -35,7 +35,7 @@ export default async function handler(req, res) {
           SELECT share_id, digger_name, days, depth, gen, cause, blocks,
                  payload->'cosmetics' AS cosmetics, received_at::date AS date
           FROM runs WHERE NOT quarantined
-          ORDER BY days DESC, depth DESC
+          ORDER BY gen DESC, days DESC, depth DESC
           OFFSET ${offset} LIMIT ${limit}`;
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
     return res.status(200).json({ board, offset, limit, rows });
