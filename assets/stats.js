@@ -144,6 +144,21 @@ function render(data) {
     { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
   ]);
 
+  renderBoardWithAvatars(document.getElementById('board-tiles'), boards.tiles, [
+    { label: 'Tiles', num: true, fmt: (r) => num(r.blocks) },
+    { label: 'Days', num: true, fmt: (r) => num(r.days) },
+    { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
+    { label: 'Fate', fmt: (r) => CAUSE_LABELS[r.cause] ?? r.cause },
+    { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
+  ]);
+
+  renderBoardWithAvatars(document.getElementById('board-discoveries'), boards.discoveries, [
+    { label: 'Discoveries', num: true, fmt: (r) => num(r.discoveries) },
+    { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
+    { label: 'Days', num: true, fmt: (r) => num(r.days) },
+    { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
+  ]);
+
   // ---- Hall of Fools ----
   function foolTile(medal, award, who) {
     const d = el('div', undefined, 'fool');
