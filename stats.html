@@ -152,6 +152,7 @@
 
     /* ── Beats (alternating prose/art) ───────────────────────────────────── */
     .beat { display:grid; grid-template-columns:1fr 1fr; gap:44px; align-items:center; margin-top:80px; }
+    .beat.solo { grid-template-columns:1fr; max-width:640px; }
     .beat.flip .art { order:2; }
     .beat .prose p { color:rgba(255,255,255,.8); font-style:italic; font-size:1.1rem; }
     @media(max-width:680px){ .beat{ grid-template-columns:1fr; gap:22px;} .beat.flip .art{ order:0;} }
@@ -224,6 +225,10 @@
       <section class="beat flip" id="beat-fall">
         <div class="prose"><div class="kicker">II. The Fall</div><h2>Everyone loses. Here is how.</h2><p id="beat-fall-copy"></p></div>
         <div class="art"><div class="chart-box"><canvas id="chart-causes" role="img" aria-label="Deaths by cause"></canvas></div></div>
+      </section>
+
+      <section class="beat solo" id="beat-bargain">
+        <div class="prose"><div class="kicker">III. The Bargain</div><h2>Every request is a reckoning.</h2><p id="beat-bargain-copy"></p></div>
       </section>
 
       <div class="divider" id="divider-village"><p class="q">"You build walls against a thing that has never known a wall it could not pass."</p></div>

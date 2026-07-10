@@ -3,7 +3,7 @@
 // arrive as JSON strings (Postgres serialization) — always Number() them.
 import { drawDigger } from './digger.js';
 import { attachCard } from './player-card.js';
-import { CAUSE_LABELS, num, metres } from './format.js';
+import { CAUSE_LABELS, num, metres, ratePct } from './format.js';
 
 // A leaderboard name cell: a small digger canvas + the digger name. The canvas
 // is drawn at 2× CSS pixels for crispness. cosmetics may be null/partial on old
@@ -193,6 +193,8 @@ function render(data) {
   const topCause = causes[0] ? (CAUSE_LABELS[causes[0].cause] ?? causes[0].cause) : 'the dark';
   document.getElementById('beat-fall-copy').textContent =
     `The most common fate is ${topCause.toLowerCase()}. You dig too greedily, or you simply forget to eat.`;
+  document.getElementById('beat-bargain-copy').textContent =
+    `Across every village, ${num(Number(totals.tasks_granted))} requests were granted and ${num(Number(totals.tasks_denied))} turned away.`;
 
   // ---- The Ledger (one sortable table) ----
   renderLedger(document.getElementById('board-ledger'), ledger);
@@ -214,6 +216,12 @@ function render(data) {
   if (f.overconfident) tiles.push(foolTile('⚰️', 'The Overconfident', `${f.overconfident.digger_name} reached ${metres(f.overconfident.depth)} — dead by day ${num(f.overconfident.days)}.`, f.overconfident));
   if (f.groundhog) tiles.push(foolTile('🔁', 'Groundhog Village', `${f.groundhog.digger_name} lost ${num(f.groundhog.mx)} generations in a single day.`, f.groundhog));
   if (f.scratched) tiles.push(foolTile('🕳️', 'Scratched the Surface', `${f.scratched.digger_name} survived ${num(f.scratched.days)} days, only ${metres(f.scratched.depth)} deep.`, f.scratched));
+  if (f.taskmaster) tiles.push(foolTile('🙅', 'The Taskmaster', `${f.taskmaster.digger_name} turned away ${num(f.taskmaster.tasks_denied)} villager requests.`, f.taskmaster));
+  if (f.coldshoulder) {
+    const c = f.coldshoulder;
+    const total = Number(c.tasks_fulfilled) + Number(c.tasks_denied);
+    tiles.push(foolTile('🪙', 'Cold Shoulder', `${c.digger_name} refused ${ratePct(c.tasks_denied, c.tasks_fulfilled)}% of ${num(total)} requests.`, c));
+  }
   if (superlatives.souls) tiles.push(foolTile('🪦', 'The Gravekeeper', `${superlatives.souls.digger_name}'s village buried ${num(superlatives.souls.villager_deaths)} souls.`, superlatives.souls));
   if (tiles.length) foolsEl.append(...tiles);
   else document.getElementById('section-fools').style.display = 'none';
@@ -228,6 +236,8 @@ function render(data) {
   if (s.tiles) champEl.append(recordTile('most tiles clawed', num(s.tiles.blocks), 'tiles', s.tiles));
   if (s.discoveries) champEl.append(recordTile('most discoveries', num(s.discoveries.discoveries), 'found', s.discoveries));
   if (s.hoard) champEl.append(recordTile('greatest hoard', num(s.hoard.gold), 'gold', s.hoard));
+  if (s.generous_count) champEl.append(recordTile('most requests granted', num(s.generous_count.tasks_fulfilled), 'granted', s.generous_count));
+  if (s.generous_rate) champEl.append(recordTile('most generous', String(ratePct(s.generous_rate.tasks_fulfilled, s.generous_rate.tasks_denied)), '% granted', s.generous_rate));
 
   // ---- Charts (Chart.js) — palette matches the site's clay/red accents ----
   const clay = '#a36936', red = '#8c2828', dim = 'rgba(255,255,255,0.35)', ink = 'rgba(255,255,255,0.75)';
