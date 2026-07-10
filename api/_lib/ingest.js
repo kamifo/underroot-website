@@ -39,3 +39,14 @@ export function hashIp(ip, salt) {
   if (!salt) throw new Error('hashIp: salt is required (set IP_SALT)');
   return createHash('sha256').update(`${salt}:${ip}`).digest('hex').slice(0, 32);
 }
+
+// Absolute origin for building shareable/OG-image URLs. Prefers an explicit
+// SITE_ORIGIN, else reconstructs from the (first) forwarded proto + host.
+export function originFromReq(req) {
+  if (process.env.SITE_ORIGIN) return process.env.SITE_ORIGIN.replace(/\/+$/, '');
+  const h = req.headers ?? {};
+  const first = (v, fallback) => (v ?? fallback).split(',')[0].trim();
+  const proto = first(h['x-forwarded-proto'], 'https');
+  const host = first(h['x-forwarded-host'] ?? h.host, 'underroot.se');
+  return `${proto}://${host}`;
+}
