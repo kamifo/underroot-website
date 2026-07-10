@@ -45,7 +45,7 @@ export function hashIp(ip, salt) {
 export function originFromReq(req) {
   if (process.env.SITE_ORIGIN) return process.env.SITE_ORIGIN.replace(/\/+$/, '');
   const h = req.headers ?? {};
-  const first = (v, fallback) => (v ?? fallback).split(',')[0].trim();
+  const first = (v, fallback) => { const s = (v ?? '').split(',')[0].trim(); return s || fallback; };
   const proto = first(h['x-forwarded-proto'], 'https');
   const host = first(h['x-forwarded-host'] ?? h.host, 'underroot.se');
   return `${proto}://${host}`;

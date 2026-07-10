@@ -45,12 +45,17 @@ test('hashIp is stable and does not contain the ip', () => {
 });
 
 test('originFromReq builds origin from forwarded headers', () => {
-  const req = { headers: { 'x-forwarded-proto': 'https', 'x-forwarded-host': 'underroot.se' } };
-  assert.equal(originFromReq(req), 'https://underroot.se');
+  const req = { headers: { 'x-forwarded-proto': 'http', 'x-forwarded-host': 'example.com' } };
+  assert.equal(originFromReq(req), 'http://example.com');
 });
 
 test('originFromReq falls back to host header and https', () => {
   const req = { headers: { host: 'localhost:3000' } };
+  assert.equal(originFromReq(req), 'https://localhost:3000');
+});
+
+test('originFromReq falls back when a forwarded header is empty', () => {
+  const req = { headers: { 'x-forwarded-proto': '', host: 'localhost:3000' } };
   assert.equal(originFromReq(req), 'https://localhost:3000');
 });
 
