@@ -37,13 +37,16 @@ function heroTile(label, value) {
   return t;
 }
 
-// Like heroTile, but attributed: a value + label + a small avatar/name line,
-// and the whole tile opens the holder's player card (reuses attachCard, exactly
-// like the leaderboard name cells). `holder` carries { digger_name, cosmetics,
-// share_id, days, depth, gen, cause, date } — the card degrades if fields are absent.
-function recordTile(label, valueText, holder) {
-  const t = el('div', undefined, 'hero-tile record-tile');
-  t.append(el('div', valueText, 'num'), el('div', label, 'lbl'));
+// A champion stat tile: a short pixel-font number, a small serif unit beneath it,
+// the category label, and the record-holder pinned to the bottom (so every tile
+// aligns on a shared baseline). The whole tile opens the holder's player card
+// (reuses attachCard, like the leaderboard name cells). `holder` carries
+// { digger_name, cosmetics, share_id, days, depth, gen, cause, date }.
+function recordTile(label, value, unit, holder) {
+  const t = el('div', undefined, 'record-tile');
+  const val = el('div', undefined, 'rt-value');
+  val.append(el('span', value, 'rt-num'), el('span', unit, 'rt-unit'));
+  t.append(val, el('div', label, 'rt-label'));
   const who = el('div', undefined, 'record-who');
   const cv = document.createElement('canvas');
   const CSS = 22, PX = CSS * 2;
@@ -57,26 +60,88 @@ function recordTile(label, valueText, holder) {
   return t;
 }
 
-// Like a plain leaderboard render, but the first column is a digger avatar + name. `cols` here
-// excludes the digger column (added automatically as the first data column).
-function renderBoardWithAvatars(table, rows, cols) {
-  table.replaceChildren();
-  const thead = document.createElement('thead');
-  const head = document.createElement('tr');
-  head.append(el('th', '#'), el('th', 'Digger'));
-  for (const c of cols) head.append(el('th', c.label, c.num ? 'num' : ''));
-  thead.append(head);
-  table.append(thead);
+// The Ledger: one browsable table of runs. Numeric columns are click-to-sort
+// (toggling ↓/↑); the digger column opens each run's player card. Sorting is
+// client-side over the fetched pool — the full per-metric boards live on
+// leaderboard.html.
+const LEDGER_COLS = [
+  { key: 'gen', label: 'Gen', num: true, sortable: true, fmt: (r) => String(r.gen) },
+  { key: 'days', label: 'Days', num: true, sortable: true, fmt: (r) => num(r.days) },
+  { key: 'blocks', label: 'Tiles', num: true, sortable: true, fmt: (r) => num(r.blocks) },
+  { key: 'discoveries', label: 'Discoveries', num: true, sortable: true, fmt: (r) => num(r.discoveries) },
+  { key: 'depth', label: 'Depth', num: true, sortable: true, fmt: (r) => metres(r.depth) },
+  { key: 'cause', label: 'Fate', num: false, sortable: false, fmt: (r) => CAUSE_LABELS[r.cause] ?? r.cause },
+];
 
-  const tbody = document.createElement('tbody');
-  rows.forEach((r, i) => {
-    const tr = document.createElement('tr');
-    tr.append(el('td', String(i + 1)));
-    tr.append(diggerCell(r));
-    for (const c of cols) tr.append(el('td', c.fmt(r), c.num ? 'num' : ''));
-    tbody.append(tr);
-  });
-  table.append(tbody);
+function renderLedger(table, rows) {
+  let sortKey = 'gen';
+  let sortDir = -1; // -1 = descending
+
+  // Per-column min/max (constant across re-sorts) for the heat map — a single
+  // clay hue whose alpha scales with each value's place in its column. Sorting a
+  // column then reads as a clean gradient. Numbers stay as text (never colour-only).
+  const ranges = {};
+  for (const c of LEDGER_COLS) {
+    if (!c.sortable) continue;
+    let min = Infinity, max = -Infinity;
+    for (const r of rows) { const v = r[c.key]; if (v < min) min = v; if (v > max) max = v; }
+    ranges[c.key] = { min, max };
+  }
+  const heat = (key, v) => {
+    const { min, max } = ranges[key];
+    const norm = max > min ? (v - min) / (max - min) : 0;
+    return `rgba(163,105,54,${(0.05 + 0.42 * norm).toFixed(3)})`; // clay accent
+  };
+
+  function draw() {
+    const sorted = [...rows].sort((a, b) => {
+      const av = a[sortKey], bv = b[sortKey];
+      return (av < bv ? -1 : av > bv ? 1 : 0) * sortDir;
+    });
+
+    table.replaceChildren();
+    const thead = document.createElement('thead');
+    const head = document.createElement('tr');
+    head.append(el('th', '#'), el('th', 'Digger'));
+    for (const c of LEDGER_COLS) {
+      const active = c.sortable && c.key === sortKey;
+      const th = el('th', c.label + (active ? (sortDir < 0 ? ' ↓' : ' ↑') : ''), c.num ? 'num' : '');
+      if (c.sortable) {
+        th.classList.add('sortable');
+        th.tabIndex = 0;
+        th.setAttribute('role', 'button');
+        th.setAttribute('aria-label', `Sort by ${c.label}`);
+        const toggle = () => {
+          if (sortKey === c.key) sortDir *= -1;
+          else { sortKey = c.key; sortDir = -1; }
+          draw();
+        };
+        th.addEventListener('click', toggle);
+        th.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+        });
+      }
+      head.append(th);
+    }
+    thead.append(head);
+    table.append(thead);
+
+    const tbody = document.createElement('tbody');
+    sorted.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      tr.append(el('td', String(i + 1)));
+      tr.append(diggerCell(r));
+      for (const c of LEDGER_COLS) {
+        const td = el('td', c.fmt(r), c.num ? 'num' : '');
+        if (c.sortable) td.style.backgroundColor = heat(c.key, r[c.key]);
+        tr.append(td);
+      }
+      tbody.append(tr);
+    });
+    table.append(tbody);
+  }
+
+  draw();
 }
 
 function showError() {
@@ -104,7 +169,7 @@ async function main() {
 }
 
 function render(data) {
-  const { totals, causes, boards, superlatives, charts } = data;
+  const { totals, causes, ledger, superlatives, charts } = data;
 
   // ---- Empty state: production launches with zero shared runs ----
   if (Number(totals.runs) === 0) {
@@ -129,35 +194,8 @@ function render(data) {
   document.getElementById('beat-fall-copy').textContent =
     `The most common fate is ${topCause.toLowerCase()}. You dig too greedily, or you simply forget to eat.`;
 
-  // ---- Boards ----
-  renderBoardWithAvatars(document.getElementById('board-lineage'), boards.lineage, [
-    { label: 'Days', num: true, fmt: (r) => num(r.days) },
-    { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
-    { label: 'Gen', num: true, fmt: (r) => String(r.gen) },
-    { label: 'Fate', fmt: (r) => CAUSE_LABELS[r.cause] ?? r.cause },
-    { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
-  ]);
-
-  renderBoardWithAvatars(document.getElementById('board-unbroken'), boards.unbroken, [
-    { label: 'Days undying', num: true, fmt: (r) => num(r.days) },
-    { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
-    { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
-  ]);
-
-  renderBoardWithAvatars(document.getElementById('board-tiles'), boards.tiles, [
-    { label: 'Tiles', num: true, fmt: (r) => num(r.blocks) },
-    { label: 'Days', num: true, fmt: (r) => num(r.days) },
-    { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
-    { label: 'Fate', fmt: (r) => CAUSE_LABELS[r.cause] ?? r.cause },
-    { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
-  ]);
-
-  renderBoardWithAvatars(document.getElementById('board-discoveries'), boards.discoveries, [
-    { label: 'Discoveries', num: true, fmt: (r) => num(r.discoveries) },
-    { label: 'Depth', num: true, fmt: (r) => metres(r.depth) },
-    { label: 'Days', num: true, fmt: (r) => num(r.days) },
-    { label: 'Date', fmt: (r) => String(r.date).slice(0, 10) },
-  ]);
+  // ---- The Ledger (one sortable table) ----
+  renderLedger(document.getElementById('board-ledger'), ledger);
 
   // ---- Hall of Fools ----
   function foolTile(medal, award, who) {
@@ -173,23 +211,20 @@ function render(data) {
   if (f.overconfident) tiles.push(foolTile('⚰️', 'The Overconfident', `${f.overconfident.digger_name} reached ${metres(f.overconfident.depth)} — dead by day ${num(f.overconfident.days)}.`));
   if (f.groundhog) tiles.push(foolTile('🔁', 'Groundhog Village', `${f.groundhog.digger_name} lost ${num(f.groundhog.mx)} generations in a single day.`));
   if (f.scratched) tiles.push(foolTile('🕳️', 'Scratched the Surface', `${f.scratched.digger_name} survived ${num(f.scratched.days)} days, only ${metres(f.scratched.depth)} deep.`));
+  if (superlatives.souls) tiles.push(foolTile('🪦', 'The Gravekeeper', `${superlatives.souls.digger_name}'s village buried ${num(superlatives.souls.villager_deaths)} souls.`));
   if (tiles.length) foolsEl.append(...tiles);
   else document.getElementById('section-fools').style.display = 'none';
 
-  // ---- Superlatives ----
-  const day0pct = superlatives.first_deaths
-    ? Math.round((100 * superlatives.day0_deaths) / superlatives.first_deaths) : 0;
-  const supEl = document.getElementById('superlatives');
-  supEl.append(heroTile('Day-0 Death Club', `${day0pct}% of first diggers`));
-  if (superlatives.hoard) {
-    supEl.append(recordTile('greatest hoard', `${num(superlatives.hoard.gold)} gold`, superlatives.hoard));
-  }
-  if (superlatives.souls) {
-    supEl.append(recordTile('most souls lost in one village', num(superlatives.souls.villager_deaths), superlatives.souls));
-  }
-  if (superlatives.lineage) {
-    supEl.append(recordTile('longest lineage', `${num(superlatives.lineage.gen)} generations`, superlatives.lineage));
-  }
+  // ---- Champions (one record-holder card per reckoning) — triumphs only.
+  // Death-count records (souls lost) live in the Hall of Fools; day-0 deaths are
+  // already there as "Speedrun to Oblivion".
+  const champEl = document.getElementById('champions');
+  const s = superlatives;
+  if (s.lineage) champEl.append(recordTile('longest lineage', num(s.lineage.gen), 'generations', s.lineage));
+  if (s.unbroken) champEl.append(recordTile('the unbroken', num(s.unbroken.unbroken_days), 'days', s.unbroken));
+  if (s.tiles) champEl.append(recordTile('most tiles clawed', num(s.tiles.blocks), 'tiles', s.tiles));
+  if (s.discoveries) champEl.append(recordTile('most discoveries', num(s.discoveries.discoveries), 'found', s.discoveries));
+  if (s.hoard) champEl.append(recordTile('greatest hoard', num(s.hoard.gold), 'gold', s.hoard));
 
   // ---- Charts (Chart.js) — palette matches the site's clay/red accents ----
   const clay = '#a36936', red = '#8c2828', dim = 'rgba(255,255,255,0.35)', ink = 'rgba(255,255,255,0.75)';

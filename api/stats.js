@@ -3,7 +3,7 @@
 import { corsHeaders } from './_lib/ingest.js';
 import { getSql } from './_lib/db.js';
 
-const LEADER_N = 20;
+const LEDGER_N = 50;         // rows in the browsable Ledger table
 const HISTORY_SAMPLE = 2000; // newest N runs used for progression percentiles
 
 export default async function handler(req, res) {
@@ -25,29 +25,13 @@ export default async function handler(req, res) {
       SELECT cause, count(*)::int AS n FROM runs
       WHERE NOT quarantined GROUP BY cause ORDER BY n DESC`;
 
-    const lineageBoard = await sql`
-      SELECT share_id, digger_name, days, depth, gen, cause, blocks,
+    // One browsable table for the whole page, sorted client-side. Default order
+    // is by generation (matches the Champions' "longest lineage" reckoning).
+    const ledger = await sql`
+      SELECT share_id, digger_name, gen, days, depth, blocks, discoveries, cause,
              payload->'cosmetics' AS cosmetics, received_at::date AS date
       FROM runs WHERE NOT quarantined
-      ORDER BY days DESC, depth DESC LIMIT ${LEADER_N}`;
-
-    const unbrokenBoard = await sql`
-      SELECT share_id, digger_name, first_death_days AS days, first_death_depth AS depth,
-             payload->'cosmetics' AS cosmetics, received_at::date AS date
-      FROM runs WHERE NOT quarantined AND first_death_days IS NOT NULL
-      ORDER BY first_death_days DESC, first_death_depth DESC LIMIT ${LEADER_N}`;
-
-    const tilesBoard = await sql`
-      SELECT share_id, digger_name, blocks, days, depth, gen, cause,
-             payload->'cosmetics' AS cosmetics, received_at::date AS date
-      FROM runs WHERE NOT quarantined
-      ORDER BY blocks DESC LIMIT ${LEADER_N}`;
-
-    const discoveriesBoard = await sql`
-      SELECT share_id, digger_name, discoveries, depth, days, gen, cause,
-             payload->'cosmetics' AS cosmetics, received_at::date AS date
-      FROM runs WHERE NOT quarantined
-      ORDER BY discoveries DESC LIMIT ${LEADER_N}`;
+      ORDER BY gen DESC, days DESC LIMIT ${LEDGER_N}`;
 
     // Day-0 Death Club is a percentage of a group — no single holder.
     const [dayCounts] = await sql`
@@ -74,13 +58,34 @@ export default async function handler(req, res) {
              days, depth, gen, cause, received_at::date AS date
       FROM runs WHERE NOT quarantined
       ORDER BY gen DESC LIMIT 1`;
+    const [unbroken] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date,
+             first_death_days AS unbroken_days
+      FROM runs WHERE NOT quarantined AND first_death_days IS NOT NULL
+      ORDER BY first_death_days DESC LIMIT 1`;
+    const [tiles] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date,
+             blocks
+      FROM runs WHERE NOT quarantined
+      ORDER BY blocks DESC LIMIT 1`;
+    const [discoveries] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date,
+             discoveries
+      FROM runs WHERE NOT quarantined
+      ORDER BY discoveries DESC LIMIT 1`;
 
     const superlatives = {
       day0_deaths: dayCounts.day0_deaths,
       first_deaths: dayCounts.first_deaths,
-      hoard: hoard ?? null,      // { …, gold } | null (no run has a gold peak)
-      souls: souls ?? null,      // { …, villager_deaths } | null
-      lineage: lineage ?? null,  // { …, gen } | null
+      hoard: hoard ?? null,              // { …, gold } | null (no run has a gold peak)
+      souls: souls ?? null,              // { …, villager_deaths } | null
+      lineage: lineage ?? null,          // { …, gen } | null
+      unbroken: unbroken ?? null,        // { …, unbroken_days } | null
+      tiles: tiles ?? null,              // { …, blocks } | null
+      discoveries: discoveries ?? null,  // { …, discoveries } | null
     };
 
     // Survival curve: share of runs alive at day N, on a fixed grid.
@@ -176,7 +181,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       totals,
       causes,
-      boards: { lineage: lineageBoard, unbroken: unbrokenBoard, tiles: tilesBoard, discoveries: discoveriesBoard },
+      ledger,
       superlatives,
       fools,
       charts: { survival, runLenHist, depthHist, progression, scatter, causesByGen },

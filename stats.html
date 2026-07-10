@@ -67,8 +67,24 @@
       color: var(--clay); line-height: 1.5; margin-bottom: 10px; word-break: break-word;
     }
     .hero-tile .lbl { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-    .record-tile { cursor: pointer; }
-    .record-who { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; font-size: 12.5px; font-style: italic; color: var(--muted); }
+    /* ── Champion stat tiles ─────────────────────────────────────────────── */
+    .record-tile {
+      display: flex; flex-direction: column; text-align: center; cursor: pointer;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 3px;
+      padding: 24px 16px 20px; transition: border-color 0.2s;
+    }
+    .record-tile:hover { border-color: rgba(255,255,255,0.25); }
+    .rt-value { line-height: 1.2; }
+    .rt-num {
+      display: block; font-family: 'Press Start 2P', monospace;
+      font-size: clamp(1rem, 2.2vw, 1.3rem); color: var(--clay); white-space: nowrap;
+    }
+    .rt-unit { display: block; margin-top: 9px; font-size: 0.92rem; color: var(--muted); }
+    .rt-label { margin-top: 14px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+    .record-who {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: auto; padding-top: 16px; font-size: 12.5px; font-style: italic; color: var(--muted);
+    }
     .record-who span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* ── Boards ───────────────────────────────────────────────────────────── */
@@ -79,6 +95,8 @@
     td { color: rgba(255,255,255,0.82); }
     tr:last-child td { border-bottom: none; }
     th.num, td.num { text-align: right; }
+    th.sortable { cursor: pointer; user-select: none; transition: color 0.15s; }
+    th.sortable:hover, th.sortable:focus-visible { color: var(--ink); outline: none; }
     tbody tr:hover td { background: rgba(255,255,255,0.025); }
     .name-cell { display: flex; align-items: center; gap: 10px; }
     .avatar-canvas { flex: none; image-rendering: auto; background: rgba(255,255,255,0.02); border-radius: 3px; }
@@ -207,31 +225,18 @@
 
       <div class="divider" id="divider-village"><p class="q">"You build walls against a thing that has never known a wall it could not pass."</p></div>
 
-      <section id="section-lineage">
+      <section id="section-champions">
         <div class="kicker">The Hall of the Great</div>
-        <h2>Longest Lineages</h2>
-        <div class="table-wrap"><table id="board-lineage"></table></div>
-        <a class="viewall" href="leaderboard.html?board=lineage">View the full board →</a>
+        <h2>Champions of the Deep</h2>
+        <p class="sub">The single greatest run in each reckoning. Click any to read their card.</p>
+        <div class="tile-row" id="champions"></div>
       </section>
 
-      <section id="section-unbroken">
-        <h2>The Unbroken — longest without a single death</h2>
-        <p class="sub">How far the <em>original</em> digger got before the village first mourned.</p>
-        <div class="table-wrap"><table id="board-unbroken"></table></div>
-        <a class="viewall" href="leaderboard.html?board=unbroken">View the full board →</a>
-      </section>
-
-      <section id="section-tiles">
-        <div class="kicker">The Hall of the Great</div>
-        <h2>Most Tiles Clawed</h2>
-        <p class="sub">Depth hits a floor. The earth moved never does.</p>
-        <div class="table-wrap"><table id="board-tiles"></table></div>
-      </section>
-
-      <section id="section-discoveries">
-        <h2>Greatest Discoverers</h2>
-        <p class="sub">Not how deep — how much of the buried strange they dragged into the light.</p>
-        <div class="table-wrap"><table id="board-discoveries"></table></div>
+      <section id="section-ledger">
+        <h2>The Ledger</h2>
+        <p class="sub">Every village the Maw still remembers. Tap a heading to sort by that reckoning.</p>
+        <div class="table-wrap"><table id="board-ledger"></table></div>
+        <a class="viewall" href="leaderboard.html?board=lineage">View the full boards →</a>
       </section>
 
       <section id="section-fools">
@@ -251,7 +256,6 @@
           <div class="chart-box"><canvas id="chart-depth-hist" role="img" aria-label="Runs by final depth"></canvas></div>
           <div class="chart-box"><canvas id="chart-scatter" role="img" aria-label="Depth versus days"></canvas></div>
         </div>
-        <section class="tile-row" id="superlatives" style="margin-top:40px"></section>
         <div class="chart-grid" style="margin-top:20px">
           <div class="chart-box"><canvas id="chart-runlen" role="img" aria-label="Runs by length"></canvas></div>
           <div class="chart-box"><canvas id="chart-causes-gen" role="img" aria-label="Deaths by cause per generation"></canvas></div>
