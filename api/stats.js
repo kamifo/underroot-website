@@ -18,8 +18,7 @@ export default async function handler(req, res) {
       SELECT count(*)::int AS runs,
              coalesce(sum(villager_deaths), 0)::bigint AS souls,
              coalesce(sum(blocks), 0)::bigint AS blocks,
-             coalesce(max(days), 0)::int AS longest,
-             coalesce(max(depth), 0)::int AS deepest
+             coalesce(max(days), 0)::int AS longest
       FROM runs WHERE NOT quarantined`;
 
     const causes = await sql`
@@ -38,13 +37,51 @@ export default async function handler(req, res) {
       FROM runs WHERE NOT quarantined AND first_death_days IS NOT NULL
       ORDER BY first_death_days DESC, first_death_depth DESC LIMIT ${LEADER_N}`;
 
-    const [superlatives] = await sql`
+    const tilesBoard = await sql`
+      SELECT share_id, digger_name, blocks, days, depth, gen, cause,
+             payload->'cosmetics' AS cosmetics, received_at::date AS date
+      FROM runs WHERE NOT quarantined
+      ORDER BY blocks DESC LIMIT ${LEADER_N}`;
+
+    const discoveriesBoard = await sql`
+      SELECT share_id, digger_name, discoveries, depth, days, gen, cause,
+             payload->'cosmetics' AS cosmetics, received_at::date AS date
+      FROM runs WHERE NOT quarantined
+      ORDER BY discoveries DESC LIMIT ${LEADER_N}`;
+
+    // Day-0 Death Club is a percentage of a group — no single holder.
+    const [dayCounts] = await sql`
       SELECT
         (SELECT count(*)::int FROM runs WHERE NOT quarantined AND first_death_days = 0)  AS day0_deaths,
-        (SELECT count(*)::int FROM runs WHERE NOT quarantined AND first_death_days IS NOT NULL) AS first_deaths,
-        (SELECT max((payload->'peaks'->>'gold')::int) FROM runs WHERE NOT quarantined AND payload->'peaks' ? 'gold') AS max_gold,
-        (SELECT max(villager_deaths) FROM runs WHERE NOT quarantined) AS max_souls,
-        (SELECT max(gen)::int FROM runs WHERE NOT quarantined) AS max_gen`;
+        (SELECT count(*)::int FROM runs WHERE NOT quarantined AND first_death_days IS NOT NULL) AS first_deaths`;
+
+    // Record-holders: full rows (name + cosmetics + card context) so each tile
+    // opens the digger's player card, exactly like a leaderboard row.
+    const [hoard] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date,
+             (payload->'peaks'->>'gold')::int AS gold
+      FROM runs WHERE NOT quarantined AND payload->'peaks' ? 'gold'
+      ORDER BY (payload->'peaks'->>'gold')::int DESC LIMIT 1`;
+    const [souls] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date,
+             villager_deaths
+      FROM runs WHERE NOT quarantined
+      ORDER BY villager_deaths DESC LIMIT 1`;
+    const [lineage] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date
+      FROM runs WHERE NOT quarantined
+      ORDER BY gen DESC LIMIT 1`;
+
+    const superlatives = {
+      day0_deaths: dayCounts.day0_deaths,
+      first_deaths: dayCounts.first_deaths,
+      hoard: hoard ?? null,      // { …, gold } | null (no run has a gold peak)
+      souls: souls ?? null,      // { …, villager_deaths } | null
+      lineage: lineage ?? null,  // { …, gen } | null
+    };
 
     // Survival curve: share of runs alive at day N, on a fixed grid.
     // One scan serves both the day series (survival, runLenHist) and depthHist.
@@ -139,7 +176,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       totals,
       causes,
-      boards: { lineage: lineageBoard, unbroken: unbrokenBoard },
+      boards: { lineage: lineageBoard, unbroken: unbrokenBoard, tiles: tilesBoard, discoveries: discoveriesBoard },
       superlatives,
       fools,
       charts: { survival, runLenHist, depthHist, progression, scatter, causesByGen },
