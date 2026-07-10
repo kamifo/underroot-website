@@ -56,7 +56,12 @@ function fakeRun() {
     discoveries: rnd(0, 80), discovery_pct: rnd(0, 100),
     villager_deaths: souls, peak_population: pop,
     wall_hp: rnd(0, 200000), machines_built: rnd(0, 21),
-    astrolabe_uses: rnd(0, 3), tasks_fulfilled: rnd(0, 200), tasks_denied: rnd(0, 80),
+    // ~1 in 4 runs is a low-request village (below the stats rate floor) so the
+    // rate tiles' exclusion path is exercised; the rest span the full range.
+    astrolabe_uses: rnd(0, 3),
+    ...(rnd(0, 3) === 0
+      ? { tasks_fulfilled: rnd(0, 12), tasks_denied: rnd(0, 8) }
+      : { tasks_fulfilled: rnd(20, 200), tasks_denied: rnd(0, 90) }),
     challenges: [],
     peaks: { gold: rnd(0, 5000), coal: rnd(0, 400), iron: rnd(0, 100) },
     lineage, history,
