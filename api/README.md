@@ -76,7 +76,7 @@ SQL editor (plain Run, not Explain). Keep `db/schema.sql` as the source of truth
 node scripts/dev-server.mjs 3000     # loads .env.development.local + vercel dev
 node scripts/seed-stats.js 40        # fake plausible runs (localhost only by default)
 node db/check-schema.mjs             # sanity: table + indexes exist
-npm test                             # 36 unit tests over _lib/
+npm test                             # unit tests over _lib/ + assets/
 curl -s -X POST localhost:3000/api/submit-run -H "Content-Type: application/json" --data-binary @db/sample-run.json
 ```
 
