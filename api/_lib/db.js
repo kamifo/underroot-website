@@ -9,8 +9,12 @@ export function getSql() {
 }
 
 // Idempotent by run_uuid: a later death in the same run replaces the row.
+// Returns the row's share_id. share_id is intentionally excluded from the
+// INSERT column list and the DO UPDATE SET list, so a first insert gets the
+// DB's default-generated id, and a re-POST of the same run_uuid keeps its
+// existing (stable) share_id rather than being reassigned.
 export async function upsertRun(sql, run, meta) {
-  await sql`
+  const rows = await sql`
     INSERT INTO runs (
       run_uuid, quarantined, quarantine_reasons, submitter_ip_hash, game_version,
       digger_name, gen, days, depth, blocks, cause,
@@ -40,7 +44,9 @@ export async function upsertRun(sql, run, meta) {
       tasks_fulfilled = EXCLUDED.tasks_fulfilled, tasks_denied = EXCLUDED.tasks_denied,
       first_death_days = EXCLUDED.first_death_days, first_death_depth = EXCLUDED.first_death_depth,
       payload = EXCLUDED.payload
+    RETURNING share_id
   `;
+  return rows[0].share_id;
 }
 
 export async function submissionsInLastHour(sql, ipHash) {
@@ -49,4 +55,19 @@ export async function submissionsInLastHour(sql, ipHash) {
     WHERE submitter_ip_hash = ${ipHash} AND received_at > now() - interval '1 hour'
   `;
   return rows[0].n;
+}
+
+// One run's public card data, by its share_id. Only non-quarantined runs are
+// viewable. `gold` is null for runs with no gold peak (caller omits that row).
+export async function getRunByShareId(sql, id) {
+  const rows = await sql`
+    SELECT digger_name, gen, days, depth, cause,
+           villager_deaths, blocks, peak_population,
+           payload->'cosmetics' AS cosmetics,
+           (payload->'peaks'->>'gold')::int AS gold,
+           received_at::date AS date
+    FROM runs
+    WHERE share_id = ${id} AND NOT quarantined
+    LIMIT 1`;
+  return rows[0] ?? null;
 }
