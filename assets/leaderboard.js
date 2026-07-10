@@ -1,9 +1,6 @@
 import { drawDigger } from './digger.js';
 import { attachCard } from './player-card.js';
-
-const num = (n) => Number(n).toLocaleString('en-US');
-const metres = (t) => `${num(Math.round(Number(t) * 1.5))} m`;
-const CAUSE_LABELS = { maw_breach: 'The Maw breached the base', starvation: 'Starvation', dehydration: 'Dehydration', starvation_dehydration: 'Starvation & dehydration', starvation_away: 'Starved while away', dehydration_away: 'Dehydrated while away', starvation_dehydration_away: 'Starved & dehydrated while away', abandoned: 'Lost the will to continue', other: 'Unknown fate' };
+import { num, metres, CAUSE_LABELS } from './format.js';
 
 const params = new URLSearchParams(location.search);
 const board = params.get('board') === 'unbroken' ? 'unbroken' : 'lineage';
