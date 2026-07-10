@@ -19,3 +19,15 @@ const cols = await sql`SELECT column_name FROM information_schema.columns WHERE 
 console.log('runs columns:', cols.length, '-', cols.map((c) => c.column_name).join(','));
 const idx = await sql`SELECT indexname FROM pg_indexes WHERE tablename = 'runs'`;
 console.log('indexes:', idx.map((i) => i.indexname).join(', '));
+
+const colNames = cols.map((c) => c.column_name);
+if (!colNames.includes('share_id')) {
+  console.error('missing column: share_id');
+  process.exit(1);
+}
+const idxNames = idx.map((i) => i.indexname);
+if (!idxNames.includes('runs_share_idx')) {
+  console.error('missing index: runs_share_idx');
+  process.exit(1);
+}
+console.log('share_id column and runs_share_idx index present.');

@@ -27,7 +27,14 @@ CREATE TABLE IF NOT EXISTS runs (
   first_death_depth  INT,
   -- Everything not queried by column: history, peaks, lineage, cosmetics.
   payload            JSONB NOT NULL
+  ,
+  -- Public, listable id for the shareable run-card page. Distinct from run_uuid,
+  -- which stays the private upsert/write key. 12 hex chars (~48 bits): unguessable
+  -- and non-enumerable at this scale. DB-generated so ALTER TABLE backfills rows.
+  share_id           TEXT UNIQUE NOT NULL
+                       DEFAULT substr(replace(gen_random_uuid()::text, '-', ''), 1, 12)
 );
 CREATE INDEX IF NOT EXISTS runs_leader_idx ON runs (quarantined, days DESC, depth DESC);
 CREATE INDEX IF NOT EXISTS runs_unbroken_idx ON runs (quarantined, first_death_days DESC, first_death_depth DESC);
 CREATE INDEX IF NOT EXISTS runs_rate_idx ON runs (submitter_ip_hash, received_at);
+CREATE INDEX IF NOT EXISTS runs_share_idx ON runs (share_id);
