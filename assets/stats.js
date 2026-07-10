@@ -198,20 +198,23 @@ function render(data) {
   renderLedger(document.getElementById('board-ledger'), ledger);
 
   // ---- Hall of Fools ----
-  function foolTile(medal, award, who) {
+  function foolTile(medal, award, who, holder) {
     const d = el('div', undefined, 'fool');
     d.append(el('div', medal, 'medal'), el('div', award, 'award'), el('div', who, 'who'));
+    // Single-run honours open the digger's card; Speedrun (a cohort count) passes
+    // no holder and stays plain text.
+    if (holder && holder.share_id) attachCard(d, holder);
     return d;
   }
   const foolsEl = document.getElementById('fools');
   const f = data.fools ?? {};
   const tiles = [];
   if (f.speedrun > 0) tiles.push(foolTile('🥇', 'Speedrun to Oblivion', `${num(f.speedrun)} villages died on day zero.`));
-  if (f.hoarder) tiles.push(foolTile('💰', 'Hoarder of Nothing', `${f.hoarder.digger_name} lasted ${num(f.hoarder.days)} days holding not one gold.`));
-  if (f.overconfident) tiles.push(foolTile('⚰️', 'The Overconfident', `${f.overconfident.digger_name} reached ${metres(f.overconfident.depth)} — dead by day ${num(f.overconfident.days)}.`));
-  if (f.groundhog) tiles.push(foolTile('🔁', 'Groundhog Village', `${f.groundhog.digger_name} lost ${num(f.groundhog.mx)} generations in a single day.`));
-  if (f.scratched) tiles.push(foolTile('🕳️', 'Scratched the Surface', `${f.scratched.digger_name} survived ${num(f.scratched.days)} days, only ${metres(f.scratched.depth)} deep.`));
-  if (superlatives.souls) tiles.push(foolTile('🪦', 'The Gravekeeper', `${superlatives.souls.digger_name}'s village buried ${num(superlatives.souls.villager_deaths)} souls.`));
+  if (f.hoarder) tiles.push(foolTile('💰', 'Hoarder of Nothing', `${f.hoarder.digger_name} lasted ${num(f.hoarder.days)} days holding not one gold.`, f.hoarder));
+  if (f.overconfident) tiles.push(foolTile('⚰️', 'The Overconfident', `${f.overconfident.digger_name} reached ${metres(f.overconfident.depth)} — dead by day ${num(f.overconfident.days)}.`, f.overconfident));
+  if (f.groundhog) tiles.push(foolTile('🔁', 'Groundhog Village', `${f.groundhog.digger_name} lost ${num(f.groundhog.mx)} generations in a single day.`, f.groundhog));
+  if (f.scratched) tiles.push(foolTile('🕳️', 'Scratched the Surface', `${f.scratched.digger_name} survived ${num(f.scratched.days)} days, only ${metres(f.scratched.depth)} deep.`, f.scratched));
+  if (superlatives.souls) tiles.push(foolTile('🪦', 'The Gravekeeper', `${superlatives.souls.digger_name}'s village buried ${num(superlatives.souls.villager_deaths)} souls.`, superlatives.souls));
   if (tiles.length) foolsEl.append(...tiles);
   else document.getElementById('section-fools').style.display = 'none';
 

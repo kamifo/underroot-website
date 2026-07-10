@@ -52,7 +52,7 @@ export default async function handler(req, res) {
              days, depth, gen, cause, received_at::date AS date,
              villager_deaths
       FROM runs WHERE NOT quarantined
-      ORDER BY villager_deaths DESC LIMIT 1`;
+      ORDER BY villager_deaths DESC, received_at DESC LIMIT 1`;
     const [lineage] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
              days, depth, gen, cause, received_at::date AS date
@@ -151,21 +151,28 @@ export default async function handler(req, res) {
       GROUP BY 1, 2 ORDER BY 1`;
 
     // ---- Hall of Fools: dubious honours (each null when no run qualifies) ----
+    // Each carries the card fields (share_id, cosmetics, gen, cause, date) so the
+    // tile opens the digger's player card; received_at DESC breaks ties toward the
+    // latest submission.
     const [hoarder] = await sql`
-      SELECT digger_name, days FROM runs
-      WHERE NOT quarantined AND NOT (payload->'peaks' ? 'gold')
-      ORDER BY days DESC LIMIT 1`;
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date
+      FROM runs WHERE NOT quarantined AND NOT (payload->'peaks' ? 'gold')
+      ORDER BY days DESC, received_at DESC LIMIT 1`;
     const [overconfident] = await sql`
-      SELECT digger_name, depth, days FROM runs
-      WHERE NOT quarantined AND days <= 15
-      ORDER BY depth DESC LIMIT 1`;
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date
+      FROM runs WHERE NOT quarantined AND days <= 15
+      ORDER BY depth DESC, received_at DESC LIMIT 1`;
     const [scratched] = await sql`
-      SELECT digger_name, days, depth FROM runs
-      WHERE NOT quarantined AND days >= 20
-      ORDER BY depth ASC, days DESC LIMIT 1`;
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date
+      FROM runs WHERE NOT quarantined AND days >= 20
+      ORDER BY depth ASC, days DESC, received_at DESC LIMIT 1`;
     const [groundhog] = await sql`
-      SELECT digger_name, mx FROM (
-        SELECT digger_name, (
+      SELECT share_id, digger_name, cosmetics, days, depth, gen, cause, date, mx FROM (
+        SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+               days, depth, gen, cause, received_at::date AS date, received_at, (
           SELECT max(cnt)::int FROM (
             SELECT count(*)::int AS cnt
             FROM jsonb_array_elements(payload->'lineage') AS e
@@ -173,7 +180,7 @@ export default async function handler(req, res) {
           ) g
         ) AS mx
         FROM runs WHERE NOT quarantined
-      ) s WHERE mx >= 2 ORDER BY mx DESC LIMIT 1`;
+      ) s WHERE mx >= 2 ORDER BY mx DESC, received_at DESC LIMIT 1`;
 
     const fools = {
       speedrun: superlatives.day0_deaths ?? 0,        // count; reuse existing superlative
