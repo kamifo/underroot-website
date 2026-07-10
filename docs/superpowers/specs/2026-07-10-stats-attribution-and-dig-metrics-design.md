@@ -11,7 +11,8 @@ Two gaps on the community stats page (`stats.html` / `assets/stats.js`, fed by `
 
 2. **Depth is a poor headline stat.** Depth is capped (~340 raw units → 510m), so every surviving village clusters at the ceiling and the stat stops discriminating between players. More interesting, wide-ranging per-run metrics are already collected but not surfaced:
    - `blocks` (tiles dug), range `0–5,000,000`, already summed as `totals.blocks` in the API but never rendered.
-   - `discoveries`, range `0–500`, a real column (`db.js`) never aggregated or shown.
+   - `discoveries`, range `0–500`, a real column (`db.js`) never aggregated or shown. **This is the count of special discovery tiles the player unearthed that run** — verified in the game source: `DiscoveryManager.session_discoveries.size()` → `GameManager.current_run.discoveries_found` → telemetry `discoveries` (`CommunityStats.gd`). It is *not* the numerator of `discovery_pct`.
+   - `discovery_pct` is a separate **completion blend** (materials + recipes + depth + machines, per the game's `compute_completion_pct()`), i.e. the compendium/unlock percentage — unrelated to the discovery-tile count. It is deliberately *not* used as a per-discovery share.
 
 ## Goals
 
@@ -100,7 +101,7 @@ FROM runs WHERE NOT quarantined
 ORDER BY blocks DESC LIMIT ${LEADER_N}
 
 -- Greatest Discoverers
-SELECT share_id, digger_name, discoveries, discovery_pct, days,
+SELECT share_id, digger_name, discoveries, depth, days,
        payload->'cosmetics' AS cosmetics, received_at::date AS date
 FROM runs WHERE NOT quarantined
 ORDER BY discoveries DESC LIMIT ${LEADER_N}
@@ -113,14 +114,14 @@ Add to the response as `boards.tiles` and `boards.discoveries`.
 Two `renderBoardWithAvatars` calls:
 
 - **tiles** columns: `Tiles` (num, `num(r.blocks)`) · `Days` (num) · `Depth` (num, `metres`) · `Fate` (`CAUSE_LABELS`) · `Date` (`slice(0,10)`).
-- **discoveries** columns: `Discoveries` (num) · `Found %` (num, `${r.discovery_pct}%`) · `Days` (num) · `Date`.
+- **discoveries** columns: `Discoveries` (num, `num(r.discoveries)`) · `Depth` (num, `metres`) · `Days` (num) · `Date`. (No `discovery_pct` column — it measures overall completion, not discoveries, and would mislead here.)
 
 ### HTML (`stats.html`)
 
 Two new `<section>`s placed after `#section-unbroken` (grouping all boards before the Hall of Fools), each with a kicker/heading, an italic `p.sub`, and a `.table-wrap > table` container:
 
 - **Most Tiles Clawed** — sub: *"Depth hits a floor. The earth moved never does."*
-- **Greatest Discoverers** — sub: *"Not how deep — how much of the dark they mapped."*
+- **Greatest Discoverers** — ranks by count of special discovery tiles unearthed. sub: *"Not how deep — how much of the buried strange they dragged into the light."*
 
 ## Testing / verification
 
