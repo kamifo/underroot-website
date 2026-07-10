@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { num, metres, roman, causeLabel, fmtDate, shareTargets, CAUSE_LABELS } from './format.js';
+import { num, metres, roman, causeLabel, fmtDate, shareTargets, CAUSE_LABELS, ratePct } from './format.js';
 
 test('num formats with thousands separators', () => {
   assert.equal(num(6601), '6,601');
@@ -23,6 +23,19 @@ test('causeLabel maps known causes and passes through unknown', () => {
 
 test('fmtDate renders an ISO-ish date', () => {
   assert.equal(fmtDate('2026-07-08'), '8 Jul 2026');
+});
+
+test('ratePct is the whole-number percent of part within part+other', () => {
+  assert.equal(ratePct(67, 149), 31);   // 67 / 216 = 31.0%
+  assert.equal(ratePct(149, 67), 69);   // 149 / 216 = 69.0%
+});
+
+test('ratePct is 0 when there are no requests at all', () => {
+  assert.equal(ratePct(0, 0), 0);       // no divide-by-zero
+});
+
+test('ratePct coerces string inputs (Postgres bigint serialization)', () => {
+  assert.equal(ratePct('1', '3'), 25);
 });
 
 test('shareTargets builds encoded intent URLs', () => {

@@ -17,6 +17,12 @@ const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 
 
 export const num = (n) => Number(n).toLocaleString('en-US');
 export const metres = (tiles) => `${num(Math.round(Number(tiles) * 1.5))} m`;
+// Whole-number percentage of `part` within `part + other`; 0 when the total is 0
+// (no divide-by-zero). Coerces inputs — Postgres bigint aggregates arrive as strings.
+export const ratePct = (part, other) => {
+  const p = Number(part), total = Number(part) + Number(other);
+  return total > 0 ? Math.round((p / total) * 100) : 0;
+};
 export const roman = (n) => ROMAN[n] ?? String(n);
 export const causeLabel = (c) => (c == null ? null : (CAUSE_LABELS[c] ?? c));
 
