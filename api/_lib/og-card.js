@@ -19,7 +19,7 @@ const fang = (x, y, w, fill) =>
   `<polygon points="${x},${y} ${x + w},${y} ${x + w * 0.775},${y + w * 0.75} ${x + w / 2},${y + w * 1.375} ${x + w * 0.225},${y + w * 0.75}" fill="${fill}"/>`;
 
 export function buildOgSvg(run) {
-  const name = escapeXml(truncate(String(run.digger_name ?? 'Unknown'), 15)).toUpperCase();
+  const name = escapeXml(truncate(String(run.digger_name ?? 'Unknown'), 13)).toUpperCase();
   const epitaph = escapeXml(causeLabel(run.cause) ?? 'Fate unrecorded');
   const days = escapeXml(num(run.days));
   const descent = escapeXml(metres(run.depth));
@@ -50,14 +50,14 @@ export function buildOgSvg(run) {
   <g transform="translate(90 150)">${portrait}</g>
 
   <text x="470" y="185" font-family="${PS}" font-size="20" fill="#a36936" letter-spacing="4">THE MAW&apos;S LEDGER</text>
-  <text x="470" y="285" font-family="${PS}" font-size="52" fill="#ffffff">${name}</text>
+  <text x="470" y="285" font-family="${PS}" font-size="48" fill="#ffffff">${name}</text>
   ${fang(470, 330, 20, '#c05a4c')}
   <text x="502" y="352" font-family="PT Serif" font-style="italic" font-size="30" fill="#c05a4c">${epitaph}</text>
   ${stat(470, days, 'DAYS')}
   ${stat(700, descent, 'DESCENT')}
   ${stat(930, gen, 'LINEAGE')}
 
-  ${fang(1052, 588, 14, 'rgba(255,255,255,0.34)')}
-  <text x="1075" y="600" font-family="${PS}" font-size="16" fill="rgba(255,255,255,0.34)">underroot.se</text>
+  ${fang(975, 588, 14, 'rgba(255,255,255,0.34)')}
+  <text x="1000" y="600" font-family="${PS}" font-size="15" fill="rgba(255,255,255,0.34)">underroot.se</text>
 </svg>`;
 }
