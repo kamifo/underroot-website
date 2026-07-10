@@ -3,7 +3,7 @@
 // Implausible runs are stored quarantined but still get a 200 (no forger feedback).
 import { validateRun } from './_lib/validate.js';
 import { checkPlausibility } from './_lib/plausibility.js';
-import { deriveFirstDeath, corsHeaders, hashIp } from './_lib/ingest.js';
+import { deriveFirstDeath, corsHeaders, hashIp, originFromReq } from './_lib/ingest.js';
 import { getSql, upsertRun, submissionsInLastHour } from './_lib/db.js';
 
 const BODY_CAP = 16 * 1024;
@@ -53,7 +53,7 @@ export default async function handler(req, res) {
     const { plausible, reasons } = checkPlausibility(run);
     const { first_death_days, first_death_depth } = deriveFirstDeath(run.lineage);
 
-    await upsertRun(sql, run, {
+    const shareId = await upsertRun(sql, run, {
       quarantined: !plausible,
       reasons,
       ipHash,
@@ -61,8 +61,9 @@ export default async function handler(req, res) {
       firstDeathDepth: first_death_depth,
     });
 
-    // Same response either way — quarantine is invisible to the client.
-    return res.status(200).json({ ok: true });
+    // Same 200 either way — quarantine stays invisible to the client. The url is
+    // the death-screen share link; a quarantined run's card route will 404 it.
+    return res.status(200).json({ ok: true, url: `${originFromReq(req)}/r/${shareId}` });
   } catch (err) {
     console.error('submit-run failed:', err instanceof Error ? err.message : err);
     return res.status(500).json({ error: 'internal error' });

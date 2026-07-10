@@ -3,6 +3,7 @@
 // arrive as JSON strings (Postgres serialization) — always Number() them.
 import { drawDigger } from './digger.js';
 import { attachCard } from './player-card.js';
+import { CAUSE_LABELS, num, metres } from './format.js';
 
 // A leaderboard name cell: a small digger canvas + the digger name. The canvas
 // is drawn at 2× CSS pixels for crispness. cosmetics may be null/partial on old
@@ -22,21 +23,6 @@ function diggerCell(r) {
   attachCard(td, r);
   return td;
 }
-
-const CAUSE_LABELS = {
-  maw_breach: 'The Maw breached the base',
-  starvation: 'Starvation',
-  dehydration: 'Dehydration',
-  starvation_dehydration: 'Starvation & dehydration',
-  starvation_away: 'Starved while away',
-  dehydration_away: 'Dehydrated while away',
-  starvation_dehydration_away: 'Starved & dehydrated while away',
-  abandoned: 'Lost the will to continue',
-  other: 'Unknown fate',
-};
-
-const num = (n) => Number(n).toLocaleString('en-US');
-const metres = (tiles) => `${num(Math.round(Number(tiles) * 1.5))} m`;
 
 function el(tag, text, className) {
   const e = document.createElement(tag);

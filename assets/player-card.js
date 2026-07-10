@@ -9,30 +9,7 @@
 // gen, cause (raw key), date }. Cards degrade gracefully — the Unbroken board
 // carries no cause/gen, so those lines are simply omitted.
 import { drawDigger } from './digger.js';
-
-const CAUSE_LABELS = {
-  maw_breach: 'The Maw breached the base',
-  starvation: 'Starvation',
-  dehydration: 'Dehydration',
-  starvation_dehydration: 'Starvation & dehydration',
-  starvation_away: 'Starved while away',
-  dehydration_away: 'Dehydrated while away',
-  starvation_dehydration_away: 'Starved & dehydrated while away',
-  abandoned: 'Lost the will to continue',
-  other: 'Unknown fate',
-};
-
-const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
-const roman = (n) => ROMAN[n] ?? String(n);
-const num = (n) => Number(n).toLocaleString('en-US');
-const metres = (tiles) => `${num(Math.round(Number(tiles) * 1.5))} m`;
-function fmtDate(v) {
-  const iso = String(v).slice(0, 10);
-  const d = new Date(iso + 'T00:00:00');
-  return Number.isNaN(d.getTime()) ? iso
-    : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-const causeLabel = (c) => (c == null ? null : (CAUSE_LABELS[c] ?? c));
+import { num, roman, metres, fmtDate, causeLabel } from './format.js';
 
 // The Maw's tooth — the card's "suit" pip, reused for corners + epitaph flourishes.
 const FANG = '<svg viewBox="0 0 8 11" fill="currentColor" aria-hidden="true"><path d="M0 0 H8 L6.2 6 Q4 11 4 11 Q4 11 1.8 6 Z"/></svg>';
@@ -103,6 +80,11 @@ const CSS = `
 .pc-row .pc-k { font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted, rgba(255,255,255,0.52)); }
 .pc-row .pc-v { font-family:'Press Start 2P', monospace; font-size:10px; color:var(--clay, #a36936); }
 .pc-foot { text-align:center; padding:11px 6px 4px; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint, rgba(255,255,255,0.32)); }
+.pc-share-row { display:flex; gap:8px; justify-content:center; padding:10px 6px 2px; }
+.pc-share-btn { font:inherit; font-size:11px; letter-spacing:.04em; padding:7px 12px; border-radius:3px;
+  border:1px solid var(--line, rgba(255,255,255,0.10)); background:rgba(0,0,0,0.25); color:var(--ink, rgba(255,255,255,0.88));
+  cursor:pointer; text-decoration:none; transition:border-color 0.18s, color 0.18s; }
+.pc-share-btn:hover, .pc-share-btn:focus-visible { border-color:var(--clay, #a36936); color:#f0dcc0; outline:none; }
 
 @keyframes pc-breathe { 0%,100% { opacity:0.75; } 50% { opacity:1; } }
 
@@ -142,7 +124,16 @@ function ensureModal() {
   document.addEventListener('keydown', (e) => {
     if (backdrop.hidden) return;
     if (e.key === 'Escape') { e.preventDefault(); close(); }
-    if (e.key === 'Tab') { e.preventDefault(); backdrop.querySelector('.pc-close')?.focus(); } // 1 focusable → keep it here
+    if (e.key === 'Tab') {
+      const f = [...backdrop.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])')].filter((el) => !el.hidden);
+      if (f.length === 0) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+      // else: let Tab move naturally between the focusable controls
+    }
   });
   document.body.append(backdrop);
   return backdrop;
@@ -195,12 +186,35 @@ function cardMarkup(run) {
         ${rows.map(([k, v]) => `<div class="pc-row"><span class="pc-k">${k}</span><span class="pc-v">${v}</span></div>`).join('')}
       </div>
       <div class="pc-foot"></div>
+      <div class="pc-share-row"></div>
     </div>`;
   // Player-provided strings via textContent only — never innerHTML.
   card.querySelector('.pc-name').textContent = run.name ?? '';
   card.querySelector('.pc-cause').textContent = epitaph;
   card.querySelector('.pc-foot').textContent = `Recorded ${fmtDate(run.date)}`;
   drawDigger(card.querySelector('canvas'), run.cosmetics || {});
+  if (run.share_id) {
+    const shareUrl = `${location.origin}/r/${run.share_id}`;
+    const shareRow = card.querySelector('.pc-share-row');
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.className = 'pc-share-btn';
+    copy.textContent = 'Copy link';
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        copy.textContent = 'Copied ✓';
+        setTimeout(() => { copy.textContent = 'Copy link'; }, 1600);
+      } catch { /* clipboard blocked */ }
+    });
+    const openLink = document.createElement('a');
+    openLink.className = 'pc-share-btn';
+    openLink.href = shareUrl;
+    openLink.target = '_blank';
+    openLink.rel = 'noopener';
+    openLink.textContent = 'Open card ↗';
+    shareRow.append(copy, openLink);
+  }
   return card;
 }
 
@@ -229,6 +243,7 @@ export function attachCard(cell, run) {
     name: run.digger_name ?? run.name,
     cosmetics: run.cosmetics,
     days: run.days, depth: run.depth, gen: run.gen, cause: run.cause, date: run.date,
+    share_id: run.share_id,
   };
   cell.addEventListener('click', () => open(normalized, cell));
   cell.addEventListener('keydown', (e) => {

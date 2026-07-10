@@ -26,13 +26,13 @@ export default async function handler(req, res) {
     const sql = getSql();
     const rows = board === 'unbroken'
       ? await sql`
-          SELECT digger_name, first_death_days AS days, first_death_depth AS depth,
+          SELECT share_id, digger_name, first_death_days AS days, first_death_depth AS depth,
                  payload->'cosmetics' AS cosmetics, received_at::date AS date
           FROM runs WHERE NOT quarantined AND first_death_days IS NOT NULL
           ORDER BY first_death_days DESC, first_death_depth DESC
           OFFSET ${offset} LIMIT ${limit}`
       : await sql`
-          SELECT digger_name, days, depth, gen, cause, blocks,
+          SELECT share_id, digger_name, days, depth, gen, cause, blocks,
                  payload->'cosmetics' AS cosmetics, received_at::date AS date
           FROM runs WHERE NOT quarantined
           ORDER BY days DESC, depth DESC
