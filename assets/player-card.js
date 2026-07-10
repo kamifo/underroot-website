@@ -9,30 +9,7 @@
 // gen, cause (raw key), date }. Cards degrade gracefully — the Unbroken board
 // carries no cause/gen, so those lines are simply omitted.
 import { drawDigger } from './digger.js';
-
-const CAUSE_LABELS = {
-  maw_breach: 'The Maw breached the base',
-  starvation: 'Starvation',
-  dehydration: 'Dehydration',
-  starvation_dehydration: 'Starvation & dehydration',
-  starvation_away: 'Starved while away',
-  dehydration_away: 'Dehydrated while away',
-  starvation_dehydration_away: 'Starved & dehydrated while away',
-  abandoned: 'Lost the will to continue',
-  other: 'Unknown fate',
-};
-
-const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
-const roman = (n) => ROMAN[n] ?? String(n);
-const num = (n) => Number(n).toLocaleString('en-US');
-const metres = (tiles) => `${num(Math.round(Number(tiles) * 1.5))} m`;
-function fmtDate(v) {
-  const iso = String(v).slice(0, 10);
-  const d = new Date(iso + 'T00:00:00');
-  return Number.isNaN(d.getTime()) ? iso
-    : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-const causeLabel = (c) => (c == null ? null : (CAUSE_LABELS[c] ?? c));
+import { num, roman, metres, fmtDate, causeLabel } from './format.js';
 
 // The Maw's tooth — the card's "suit" pip, reused for corners + epitaph flourishes.
 const FANG = '<svg viewBox="0 0 8 11" fill="currentColor" aria-hidden="true"><path d="M0 0 H8 L6.2 6 Q4 11 4 11 Q4 11 1.8 6 Z"/></svg>';
