@@ -107,6 +107,7 @@
       position: relative; height: 320px; padding: 16px;
       background: var(--panel); border: 1px solid var(--line); border-radius: 3px;
     }
+    .chart-wide { height: 380px; }
 
     /* ── Footer (matches index.html) ─────────────────────────────────────── */
     footer { background: #0c0907; border-top: 1px solid var(--line); padding: clamp(48px, 7vw, 80px) clamp(20px, 5vw, 48px) 40px; text-align: center; }
@@ -254,12 +255,10 @@
         <div class="chart-grid">
           <div class="chart-box"><canvas id="chart-progression" role="img" aria-label="Tiles-dug progression"></canvas></div>
           <div class="chart-box"><canvas id="chart-tiles-hist" role="img" aria-label="Runs by tiles dug"></canvas></div>
-          <div class="chart-box"><canvas id="chart-scatter" role="img" aria-label="Tiles versus days"></canvas></div>
-        </div>
-        <div class="chart-grid" style="margin-top:20px">
           <div class="chart-box"><canvas id="chart-runlen" role="img" aria-label="Runs by length"></canvas></div>
           <div class="chart-box"><canvas id="chart-causes-gen" role="img" aria-label="Deaths by cause per generation"></canvas></div>
         </div>
+        <div class="chart-box chart-wide" style="margin-top:20px"><canvas id="chart-scatter" role="img" aria-label="Tiles versus days"></canvas></div>
       </section>
     </div>
   </article>
