@@ -207,13 +207,13 @@ function cardMarkup(run) {
         setTimeout(() => { copy.textContent = 'Copy link'; }, 1600);
       } catch { /* clipboard blocked */ }
     });
-    const open = document.createElement('a');
-    open.className = 'pc-share-btn';
-    open.href = shareUrl;
-    open.target = '_blank';
-    open.rel = 'noopener';
-    open.textContent = 'Open card ↗';
-    shareRow.append(copy, open);
+    const openLink = document.createElement('a');
+    openLink.className = 'pc-share-btn';
+    openLink.href = shareUrl;
+    openLink.target = '_blank';
+    openLink.rel = 'noopener';
+    openLink.textContent = 'Open card ↗';
+    shareRow.append(copy, openLink);
   }
   return card;
 }
