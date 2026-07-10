@@ -5,6 +5,7 @@ import { getSql } from './_lib/db.js';
 
 const LEDGER_N = 50;         // rows in the browsable Ledger table
 const HISTORY_SAMPLE = 2000; // newest N runs used for progression percentiles
+const TASK_FLOOR = 50;       // min villager requests (fulfilled+denied) to qualify for the RATE tiles
 
 export default async function handler(req, res) {
   const cors = corsHeaders(req.headers.origin);
@@ -18,7 +19,9 @@ export default async function handler(req, res) {
       SELECT count(*)::int AS runs,
              coalesce(sum(villager_deaths), 0)::bigint AS souls,
              coalesce(sum(blocks), 0)::bigint AS blocks,
-             coalesce(max(days), 0)::int AS longest
+             coalesce(max(days), 0)::int AS longest,
+             coalesce(sum(tasks_fulfilled), 0)::bigint AS tasks_granted,
+             coalesce(sum(tasks_denied), 0)::bigint AS tasks_denied
       FROM runs WHERE NOT quarantined`;
 
     const causes = await sql`
@@ -77,6 +80,37 @@ export default async function handler(req, res) {
       FROM runs WHERE NOT quarantined
       ORDER BY discoveries DESC LIMIT 1`;
 
+    // Task honours. Raw-count tiles reward volume; rate tiles reward the ratio but
+    // require TASK_FLOOR total requests so a 1-of-1 run can't win.
+    const [taskmaster] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date,
+             tasks_denied
+      FROM runs WHERE NOT quarantined AND tasks_denied > 0
+      ORDER BY tasks_denied DESC, received_at DESC LIMIT 1`;
+    const [generousCount] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date,
+             tasks_fulfilled
+      FROM runs WHERE NOT quarantined AND tasks_fulfilled > 0
+      ORDER BY tasks_fulfilled DESC, received_at DESC LIMIT 1`;
+    const [coldShoulder] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date,
+             tasks_fulfilled, tasks_denied
+      FROM runs
+      WHERE NOT quarantined AND (tasks_fulfilled + tasks_denied) >= ${TASK_FLOOR}
+      ORDER BY tasks_denied::real / (tasks_fulfilled + tasks_denied) DESC, received_at DESC
+      LIMIT 1`;
+    const [generousRate] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date,
+             tasks_fulfilled, tasks_denied
+      FROM runs
+      WHERE NOT quarantined AND (tasks_fulfilled + tasks_denied) >= ${TASK_FLOOR}
+      ORDER BY tasks_fulfilled::real / (tasks_fulfilled + tasks_denied) DESC, received_at DESC
+      LIMIT 1`;
+
     const superlatives = {
       day0_deaths: dayCounts.day0_deaths,
       first_deaths: dayCounts.first_deaths,
@@ -86,6 +120,8 @@ export default async function handler(req, res) {
       unbroken: unbroken ?? null,        // { …, unbroken_days } | null
       tiles: tiles ?? null,              // { …, blocks } | null
       discoveries: discoveries ?? null,  // { …, discoveries } | null
+      generous_count: generousCount ?? null, // { …, tasks_fulfilled } | null
+      generous_rate: generousRate ?? null,   // { …, tasks_fulfilled, tasks_denied } | null
     };
 
     // Survival curve: share of runs alive at day N, on a fixed grid.
@@ -188,6 +224,8 @@ export default async function handler(req, res) {
       overconfident: overconfident ?? null,            // { digger_name, depth, days }
       scratched: scratched ?? null,                    // { digger_name, days, depth }
       groundhog: groundhog ?? null,                    // { digger_name, mx }
+      taskmaster: taskmaster ?? null,                  // { …, tasks_denied } | null
+      coldshoulder: coldShoulder ?? null,              // { …, tasks_fulfilled, tasks_denied } | null
     };
 
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
