@@ -89,9 +89,9 @@ export default async function handler(req, res) {
     };
 
     // Survival curve: share of runs alive at day N, on a fixed grid.
-    // One scan serves both the day series (survival, runLenHist) and depthHist.
-    const dayDepthRows = await sql`SELECT days, depth FROM runs WHERE NOT quarantined`;
-    const allDays = dayDepthRows.map((r) => r.days);
+    // One scan serves the day series (survival, runLenHist) and the tiles histogram.
+    const dayRows = await sql`SELECT days, blocks FROM runs WHERE NOT quarantined`;
+    const allDays = dayRows.map((r) => r.days);
     // reduce, not Math.max(...spread) — spread blows the call stack past ~130k rows.
     const maxDay = allDays.reduce((m, x) => (x > m ? x : m), 0);
     const survival = [];
@@ -109,32 +109,38 @@ export default async function handler(req, res) {
       return Object.entries(out).map(([b, n]) => [Number(b), n]).sort((a, z) => a[0] - z[0]);
     };
     const runLenHist = histogram(allDays, 10);
-    const depthHist = histogram(dayDepthRows.map((r) => r.depth), 25);
+    // Tiles dug spans a huge range (unlike depth, which saturates at the floor),
+    // so bucket adaptively into ~12 bins rounded to 500.
+    const blocksVals = dayRows.map((r) => r.blocks);
+    const maxBlocks = blocksVals.reduce((m, x) => (x > m ? x : m), 0);
+    const tilesBucket = Math.max(500, Math.ceil(maxBlocks / 12 / 500) * 500);
+    const tilesHist = histogram(blocksVals, tilesBucket);
 
-    // Depth progression percentiles from history curves (25/50/75 per day).
+    // Tiles-dug progression percentiles from history curves (25/50/75 per day).
+    // History rows are [day, depth, blocks, pop, souls] — index 2 is cumulative tiles.
     const histRows = await sql`
       SELECT payload->'history' AS history FROM runs
       WHERE NOT quarantined AND jsonb_array_length(payload->'history') > 0
       ORDER BY received_at DESC LIMIT ${HISTORY_SAMPLE}`;
     const byDay = new Map();
     for (const { history } of histRows) {
-      for (const [day, depth] of history) {
+      for (const [day, , blocks] of history) {
         if (!byDay.has(day)) byDay.set(day, []);
-        byDay.get(day).push(depth);
+        byDay.get(day).push(blocks);
       }
     }
     const pct = (arr, p) => arr[Math.min(arr.length - 1, Math.floor((arr.length - 1) * p))];
     const progression = [...byDay.entries()]
       .filter(([, v]) => v.length >= 3)
       .sort((a, z) => a[0] - z[0])
-      .map(([day, depths]) => {
-        depths.sort((a, z) => a - z);
-        return [day, pct(depths, 0.25), pct(depths, 0.5), pct(depths, 0.75)];
+      .map(([day, curve]) => {
+        curve.sort((a, z) => a - z);
+        return [day, pct(curve, 0.25), pct(curve, 0.5), pct(curve, 0.75)];
       });
 
-    // Depth-vs-days scatter (cap the dots).
+    // Tiles-vs-days scatter (cap the dots).
     const scatter = await sql`
-      SELECT days, depth, cause FROM runs WHERE NOT quarantined
+      SELECT days, blocks, cause FROM runs WHERE NOT quarantined
       ORDER BY received_at DESC LIMIT 1000`;
 
     // Deaths by cause per generation, from every lineage entry across all runs.
@@ -184,7 +190,7 @@ export default async function handler(req, res) {
       ledger,
       superlatives,
       fools,
-      charts: { survival, runLenHist, depthHist, progression, scatter, causesByGen },
+      charts: { survival, runLenHist, tilesHist, progression, scatter, causesByGen },
     });
   } catch (err) {
     console.error('stats failed:', err instanceof Error ? err.message : err);

@@ -289,20 +289,20 @@ function render(data) {
       type: 'line',
       data: {
         datasets: [
-          { label: '75th percentile depth', data: charts.progression.map(([d, , , p75]) => ({ x: d, y: p75 * 1.5 })), borderColor: dim, pointRadius: 0, fill: '+1', backgroundColor: 'rgba(163,105,54,0.15)' },
-          { label: 'median depth', data: charts.progression.map(([d, , p50]) => ({ x: d, y: p50 * 1.5 })), borderColor: clay, pointRadius: 0 },
-          { label: '25th percentile depth', data: charts.progression.map(([d, p25]) => ({ x: d, y: p25 * 1.5 })), borderColor: dim, pointRadius: 0 },
+          { label: '75th percentile tiles', data: charts.progression.map(([d, , , p75]) => ({ x: d, y: p75 })), borderColor: dim, pointRadius: 0, fill: '+1', backgroundColor: 'rgba(163,105,54,0.15)' },
+          { label: 'median tiles', data: charts.progression.map(([d, , p50]) => ({ x: d, y: p50 })), borderColor: clay, pointRadius: 0 },
+          { label: '25th percentile tiles', data: charts.progression.map(([d, p25]) => ({ x: d, y: p25 })), borderColor: dim, pointRadius: 0 },
         ],
       },
-      options: { maintainAspectRatio: false, scales: { x: { type: 'linear', title: { display: true, text: 'day' } }, y: { title: { display: true, text: 'depth (m)' } } } },
+      options: { maintainAspectRatio: false, scales: { x: { type: 'linear', title: { display: true, text: 'day' } }, y: { title: { display: true, text: 'tiles dug' } } } },
     });
   }
 
-  new Chart(document.getElementById('chart-depth-hist'), {
+  new Chart(document.getElementById('chart-tiles-hist'), {
     type: 'bar',
     data: {
-      labels: charts.depthHist.map(([b]) => `${Math.round(b * 1.5)}m`),
-      datasets: [{ label: 'runs by final depth', data: charts.depthHist.map(([, n]) => n), backgroundColor: clay }],
+      labels: charts.tilesHist.map(([b]) => num(b)),
+      datasets: [{ label: 'runs by tiles dug', data: charts.tilesHist.map(([, n]) => n), backgroundColor: clay }],
     },
     options: { maintainAspectRatio: false },
   });
@@ -312,11 +312,11 @@ function render(data) {
     data: {
       datasets: [{
         label: 'each dot is a shared run',
-        data: charts.scatter.map((r) => ({ x: r.days, y: r.depth * 1.5 })),
+        data: charts.scatter.map((r) => ({ x: r.days, y: r.blocks })),
         backgroundColor: charts.scatter.map((r) => (r.cause === 'maw_breach' ? red : clay)),
       }],
     },
-    options: { maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'days survived' } }, y: { title: { display: true, text: 'depth (m)' } } } },
+    options: { maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'days survived' } }, y: { title: { display: true, text: 'tiles dug' } } } },
   });
 }
 
