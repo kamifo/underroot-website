@@ -60,6 +60,18 @@ function recordTile(label, value, unit, holder) {
   return t;
 }
 
+// An unclaimed champion reckoning: same footprint as recordTile (so the grid
+// stays aligned) but with a placeholder value and a "waiting to be claimed" note
+// where the record-holder normally sits. Not clickable — no run to open.
+function recordTileEmpty(label, unit) {
+  const t = el('div', undefined, 'record-tile record-tile--empty');
+  const val = el('div', undefined, 'rt-value');
+  val.append(el('span', '—', 'rt-num'), el('span', unit, 'rt-unit'));
+  t.append(val, el('div', label, 'rt-label'));
+  t.append(el('div', 'waiting to be claimed', 'record-who record-who--unclaimed'));
+  return t;
+}
+
 // The Ledger: one browsable table of runs. Numeric columns are click-to-sort
 // (toggling ↓/↑); the digger column opens each run's player card. Sorting is
 // client-side over the fetched pool — the full per-metric boards live on
@@ -217,7 +229,7 @@ function render(data) {
   if (f.hoarder) tiles.push(foolTile('💰', 'Hoarder of Nothing', `${f.hoarder.digger_name} lasted ${num(f.hoarder.days)} days holding not one gold.`, f.hoarder));
   if (f.overconfident) tiles.push(foolTile('⚰️', 'The Overconfident', `${f.overconfident.digger_name} reached ${metres(f.overconfident.depth)} — dead by day ${num(f.overconfident.days)}.`, f.overconfident));
   if (f.groundhog) tiles.push(foolTile('🔁', 'Groundhog Village', `${f.groundhog.digger_name} lost ${num(f.groundhog.mx)} generations in a single day.`, f.groundhog));
-  if (f.scratched) tiles.push(foolTile('🕳️', 'Scratched the Surface', `${f.scratched.digger_name} survived ${num(f.scratched.days)} days, only ${metres(f.scratched.depth)} deep.`, f.scratched));
+  if (f.scratched) tiles.push(foolTile('🕳️', 'Scratched the Surface', `${f.scratched.digger_name} survived ${num(f.scratched.days)} days but dug only ${num(f.scratched.blocks)} tiles.`, f.scratched));
   if (f.taskmaster) tiles.push(foolTile('🙅', 'The Taskmaster', `${f.taskmaster.digger_name} turned away ${num(f.taskmaster.tasks_denied)} villager requests.`, f.taskmaster));
   if (f.coldshoulder) {
     const c = f.coldshoulder;
@@ -237,7 +249,12 @@ function render(data) {
   if (s.unbroken) champEl.append(recordTile('the unbroken', num(s.unbroken.unbroken_days), 'days', s.unbroken));
   if (s.tiles) champEl.append(recordTile('most tiles clawed', num(s.tiles.blocks), 'tiles', s.tiles));
   if (s.discoveries) champEl.append(recordTile('most discoveries', num(s.discoveries.discoveries), 'found', s.discoveries));
-  if (s.ritualist) champEl.append(recordTile('the lone ritualist', num(s.ritualist.astrolabe_uses), 'rituals', s.ritualist));
+  champEl.append(s.rituals_most
+    ? recordTile('most rituals dared', num(s.rituals_most.astrolabe_uses), 'rituals', s.rituals_most)
+    : recordTileEmpty('most rituals dared', 'rituals'));
+  champEl.append(s.ritualist
+    ? recordTile('the lone ritualist', num(s.ritualist.astrolabe_uses), 'rituals', s.ritualist)
+    : recordTileEmpty('the lone ritualist', 'rituals'));
   if (s.hoard) champEl.append(recordTile('greatest hoard', num(s.hoard.gold), 'gold', s.hoard));
   if (s.generous_count) champEl.append(recordTile('most requests granted', num(s.generous_count.tasks_fulfilled), 'granted', s.generous_count));
   if (s.generous_rate) champEl.append(recordTile('most generous', String(ratePct(s.generous_rate.tasks_fulfilled, s.generous_rate.tasks_denied)), '% granted', s.generous_rate));

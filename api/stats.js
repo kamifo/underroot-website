@@ -80,9 +80,17 @@ export default async function handler(req, res) {
              discoveries
       FROM runs WHERE NOT quarantined
       ORDER BY discoveries DESC LIMIT 1`;
-    // The lone ritualist: most Astrolabe rituals dared by a founding digger who
-    // never fell to a successor (gen = 1). Requires at least one ritual so a
-    // ritual-less run can't hold the title.
+    // Most rituals: the single run that dared the Astrolabe the most times, any
+    // generation. Requires at least one ritual so a ritual-less run can't win.
+    const [ritualsMost] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date,
+             astrolabe_uses
+      FROM runs WHERE NOT quarantined AND astrolabe_uses > 0
+      ORDER BY astrolabe_uses DESC, received_at DESC LIMIT 1`;
+    // The lone ritualist: most Astrolabe rituals dared within a single-generation
+    // lineage (gen = 1) — every ritual fired under the original digger, who never
+    // fell to a successor. Requires at least one ritual.
     const [ritualist] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
              days, depth, gen, cause, received_at::date AS date,
@@ -130,6 +138,7 @@ export default async function handler(req, res) {
       unbroken: unbroken ?? null,        // { …, unbroken_days } | null
       tiles: tiles ?? null,              // { …, blocks } | null
       discoveries: discoveries ?? null,  // { …, discoveries } | null
+      rituals_most: ritualsMost ?? null, // { …, astrolabe_uses } | null (uses>0)
       ritualist: ritualist ?? null,      // { …, astrolabe_uses } | null (gen 1, uses>0)
       generous_count: generousCount ?? null, // { …, tasks_fulfilled } | null
       generous_rate: generousRate ?? null,   // { …, tasks_fulfilled, tasks_denied } | null
@@ -211,11 +220,17 @@ export default async function handler(req, res) {
              days, depth, gen, cause, received_at::date AS date
       FROM runs WHERE NOT quarantined AND days <= 15
       ORDER BY depth DESC, received_at DESC LIMIT 1`;
+    // Scratched the Surface: survived a long time (days >= 20) yet dug the fewest
+    // tiles — all that time above ground and barely a hole to show for it. Keyed
+    // on tiles (not depth): depth saturates at the 342 (513 m) world floor, so a
+    // depth race crowned floor-huggers; tiles dug has no ceiling, so "least dug"
+    // stays meaningful. Ties break toward the longest-lived slacker.
     const [scratched] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date
+             days, depth, gen, cause, received_at::date AS date,
+             blocks
       FROM runs WHERE NOT quarantined AND days >= 20
-      ORDER BY depth ASC, days DESC, received_at DESC LIMIT 1`;
+      ORDER BY blocks ASC, days DESC, received_at DESC LIMIT 1`;
     const [groundhog] = await sql`
       SELECT share_id, digger_name, cosmetics, days, depth, gen, cause, date, mx FROM (
         SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,

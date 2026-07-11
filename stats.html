@@ -86,6 +86,11 @@
       margin-top: auto; padding-top: 16px; font-size: 12.5px; font-style: italic; color: var(--muted);
     }
     .record-who span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* Unclaimed reckoning: same footprint, dimmed, not clickable. */
+    .record-tile--empty { cursor: default; opacity: 0.7; }
+    .record-tile--empty:hover { border-color: var(--line); }
+    .record-tile--empty .rt-num { color: var(--faint); }
+    .record-who--unclaimed { text-transform: none; }
 
     /* ── Boards ───────────────────────────────────────────────────────────── */
     .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 3px; background: var(--panel); }
