@@ -21,7 +21,8 @@ export default async function handler(req, res) {
              coalesce(sum(blocks), 0)::bigint AS blocks,
              coalesce(max(days), 0)::int AS longest,
              coalesce(sum(tasks_fulfilled), 0)::bigint AS tasks_granted,
-             coalesce(sum(tasks_denied), 0)::bigint AS tasks_denied
+             coalesce(sum(tasks_denied), 0)::bigint AS tasks_denied,
+             coalesce(sum(astrolabe_uses), 0)::bigint AS astrolabe_rituals
       FROM runs WHERE NOT quarantined`;
 
     const causes = await sql`
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
     // One browsable table for the whole page, sorted client-side. Default order
     // is by generation (matches the Champions' "longest lineage" reckoning).
     const ledger = await sql`
-      SELECT share_id, digger_name, gen, days, depth, blocks, discoveries, cause,
+      SELECT share_id, digger_name, gen, days, depth, blocks, discoveries, astrolabe_uses, cause,
              payload->'cosmetics' AS cosmetics, received_at::date AS date
       FROM runs WHERE NOT quarantined
       ORDER BY gen DESC, days DESC LIMIT ${LEDGER_N}`;
@@ -79,6 +80,15 @@ export default async function handler(req, res) {
              discoveries
       FROM runs WHERE NOT quarantined
       ORDER BY discoveries DESC LIMIT 1`;
+    // The lone ritualist: most Astrolabe rituals dared by a founding digger who
+    // never fell to a successor (gen = 1). Requires at least one ritual so a
+    // ritual-less run can't hold the title.
+    const [ritualist] = await sql`
+      SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
+             days, depth, gen, cause, received_at::date AS date,
+             astrolabe_uses
+      FROM runs WHERE NOT quarantined AND gen = 1 AND astrolabe_uses > 0
+      ORDER BY astrolabe_uses DESC, received_at DESC LIMIT 1`;
 
     // Task honours. Raw-count tiles reward volume; rate tiles reward the ratio but
     // require TASK_FLOOR total requests so a 1-of-1 run can't win.
@@ -120,6 +130,7 @@ export default async function handler(req, res) {
       unbroken: unbroken ?? null,        // { …, unbroken_days } | null
       tiles: tiles ?? null,              // { …, blocks } | null
       discoveries: discoveries ?? null,  // { …, discoveries } | null
+      ritualist: ritualist ?? null,      // { …, astrolabe_uses } | null (gen 1, uses>0)
       generous_count: generousCount ?? null, // { …, tasks_fulfilled } | null
       generous_rate: generousRate ?? null,   // { …, tasks_fulfilled, tasks_denied } | null
     };

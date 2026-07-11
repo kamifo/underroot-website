@@ -69,6 +69,7 @@ const LEDGER_COLS = [
   { key: 'days', label: 'Days', num: true, sortable: true, fmt: (r) => num(r.days) },
   { key: 'blocks', label: 'Tiles', num: true, sortable: true, fmt: (r) => num(r.blocks) },
   { key: 'discoveries', label: 'Discoveries', num: true, sortable: true, fmt: (r) => num(r.discoveries) },
+  { key: 'astrolabe_uses', label: 'Rituals', num: true, sortable: true, fmt: (r) => num(r.astrolabe_uses) },
   { key: 'depth', label: 'Depth', num: true, sortable: true, fmt: (r) => metres(r.depth) },
   { key: 'cause', label: 'Fate', num: false, sortable: false, fmt: (r) => CAUSE_LABELS[r.cause] ?? r.cause },
 ];
@@ -184,6 +185,7 @@ function render(data) {
     heroTile('villages fallen', num(totals.runs)),
     heroTile('tiles clawed from the earth', num(totals.blocks)),
     heroTile('longest a village held', `${num(totals.longest)} days`),
+    heroTile('astrolabe rituals dared', num(totals.astrolabe_rituals)),
   );
 
   // Beat copy — derived from the data so the story stays true to the numbers.
@@ -235,6 +237,7 @@ function render(data) {
   if (s.unbroken) champEl.append(recordTile('the unbroken', num(s.unbroken.unbroken_days), 'days', s.unbroken));
   if (s.tiles) champEl.append(recordTile('most tiles clawed', num(s.tiles.blocks), 'tiles', s.tiles));
   if (s.discoveries) champEl.append(recordTile('most discoveries', num(s.discoveries.discoveries), 'found', s.discoveries));
+  if (s.ritualist) champEl.append(recordTile('the lone ritualist', num(s.ritualist.astrolabe_uses), 'rituals', s.ritualist));
   if (s.hoard) champEl.append(recordTile('greatest hoard', num(s.hoard.gold), 'gold', s.hoard));
   if (s.generous_count) champEl.append(recordTile('most requests granted', num(s.generous_count.tasks_fulfilled), 'granted', s.generous_count));
   if (s.generous_rate) champEl.append(recordTile('most generous', String(ratePct(s.generous_rate.tasks_fulfilled, s.generous_rate.tasks_denied)), '% granted', s.generous_rate));
