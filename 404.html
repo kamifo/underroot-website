@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Underroot — Lost in the Deep (404)</title>
+  <meta name="description" content="This tunnel caved in — the page you were digging for isn't here." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/png" href="assets/images/underroot_favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:    #14100c;
+      --ink:   rgba(255,255,255,0.88);
+      --muted: rgba(255,255,255,0.62);
+      --faint: rgba(255,255,255,0.34);
+      --red:   #8c2828;
+      --line:  rgba(255,255,255,0.10);
+      --clay:  #a36936;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Georgia', serif;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: inherit; }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: clamp(48px, 9vw, 100px) clamp(20px, 5vw, 40px);
+    }
+    .card { max-width: 720px; width: 100%; }
+
+    .hero-img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      box-shadow: 0 22px 60px rgba(0,0,0,0.5);
+      margin-bottom: clamp(30px, 5vw, 44px);
+    }
+    .kicker {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      color: var(--red);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(15px, 3.4vw, 22px);
+      line-height: 1.5;
+      color: #fff;
+      font-weight: normal;
+      margin-bottom: 24px;
+    }
+    .lede {
+      max-width: 480px;
+      margin: 0 auto clamp(34px, 6vw, 44px);
+      font-size: clamp(1rem, 2vw, 1.14rem);
+      color: rgba(255,255,255,0.8);
+    }
+
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      border-radius: 2px; padding: 13px 28px; text-decoration: none;
+      letter-spacing: 0.14em; text-transform: uppercase; font-size: 13px;
+      transition: background 0.2s, box-shadow 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn svg { flex-shrink: 0; }
+    .btn.primary {
+      background: rgba(140,40,40,0.9); border: 1px solid rgba(255,255,255,0.3); color: #fff;
+      box-shadow: 0 0 24px rgba(140,40,40,0.45);
+    }
+    .btn.primary:hover  { background: rgba(160,46,46,1); box-shadow: 0 0 32px rgba(140,40,40,0.65); }
+    .btn.primary:active { transform: translateY(1px); }
+    .btn.ghost {
+      background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.82);
+    }
+    .btn.ghost:hover { background: rgba(0,0,0,0.6); color: #fff; border-color: rgba(255,255,255,0.45); }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 28px 20px 34px;
+      text-align: center;
+      color: var(--faint);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="card">
+      <img class="hero-img" src="assets/images/404.png" alt="A puzzled miner with a lantern at a caved-in tunnel, beside a wooden 404 sign marked with a skull" />
+      <div class="kicker">Lost in the deep</div>
+      <h1>This tunnel caved in</h1>
+      <p class="lede">
+        The page you were digging for isn't here — the Maw may have gotten to it first.
+        Grab your lantern and head back to solid ground.
+      </p>
+      <div class="actions">
+        <a class="btn primary" href="https://play.underroot.se">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+          Play the Game
+        </a>
+        <a class="btn ghost" href="index.html">← Back to Underroot</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>A Swavvy AB game · © 2026 Swavvy AB. All rights reserved.</footer>
+</body>
+</html>
