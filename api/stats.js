@@ -47,36 +47,35 @@ export default async function handler(req, res) {
     // opens the digger's player card, exactly like a leaderboard row.
     const [hoard] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
+             days, depth, blocks, gen, cause, received_at::date AS date,
              (payload->'peaks'->>'gold')::int AS gold
       FROM runs WHERE NOT quarantined AND payload->'peaks' ? 'gold'
       ORDER BY (payload->'peaks'->>'gold')::int DESC LIMIT 1`;
     const [souls] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
+             days, depth, blocks, gen, cause, received_at::date AS date,
              villager_deaths
       FROM runs WHERE NOT quarantined
       ORDER BY villager_deaths DESC, received_at DESC LIMIT 1`;
     const [lineage] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date
+             days, depth, blocks, gen, cause, received_at::date AS date
       FROM runs WHERE NOT quarantined
       ORDER BY gen DESC LIMIT 1`;
     const [unbroken] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
+             days, depth, blocks, gen, cause, received_at::date AS date,
              first_death_days AS unbroken_days
       FROM runs WHERE NOT quarantined AND first_death_days IS NOT NULL
       ORDER BY first_death_days DESC LIMIT 1`;
     const [tiles] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
-             blocks
+             days, depth, blocks, gen, cause, received_at::date AS date
       FROM runs WHERE NOT quarantined
       ORDER BY blocks DESC LIMIT 1`;
     const [discoveries] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
+             days, depth, blocks, gen, cause, received_at::date AS date,
              discoveries
       FROM runs WHERE NOT quarantined
       ORDER BY discoveries DESC LIMIT 1`;
@@ -84,7 +83,7 @@ export default async function handler(req, res) {
     // generation. Requires at least one ritual so a ritual-less run can't win.
     const [ritualsMost] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
+             days, depth, blocks, gen, cause, received_at::date AS date,
              astrolabe_uses
       FROM runs WHERE NOT quarantined AND astrolabe_uses > 0
       ORDER BY astrolabe_uses DESC, received_at DESC LIMIT 1`;
@@ -93,7 +92,7 @@ export default async function handler(req, res) {
     // fell to a successor. Requires at least one ritual.
     const [ritualist] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
+             days, depth, blocks, gen, cause, received_at::date AS date,
              astrolabe_uses
       FROM runs WHERE NOT quarantined AND gen = 1 AND astrolabe_uses > 0
       ORDER BY astrolabe_uses DESC, received_at DESC LIMIT 1`;
@@ -102,19 +101,19 @@ export default async function handler(req, res) {
     // require TASK_FLOOR total requests so a 1-of-1 run can't win.
     const [taskmaster] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
+             days, depth, blocks, gen, cause, received_at::date AS date,
              tasks_denied
       FROM runs WHERE NOT quarantined AND tasks_denied > 0
       ORDER BY tasks_denied DESC, received_at DESC LIMIT 1`;
     const [generousCount] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
+             days, depth, blocks, gen, cause, received_at::date AS date,
              tasks_fulfilled
       FROM runs WHERE NOT quarantined AND tasks_fulfilled > 0
       ORDER BY tasks_fulfilled DESC, received_at DESC LIMIT 1`;
     const [coldShoulder] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
+             days, depth, blocks, gen, cause, received_at::date AS date,
              tasks_fulfilled, tasks_denied
       FROM runs
       WHERE NOT quarantined AND (tasks_fulfilled + tasks_denied) >= ${TASK_FLOOR}
@@ -122,7 +121,7 @@ export default async function handler(req, res) {
       LIMIT 1`;
     const [generousRate] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
+             days, depth, blocks, gen, cause, received_at::date AS date,
              tasks_fulfilled, tasks_denied
       FROM runs
       WHERE NOT quarantined AND (tasks_fulfilled + tasks_denied) >= ${TASK_FLOOR}
@@ -212,12 +211,12 @@ export default async function handler(req, res) {
     // latest submission.
     const [hoarder] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date
+             days, depth, blocks, gen, cause, received_at::date AS date
       FROM runs WHERE NOT quarantined AND NOT (payload->'peaks' ? 'gold')
       ORDER BY days DESC, received_at DESC LIMIT 1`;
     const [overconfident] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date
+             days, depth, blocks, gen, cause, received_at::date AS date
       FROM runs WHERE NOT quarantined AND days <= 15
       ORDER BY depth DESC, received_at DESC LIMIT 1`;
     // Scratched the Surface: survived a long time (days >= 20) yet dug the fewest
@@ -227,14 +226,13 @@ export default async function handler(req, res) {
     // stays meaningful. Ties break toward the longest-lived slacker.
     const [scratched] = await sql`
       SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-             days, depth, gen, cause, received_at::date AS date,
-             blocks
+             days, depth, blocks, gen, cause, received_at::date AS date
       FROM runs WHERE NOT quarantined AND days >= 20
       ORDER BY blocks ASC, days DESC, received_at DESC LIMIT 1`;
     const [groundhog] = await sql`
-      SELECT share_id, digger_name, cosmetics, days, depth, gen, cause, date, mx FROM (
+      SELECT share_id, digger_name, cosmetics, days, depth, blocks, gen, cause, date, mx FROM (
         SELECT share_id, digger_name, payload->'cosmetics' AS cosmetics,
-               days, depth, gen, cause, received_at::date AS date, received_at, (
+               days, depth, blocks, gen, cause, received_at::date AS date, received_at, (
           SELECT max(cnt)::int FROM (
             SELECT count(*)::int AS cnt
             FROM jsonb_array_elements(payload->'lineage') AS e
