@@ -5,9 +5,10 @@
 // Shared by stats.js and leaderboard.js. attachCard(cell, run) makes a name cell
 // interactive; the modal + its CSS are created once, lazily, on first open.
 //
-// `run` fields (all optional except name): { name, cosmetics, days, depth (tiles),
-// gen, cause (raw key), date }. Cards degrade gracefully — the Unbroken board
-// carries no cause/gen, so those lines are simply omitted.
+// `run` fields (all optional except name): { name, cosmetics, days, blocks,
+// depth (tiles), gen, cause (raw key), date }. Cards degrade gracefully — the
+// Unbroken board carries no cause/gen/blocks, so those lines are omitted and
+// the stat ledger falls back from Tiles dug to Descent.
 import { drawDigger } from './digger.js';
 import { num, roman, metres, fmtDate, causeLabel } from './format.js';
 
@@ -158,8 +159,12 @@ function cardMarkup(run) {
   const gen = run.gen != null ? roman(run.gen) : '·';
   const rows = [
     ['Endured', `${num(run.days)} days`],
-    ['Descent', metres(run.depth)],
   ];
+  // Mirrors the /r/ card: tiles dug is the interesting stat. Descent only as a
+  // fallback for row shapes without blocks (the Unbroken board's first-death
+  // framing keeps its first-death depth rather than mixing in run totals).
+  if (run.blocks != null) rows.push(['Tiles dug', num(run.blocks)]);
+  else if (run.depth != null) rows.push(['Descent', metres(run.depth)]);
   if (run.gen != null) rows.push(['Lineage', `Gen ${roman(run.gen)}`]);
   const epitaph = causeLabel(run.cause) ?? 'Fate unrecorded';
 
@@ -242,7 +247,7 @@ export function attachCard(cell, run) {
   const normalized = {
     name: run.digger_name ?? run.name,
     cosmetics: run.cosmetics,
-    days: run.days, depth: run.depth, gen: run.gen, cause: run.cause, date: run.date,
+    days: run.days, depth: run.depth, blocks: run.blocks, gen: run.gen, cause: run.cause, date: run.date,
     share_id: run.share_id,
   };
   cell.addEventListener('click', () => open(normalized, cell));
