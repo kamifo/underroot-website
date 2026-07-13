@@ -20,6 +20,15 @@ test('cors allows known origins and rejects others', () => {
   assert.equal(corsHeaders('https://evil.example')['Access-Control-Allow-Origin'], undefined);
 });
 
+test('cors allows play.underroot.se (game host) but not other subdomains or lookalikes', () => {
+  assert.equal(corsHeaders('https://play.underroot.se')['Access-Control-Allow-Origin'], 'https://play.underroot.se');
+  assert.equal(corsHeaders('https://www.underroot.se')['Access-Control-Allow-Origin'], 'https://www.underroot.se');
+  assert.equal(corsHeaders('https://api.underroot.se')['Access-Control-Allow-Origin'], undefined);
+  assert.equal(corsHeaders('https://xplay.underroot.se')['Access-Control-Allow-Origin'], undefined);
+  assert.equal(corsHeaders('https://play-underroot.se')['Access-Control-Allow-Origin'], undefined);
+  assert.equal(corsHeaders('http://play.underroot.se')['Access-Control-Allow-Origin'], undefined);
+});
+
 test('vary is always set (cache safety)', () => {
   assert.equal(corsHeaders('https://underroot.se')['Vary'], 'Origin');
   assert.equal(corsHeaders('https://evil.example')['Vary'], 'Origin');

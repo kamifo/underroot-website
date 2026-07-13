@@ -12,7 +12,7 @@ export function deriveFirstDeath(lineage) {
 // CORS is a courtesy, not security (validation is the gate) — but keep an
 // allowlist so random sites don't embed the endpoint.
 const ORIGIN_ALLOW = [
-  /^https:\/\/(www\.)?underroot\.se$/,
+  /^https:\/\/(www\.|play\.)?underroot\.se$/, // apex + www (site), play (game host)
   /^https:\/\/[a-z0-9-]+\.itch\.zone$/,      // itch.io game embeds
   /^https:\/\/[a-z0-9-]+\.ssl\.hwcdn\.net$/, // itch.io CDN embeds
   /^https:\/\/underroot-playtest[a-z0-9-]*\.vercel\.app$/,  // playtest deploys (scoped to our project)
