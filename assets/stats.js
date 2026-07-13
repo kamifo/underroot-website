@@ -157,7 +157,14 @@ function renderLedger(table, rows) {
   draw();
 }
 
+// The loading block ("the Maw is regurgitating…") shows by default; every
+// terminal state — rendered ledger, empty archive, error — must clear it.
+function hideLoading() {
+  document.getElementById('stats-loading').style.display = 'none';
+}
+
 function showError() {
+  hideLoading();
   document.getElementById('stats-error').style.display = 'block';
   document.getElementById('stats-content').style.display = 'none';
 }
@@ -183,6 +190,7 @@ async function main() {
 
 function render(data) {
   const { totals, causes, ledger, superlatives, charts } = data;
+  hideLoading();
 
   // ---- Empty state: production launches with zero shared runs ----
   if (Number(totals.runs) === 0) {

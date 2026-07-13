@@ -47,13 +47,19 @@ export function renderCardHtml(run, { origin, id }) {
 <meta name="twitter:description" content="${escapeHtml(desc)}"/>
 <meta name="twitter:image" content="${escapeHtml(ogImg)}"/>`;
 
-  const ledger = [row('Endured', `${num(run.days)} days`), row('Descent', metres(run.depth))];
+  const ledger = [row('Endured', `${num(run.days)} days`), row('Tiles dug', num(run.blocks))];
   if (run.gen != null) ledger.push(row('Lineage', `Gen ${roman(run.gen)}`));
 
   const context = [];
   if (run.villager_deaths != null) context.push(row('Souls lost', num(run.villager_deaths)));
-  if (run.blocks != null) context.push(row('Blocks mined', num(run.blocks)));
+  // Descent lives here since tiles dug took its place on the card — demoted, not dropped.
+  if (run.depth != null) context.push(row('Descent', metres(run.depth)));
   if (run.discoveries != null) context.push(row('Discoveries', num(run.discoveries)));
+  // Pips echo the game's Astrolabe panel; capped so a ritual-spammer's row
+  // can't outgrow the ledger. Hidden entirely at 0 — most runs never dare one.
+  if (run.astrolabe_uses > 0) {
+    context.push(row('Rituals dared', `${'◆'.repeat(Math.min(run.astrolabe_uses, 5))} ${num(run.astrolabe_uses)}`));
+  }
   if (run.peak_population != null) context.push(row('Peak village', num(run.peak_population)));
   if (run.gold != null) context.push(row('Greatest hoard', `${num(run.gold)} gold`));
 

@@ -51,6 +51,32 @@
       font-size: 0.98rem;
     }
 
+    /* Loading state — visible on arrival, removed when the ledger renders
+       (or the error/empty state takes over). The fang mirrors the OG card's
+       tooth polygon. */
+    #stats-loading {
+      text-align: center;
+      padding: 56px 20px;
+      color: var(--muted);
+      font-style: italic;
+      font-size: 0.98rem;
+    }
+    #stats-loading .fang {
+      width: 22px;
+      height: 30px;
+      margin: 0 auto 18px;
+      background: #c05a4c;
+      clip-path: polygon(0% 0%, 100% 0%, 77.5% 54.5%, 50% 100%, 22.5% 54.5%);
+      animation: fang-chew 1.6s ease-in-out infinite;
+    }
+    @keyframes fang-chew {
+      0%, 100% { opacity: 0.3; transform: translateY(0); }
+      50%      { opacity: 1;   transform: translateY(7px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #stats-loading .fang { animation: none; opacity: 0.8; }
+    }
+
     section { margin-top: 56px; }
     section h2 { font-size: 1.35rem; font-weight: normal; letter-spacing: 0.02em; color: rgba(255,255,255,0.95); margin-bottom: 10px; }
     section p.sub { color: var(--muted); font-size: 0.95rem; font-style: italic; margin-bottom: 18px; max-width: 560px; }
@@ -218,6 +244,10 @@
   </div>
 
   <article class="doc">
+    <div id="stats-loading" role="status">
+      <div class="fang" aria-hidden="true"></div>
+      Patience — the Maw is regurgitating the ledger…
+    </div>
     <div id="stats-error">The village archive is unreachable right now — try again soon.</div>
     <div id="empty-state">No runs shared yet — be the first: share your run from the death screen.</div>
 

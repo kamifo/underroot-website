@@ -2,7 +2,7 @@
 // api/og.js via resvg. Layout: "horizontal dossier" — portrait left, name +
 // epitaph + a three-stat row right, underroot.se brand mark. Site palette.
 import { diggerSvg } from '../../assets/digger-svg.js';
-import { num, metres, roman, causeLabel } from '../../assets/format.js';
+import { num, compact, roman, causeLabel } from '../../assets/format.js';
 
 export const OG_W = 1200;
 export const OG_H = 630;
@@ -22,7 +22,7 @@ export function buildOgSvg(run) {
   const name = escapeXml(truncate(String(run.digger_name ?? 'Unknown'), 13)).toUpperCase();
   const epitaph = escapeXml(causeLabel(run.cause) ?? 'Fate unrecorded');
   const days = escapeXml(num(run.days));
-  const descent = escapeXml(metres(run.depth));
+  const tiles = escapeXml(compact(run.blocks)); // compact: a 7-digit count won't fit the column
   const gen = escapeXml(run.gen != null ? roman(run.gen) : '·');
   const portrait = diggerSvg(run.cosmetics || {}, 330); // drawn feet-down in a 330 box
 
@@ -54,7 +54,7 @@ export function buildOgSvg(run) {
   ${fang(470, 330, 20, '#c05a4c')}
   <text x="502" y="352" font-family="PT Serif" font-style="italic" font-size="30" fill="#c05a4c">${epitaph}</text>
   ${stat(470, days, 'DAYS')}
-  ${stat(700, descent, 'DESCENT')}
+  ${stat(700, tiles, 'TILES DUG')}
   ${stat(930, gen, 'LINEAGE')}
 
   ${fang(975, 588, 14, 'rgba(255,255,255,0.34)')}

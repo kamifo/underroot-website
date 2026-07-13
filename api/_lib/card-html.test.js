@@ -32,6 +32,31 @@ test('renderCardHtml shows the discoveries count in the context ledger', () => {
   assert.ok(html.includes('61'));
 });
 
+test('renderCardHtml puts tiles dug on the card and demotes descent to the context ledger', () => {
+  const html = renderCardHtml(RUN, OPTS);
+  const card = html.slice(html.indexOf('pc-card'), html.indexOf('cp-context'));
+  const context = html.slice(html.indexOf('cp-context'));
+  assert.ok(card.includes('Tiles dug') && card.includes('6,601'), 'card ledger has tiles dug');
+  assert.ok(!card.includes('Descent'), 'card ledger no longer shows descent');
+  assert.ok(context.includes('Descent') && context.includes('486 m'), 'context ledger gains descent');
+  assert.ok(!context.includes('Blocks mined'), 'context ledger drops the now-duplicate blocks row');
+});
+
+test('renderCardHtml shows rituals dared with capped pips when > 0', () => {
+  const two = renderCardHtml({ ...RUN, astrolabe_uses: 2 }, OPTS);
+  assert.ok(two.includes('Rituals dared'));
+  assert.ok(two.includes('◆◆ 2'));
+  assert.ok(!two.includes('◆◆◆'));
+  const many = renderCardHtml({ ...RUN, astrolabe_uses: 23 }, OPTS);
+  assert.ok(many.includes('◆◆◆◆◆ 23'), 'pips cap at 5');
+  assert.ok(!many.includes('◆◆◆◆◆◆'));
+});
+
+test('renderCardHtml hides the rituals row for 0 or missing astrolabe_uses', () => {
+  assert.ok(!renderCardHtml({ ...RUN, astrolabe_uses: 0 }, OPTS).includes('Rituals dared'));
+  assert.ok(!renderCardHtml(RUN, OPTS).includes('Rituals dared'));
+});
+
 test('renderCardHtml escapes a hostile name in meta and body', () => {
   const html = renderCardHtml({ ...RUN, digger_name: '"><script>x</script>' }, OPTS);
   assert.ok(!html.includes('<script>x</script>'));
