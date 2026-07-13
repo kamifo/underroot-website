@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { num, metres, roman, causeLabel, fmtDate, shareTargets, CAUSE_LABELS, ratePct, compact } from './format.js';
+import { num, metres, roman, causeLabel, fmtDate, shareTargets, CAUSE_LABELS, ratePct, compact, ritualMark } from './format.js';
 
 test('num formats with thousands separators', () => {
   assert.equal(num(6601), '6,601');
@@ -36,6 +36,15 @@ test('ratePct is 0 when there are no requests at all', () => {
 
 test('ratePct coerces string inputs (Postgres bigint serialization)', () => {
   assert.equal(ratePct('1', '3'), 25);
+});
+
+test('ritualMark: pips to 5, then one pip + exact count, empty at 0', () => {
+  assert.equal(ritualMark(0), '');
+  assert.equal(ritualMark(null), '');
+  assert.equal(ritualMark(1), '◆');
+  assert.equal(ritualMark(5), '◆◆◆◆◆');
+  assert.equal(ritualMark(6), '◆ 6');
+  assert.equal(ritualMark(23), '◆ 23');
 });
 
 test('compact keeps numbers under 10k exact, shortens the rest', () => {

@@ -32,7 +32,7 @@ export default async function handler(req, res) {
           ORDER BY first_death_days DESC, first_death_depth DESC
           OFFSET ${offset} LIMIT ${limit}`
       : await sql`
-          SELECT share_id, digger_name, days, depth, gen, cause, blocks,
+          SELECT share_id, digger_name, days, depth, gen, cause, blocks, astrolabe_uses,
                  payload->'cosmetics' AS cosmetics, received_at::date AS date
           FROM runs WHERE NOT quarantined
           ORDER BY gen DESC, days DESC, depth DESC

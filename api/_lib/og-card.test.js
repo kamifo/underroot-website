@@ -34,6 +34,16 @@ test('buildOgSvg compacts a huge tiles-dug value to fit its column', () => {
   assert.ok(!svg.includes('1,200,000'), 'no full-width number');
 });
 
+test('buildOgSvg draws ritual pips as diamonds: count to 5, then one + exact number', () => {
+  const none = buildOgSvg(RUN);
+  assert.ok(!none.includes('#d6924e'), 'no pips without rituals');
+  const three = buildOgSvg({ ...RUN, astrolabe_uses: 3 });
+  assert.equal((three.match(/fill="#d6924e"/g) || []).length, 3, 'three diamond polygons');
+  const many = buildOgSvg({ ...RUN, astrolabe_uses: 23 });
+  assert.equal((many.match(/polygon[^>]*fill="#d6924e"/g) || []).length, 1, 'one diamond above 5');
+  assert.ok(/text[^>]*fill="#d6924e"[^>]*>23</.test(many), 'exact count beside it');
+});
+
 test('buildOgSvg truncates an over-long name', () => {
   const svg = buildOgSvg({ ...RUN, digger_name: 'Aaaaaaaaaaaaaaaaaaaaaaaa' });
   assert.ok(svg.includes('…'), 'ellipsis');

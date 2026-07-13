@@ -18,6 +18,23 @@ const truncate = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 const fang = (x, y, w, fill) =>
   `<polygon points="${x},${y} ${x + w},${y} ${x + w * 0.775},${y + w * 0.75} ${x + w / 2},${y + w * 1.375} ${x + w * 0.225},${y + w * 0.75}" fill="${fill}"/>`;
 
+// Astrolabe ritual pips at the top-right of the portrait box (90..420 x, from
+// y 150). Same rule as ritualMark: 1–5 diamonds, above 5 one diamond + the
+// exact count. Real polygons, not ◆ text — the bundled OG fonts lack U+25C6.
+const PIP_FILL = '#d6924e';
+function ritualPipsSvg(n) {
+  if (!(n > 0)) return '';
+  const y = 180, s = 8, right = 412;
+  const diamond = (cx) => `<polygon points="${cx},${y - s} ${cx + s},${y} ${cx},${y + s} ${cx - s},${y}" fill="${PIP_FILL}"/>`;
+  if (n <= 5) {
+    let out = '';
+    for (let i = 0; i < n; i++) out += diamond(right - s - i * (s * 2 + 6));
+    return out;
+  }
+  return diamond(right - s)
+    + `<text x="${right - s * 2 - 10}" y="${y + 8}" font-family="Press Start 2P" font-size="22" fill="${PIP_FILL}" text-anchor="end">${num(n)}</text>`;
+}
+
 export function buildOgSvg(run) {
   const name = escapeXml(truncate(String(run.digger_name ?? 'Unknown'), 13)).toUpperCase();
   const epitaph = escapeXml(causeLabel(run.cause) ?? 'Fate unrecorded');
@@ -48,6 +65,7 @@ export function buildOgSvg(run) {
   <rect x="0" y="0" width="${OG_W}" height="6" fill="#8c2828"/>
   <ellipse cx="255" cy="300" rx="200" ry="200" fill="url(#glow)"/>
   <g transform="translate(90 150)">${portrait}</g>
+  ${ritualPipsSvg(run.astrolabe_uses)}
 
   <text x="470" y="185" font-family="${PS}" font-size="20" fill="#a36936" letter-spacing="4">THE MAW&apos;S LEDGER</text>
   <text x="470" y="285" font-family="${PS}" font-size="48" fill="#ffffff">${name}</text>

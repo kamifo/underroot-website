@@ -46,6 +46,9 @@ a { color:inherit; }
 .pc-glow { position:absolute; left:50%; top:44%; width:150px; height:150px; transform:translate(-50%,-50%); pointer-events:none;
   background:radial-gradient(circle, rgba(214,146,78,.28), transparent 68%); }
 .pc-portrait canvas { position:relative; z-index:2; margin-bottom:8px; filter:drop-shadow(0 6px 10px rgba(0,0,0,.55)); }
+/* Astrolabe ritual pips, top-right of the portrait (ritualMark: ◆-pips to 5, then "◆ N") */
+.pc-pips { position:absolute; z-index:3; top:8px; right:10px; color:#d6924e; font-size:13px; letter-spacing:2px;
+  text-shadow:0 1px 6px rgba(0,0,0,.8); pointer-events:auto; cursor:default; }
 .pc-epitaph { color:#c86a63; font-size:.98rem; font-style:italic; margin:12px 6px 14px; }
 .pc-ledger { border-top:1px solid var(--line); border-bottom:1px solid var(--line); margin:0 2px; padding:4px 0; }
 .pc-row { display:flex; justify-content:space-between; align-items:baseline; padding:7px 6px; border-bottom:1px solid rgba(255,255,255,.05); }
