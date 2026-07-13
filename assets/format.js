@@ -17,6 +17,14 @@ const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 
 
 export const num = (n) => Number(n).toLocaleString('en-US');
 export const metres = (tiles) => `${num(Math.round(Number(tiles) * 1.5))} m`;
+// Shortened form for width-constrained slots (the OG image's stat columns):
+// exact with separators below 10k, then "123k" / "1.2M" (trailing .0 dropped).
+export const compact = (n) => {
+  const v = Number(n);
+  if (v < 10_000) return num(v);
+  if (v < 1_000_000) return `${num(Math.round(v / 1_000))}k`;
+  return `${(v / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+};
 // Whole-number percentage of `part` within `part + other`; 0 when the total is 0
 // (no divide-by-zero). Coerces inputs — Postgres bigint aggregates arrive as strings.
 export const ratePct = (part, other) => {
