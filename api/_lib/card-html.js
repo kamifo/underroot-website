@@ -54,6 +54,11 @@ export function renderCardHtml(run, { origin, id }) {
   if (run.villager_deaths != null) context.push(row('Souls lost', num(run.villager_deaths)));
   if (run.blocks != null) context.push(row('Blocks mined', num(run.blocks)));
   if (run.discoveries != null) context.push(row('Discoveries', num(run.discoveries)));
+  // Pips echo the game's Astrolabe panel; capped so a ritual-spammer's row
+  // can't outgrow the ledger. Hidden entirely at 0 — most runs never dare one.
+  if (run.astrolabe_uses > 0) {
+    context.push(row('Rituals dared', `${'◆'.repeat(Math.min(run.astrolabe_uses, 5))} ${num(run.astrolabe_uses)}`));
+  }
   if (run.peak_population != null) context.push(row('Peak village', num(run.peak_population)));
   if (run.gold != null) context.push(row('Greatest hoard', `${num(run.gold)} gold`));
 
