@@ -106,6 +106,7 @@ const CSS = `
 
 let backdrop = null;   // the singleton modal root
 let lastFocus = null;  // element to restore focus to on close
+let teardown = null;   // close()'s pending timeout — cancelled if open() wins the race
 
 function ensureModal() {
   if (backdrop) return backdrop;
@@ -143,13 +144,13 @@ function ensureModal() {
 function close() {
   if (!backdrop || backdrop.hidden) return;
   backdrop.classList.remove('pc-open');
-  const done = () => { backdrop.hidden = true; backdrop.replaceChildren(); };
+  const done = () => { teardown = null; backdrop.hidden = true; backdrop.replaceChildren(); };
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   // Fixed timeout (not transitionend) so the backdrop always tears down — a
   // throttled tab may never fire transitionend, which would leave an invisible
   // overlay swallowing every click.
   if (reduced) done();
-  else setTimeout(done, 260);
+  else teardown = setTimeout(done, 260);
   document.body.style.overflow = '';
   if (lastFocus && lastFocus.isConnected) lastFocus.focus();
   lastFocus = null;
@@ -224,6 +225,10 @@ function cardMarkup(run) {
 }
 
 function open(run, trigger) {
+  // Cancel a still-pending close() teardown: without this, closing a card and
+  // clicking another digger within the 260 ms window let the stale timeout
+  // hide + wipe the freshly opened card.
+  if (teardown) { clearTimeout(teardown); teardown = null; }
   const root = ensureModal();
   lastFocus = trigger ?? document.activeElement;
   const card = cardMarkup(run);
