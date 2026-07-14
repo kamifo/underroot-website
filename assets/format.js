@@ -17,6 +17,15 @@ const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 
 
 export const num = (n) => Number(n).toLocaleString('en-US');
 export const metres = (tiles) => `${num(Math.round(Number(tiles) * 1.5))} m`;
+// Astrolabe-ritual mark, shared by every card surface: 1–5 rituals show that
+// many ◆ pips; above 5 a single pip carries the exact count ("◆ 6"). Empty at 0.
+export const ritualMark = (n) => {
+  const v = Number(n) || 0;
+  if (v <= 0) return '';
+  if (v <= 5) return '◆'.repeat(v);
+  return `◆ ${num(v)}`;
+};
+
 // Shortened form for width-constrained slots (the OG image's stat columns):
 // exact with separators below 10k, then "123k" / "1.2M" (trailing .0 dropped).
 export const compact = (n) => {

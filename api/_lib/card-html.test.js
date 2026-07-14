@@ -42,14 +42,24 @@ test('renderCardHtml puts tiles dug on the card and demotes descent to the conte
   assert.ok(!context.includes('Blocks mined'), 'context ledger drops the now-duplicate blocks row');
 });
 
-test('renderCardHtml shows rituals dared with capped pips when > 0', () => {
+test('renderCardHtml shows rituals dared: pips to 5, then one pip + exact count', () => {
   const two = renderCardHtml({ ...RUN, astrolabe_uses: 2 }, OPTS);
   assert.ok(two.includes('Rituals dared'));
   assert.ok(two.includes('◆◆ 2'));
   assert.ok(!two.includes('◆◆◆'));
   const many = renderCardHtml({ ...RUN, astrolabe_uses: 23 }, OPTS);
-  assert.ok(many.includes('◆◆◆◆◆ 23'), 'pips cap at 5');
-  assert.ok(!many.includes('◆◆◆◆◆◆'));
+  assert.ok(many.includes('◆ 23'), 'one pip + exact count above 5');
+  assert.ok(!many.includes('◆◆'), 'no pip row above 5');
+});
+
+test('renderCardHtml puts a ritual-pips badge on the portrait', () => {
+  const three = renderCardHtml({ ...RUN, astrolabe_uses: 3 }, OPTS);
+  assert.ok(three.includes('class="pc-pips"'));
+  assert.ok(three.includes('>◆◆◆</div>'), 'pips-only badge at 3');
+  assert.ok(three.includes('3 astrolabe rituals dared'), 'exact count on hover');
+  const one = renderCardHtml({ ...RUN, astrolabe_uses: 1 }, OPTS);
+  assert.ok(one.includes('1 astrolabe ritual dared'), 'singular title');
+  assert.ok(!renderCardHtml({ ...RUN, astrolabe_uses: 0 }, OPTS).includes('pc-pips'), 'no badge at 0');
 });
 
 test('renderCardHtml hides the rituals row for 0 or missing astrolabe_uses', () => {

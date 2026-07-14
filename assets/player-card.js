@@ -10,7 +10,7 @@
 // Unbroken board carries no cause/gen/blocks, so those lines are omitted and
 // the stat ledger falls back from Tiles dug to Descent.
 import { drawDigger } from './digger.js';
-import { num, roman, metres, fmtDate, causeLabel } from './format.js';
+import { num, roman, metres, fmtDate, causeLabel, ritualMark } from './format.js';
 
 // The Maw's tooth — the card's "suit" pip, reused for corners + epitaph flourishes.
 const FANG = '<svg viewBox="0 0 8 11" fill="currentColor" aria-hidden="true"><path d="M0 0 H8 L6.2 6 Q4 11 4 11 Q4 11 1.8 6 Z"/></svg>';
@@ -70,6 +70,8 @@ const CSS = `
 .pc-ground { position:absolute; left:50%; bottom:16px; width:120px; height:14px; transform:translateX(-50%); z-index:1;
   background:radial-gradient(ellipse at center, rgba(0,0,0,0.55), transparent 70%); }
 .pc-portrait canvas { position:relative; z-index:2; margin-bottom:8px; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.55)); }
+.pc-pips { position:absolute; z-index:3; top:8px; right:10px; color:#d6924e; font-size:13px; letter-spacing:2px;
+  text-shadow:0 1px 6px rgba(0,0,0,0.8); }
 
 .pc-epitaph { display:flex; align-items:center; justify-content:center; gap:10px; color:#c86a63; font-size:0.98rem; font-style:italic; margin:12px 6px 14px; }
 .pc-epitaph svg { width:8px; height:11px; flex:none; opacity:0.7; }
@@ -180,6 +182,7 @@ function cardMarkup(run) {
       <div class="pc-kicker">The Maw&rsquo;s Ledger</div>
       <div class="pc-portrait">
         <div class="pc-glow"></div>
+        <div class="pc-pips" hidden></div>
         <div class="pc-ground"></div>
         <canvas width="440" height="440" style="width:220px;height:220px"></canvas>
       </div>
@@ -197,6 +200,12 @@ function cardMarkup(run) {
   // Player-provided strings via textContent only — never innerHTML.
   card.querySelector('.pc-name').textContent = run.name ?? '';
   card.querySelector('.pc-cause').textContent = epitaph;
+  if (run.astrolabe_uses > 0) {
+    const pips = card.querySelector('.pc-pips');
+    pips.hidden = false;
+    pips.textContent = ritualMark(run.astrolabe_uses);
+    pips.title = `${num(run.astrolabe_uses)} astrolabe ritual${run.astrolabe_uses === 1 ? '' : 's'} dared`;
+  }
   card.querySelector('.pc-foot').textContent = `Recorded ${fmtDate(run.date)}`;
   drawDigger(card.querySelector('canvas'), run.cosmetics || {});
   if (run.share_id) {
@@ -253,6 +262,7 @@ export function attachCard(cell, run) {
     name: run.digger_name ?? run.name,
     cosmetics: run.cosmetics,
     days: run.days, depth: run.depth, blocks: run.blocks, gen: run.gen, cause: run.cause, date: run.date,
+    astrolabe_uses: run.astrolabe_uses,
     share_id: run.share_id,
   };
   cell.addEventListener('click', () => open(normalized, cell));

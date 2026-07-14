@@ -26,3 +26,22 @@ test('a crowned digger differs from bare (no case fall-through)', () => {
 test('the Maw-Eaten form emits polylines (magma cracks)', () => {
   assert.ok(diggerSvg({ form: 'form_maweaten' }, 300).includes('<polyline'));
 });
+
+// The blank-portrait regression: before the form ports + fallback, any form the
+// site didn't know drew NOTHING (Swedish Dave's card was an empty glow).
+test('every ported form draws a substantial figure', () => {
+  const bare = diggerSvg({}, 300);
+  for (const form of ['form_axel', 'form_dave', 'form_hugo']) {
+    const svg = diggerSvg({ form }, 300);
+    const elements = (svg.match(/<(rect|circle|polygon|line|polyline)/g) || []).length;
+    assert.ok(elements > 50, `${form} draws ${elements} elements (expected a full figure)`);
+    assert.notEqual(svg, bare, `${form} is not the bare digger`);
+  }
+});
+
+test('an unknown form falls back to the standard body instead of blanking', () => {
+  const svg = diggerSvg({ form: 'form_from_the_future', headwear: 'head_crown' }, 300);
+  assert.ok(svg.includes('<circle'), 'head drawn');
+  assert.equal(svg, diggerSvg({ form: 'form_none', headwear: 'head_crown' }, 300),
+    'renders exactly as if no form were equipped');
+});

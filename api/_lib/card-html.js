@@ -1,6 +1,6 @@
 // Pure server-rendered HTML for the standalone run card (Direction B) + a themed
 // 404. All player strings are escaped — this is a server-HTML injection surface.
-import { num, metres, roman, causeLabel, fmtDate } from '../../assets/format.js';
+import { num, metres, roman, causeLabel, fmtDate, ritualMark } from '../../assets/format.js';
 
 export function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (ch) =>
@@ -55,10 +55,11 @@ export function renderCardHtml(run, { origin, id }) {
   // Descent lives here since tiles dug took its place on the card — demoted, not dropped.
   if (run.depth != null) context.push(row('Descent', metres(run.depth)));
   if (run.discoveries != null) context.push(row('Discoveries', num(run.discoveries)));
-  // Pips echo the game's Astrolabe panel; capped so a ritual-spammer's row
-  // can't outgrow the ledger. Hidden entirely at 0 — most runs never dare one.
+  // Pips echo the game's Astrolabe panel (ritualMark: pips to 5, then "◆ N").
+  // Hidden entirely at 0 — most runs never dare one.
   if (run.astrolabe_uses > 0) {
-    context.push(row('Rituals dared', `${'◆'.repeat(Math.min(run.astrolabe_uses, 5))} ${num(run.astrolabe_uses)}`));
+    const mark = ritualMark(run.astrolabe_uses);
+    context.push(row('Rituals dared', run.astrolabe_uses <= 5 ? `${mark} ${num(run.astrolabe_uses)}` : mark));
   }
   if (run.peak_population != null) context.push(row('Peak village', num(run.peak_population)));
   if (run.gold != null) context.push(row('Greatest hoard', `${num(run.gold)} gold`));
@@ -75,7 +76,9 @@ export function renderCardHtml(run, { origin, id }) {
     <div class="pc-inner">
       <div class="pc-name">${escapeHtml(name)}</div>
       <div class="pc-kicker">The Maw's Ledger</div>
-      <div class="pc-portrait"><div class="pc-glow"></div><canvas id="card-canvas" width="440" height="440" style="width:220px;height:220px"></canvas></div>
+      <div class="pc-portrait"><div class="pc-glow"></div>${run.astrolabe_uses > 0
+        ? `<div class="pc-pips" title="${escapeHtml(num(run.astrolabe_uses))} astrolabe ritual${run.astrolabe_uses === 1 ? '' : 's'} dared">${escapeHtml(ritualMark(run.astrolabe_uses))}</div>` : ''
+      }<canvas id="card-canvas" width="440" height="440" style="width:220px;height:220px"></canvas></div>
       <div class="pc-epitaph">${escapeHtml(epitaph)}</div>
       <div class="pc-ledger">${ledger.join('')}</div>
       <div class="pc-foot">Recorded ${escapeHtml(fmtDate(run.date))}</div>
