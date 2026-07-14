@@ -64,6 +64,7 @@ export async function getRunByShareId(sql, id) {
     SELECT digger_name, gen, days, depth, cause,
            villager_deaths, blocks, discoveries, peak_population, astrolabe_uses,
            payload->'cosmetics' AS cosmetics,
+           payload->'lineage' AS lineage,
            (payload->'peaks'->>'gold')::int AS gold,
            received_at::date AS date
     FROM runs

@@ -6,6 +6,12 @@ const RUN = { digger_name: 'Heimdall', gen: 8, days: 85, depth: 324, cause: 'maw
   villager_deaths: 210, blocks: 6601, discoveries: 61, peak_population: 342, gold: 4034,
   cosmetics: { headwear: 'head_crown' }, date: '2026-07-08' };
 const OPTS = { origin: 'https://underroot.se', id: 'a3f9c2d81e04' };
+// Payload-shaped lineage: final entry is the fallen digger (matches the run).
+const LINEAGE = [
+  { gen: 1, days: 15, depth: 100, cause: 'starvation' },
+  { gen: 7, days: 52, depth: 300, cause: 'maw_breach' },
+  { gen: 8, days: 85, depth: 324, cause: 'maw_breach' },
+];
 
 test('escapeHtml neutralizes the five entities', () => {
   assert.equal(escapeHtml(`&<>"'`), '&amp;&lt;&gt;&quot;&#39;');
@@ -30,6 +36,26 @@ test('renderCardHtml shows the discoveries count in the context ledger', () => {
   const html = renderCardHtml(RUN, OPTS);
   assert.ok(html.includes('Discoveries'));
   assert.ok(html.includes('61'));
+});
+
+test('renderCardHtml shows the final digger\'s watch, derived from lineage', () => {
+  // Gen 8 fell on day 85; gen 7 fell on day 52 → this digger held the village 33 days.
+  const html = renderCardHtml({ ...RUN, lineage: LINEAGE }, OPTS);
+  assert.ok(html.includes('Held the village'));
+  assert.ok(html.includes('33 days'));
+});
+
+test('renderCardHtml watch row: singular day, and hidden when underivable or redundant', () => {
+  const oneDay = renderCardHtml({ ...RUN, days: 53, lineage: [
+    { gen: 7, days: 52, depth: 300, cause: 'maw_breach' },
+    { gen: 8, days: 53, depth: 324, cause: 'maw_breach' },
+  ] }, OPTS);
+  assert.ok(oneDay.includes('1 day<'), 'singular, not "1 days"');
+  // Gen 1: the watch IS the whole run — redundant with Endured, so omitted.
+  const gen1 = renderCardHtml({ ...RUN, gen: 1, lineage: [LINEAGE[2]] }, OPTS);
+  assert.ok(!gen1.includes('Held the village'));
+  // No lineage data (pre-feature row): omitted.
+  assert.ok(!renderCardHtml(RUN, OPTS).includes('Held the village'));
 });
 
 test('renderCardHtml puts tiles dug on the card and demotes descent to the context ledger', () => {

@@ -47,7 +47,21 @@ export function renderCardHtml(run, { origin, id }) {
 <meta name="twitter:description" content="${escapeHtml(desc)}"/>
 <meta name="twitter:image" content="${escapeHtml(ogImg)}"/>`;
 
-  const ledger = [row('Endured', `${num(run.days)} days`), row('Tiles dug', num(run.blocks))];
+  const ledger = [row('Endured', `${num(run.days)} days`)];
+  // The fallen digger's own watch, derived from lineage: run days minus the
+  // previous generation's death day. Every other stat on the card is the
+  // VILLAGE's cumulative record — this is the one personal line. Omitted for
+  // gen 1 (the watch is the whole run — Endured already says it) and for
+  // pre-lineage rows where it can't be derived.
+  const lin = Array.isArray(run.lineage) ? run.lineage : [];
+  if (run.gen > 1 && run.days != null && lin.length >= 2) {
+    const prevDays = Number(lin[lin.length - 2].days);
+    if (Number.isFinite(prevDays)) {
+      const watch = Math.max(0, run.days - prevDays);
+      ledger.push(row('Held the village', `${num(watch)} day${watch === 1 ? '' : 's'}`));
+    }
+  }
+  ledger.push(row('Tiles dug', num(run.blocks)));
   if (run.gen != null) ledger.push(row('Lineage', `Gen ${roman(run.gen)}`));
 
   const context = [];
