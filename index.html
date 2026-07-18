@@ -224,6 +224,30 @@
     .more-card .cap .go { margin-top: 12px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--clay); }
     @media (max-width: 640px) { .more-grid { grid-template-columns: 1fr; } }
 
+    /* ── Support / donate ───────────────────────────────────────────────── */
+    #support { background: linear-gradient(180deg, var(--bg), #100c08); text-align: center; }
+    #support .kicker { color: #e0ad2e; }
+    #support .wrap { max-width: 640px; }
+    #support h2.title { margin-bottom: 18px; }
+    #support .blurb { font-size: clamp(1rem, 1.8vw, 1.14rem); line-height: 1.8; color: rgba(255,255,255,0.78); margin-bottom: 30px; }
+    .donate-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(46,33,10,0.95); color: #f2c747;
+      border: 1px solid rgba(224,173,46,0.80); border-radius: 4px;
+      padding: 14px clamp(20px, 4vw, 30px);
+      font-family: 'Georgia', serif; font-size: clamp(0.95rem, 1.6vw, 1.05rem); letter-spacing: 0.02em;
+      text-decoration: none; white-space: nowrap;
+      box-shadow: 0 0 6px rgba(224,173,46,0.10);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
+      animation: donate-glow 2.8s ease-in-out infinite;
+    }
+    .donate-btn:hover { background: rgba(58,42,13,0.98); color: #ffec8c; box-shadow: 0 0 26px rgba(224,173,46,0.45); transform: translateY(-1px); }
+    @keyframes donate-glow {
+      0%, 100% { box-shadow: 0 0 6px rgba(224,173,46,0.10); }
+      50%      { box-shadow: 0 0 22px rgba(224,173,46,0.38); }
+    }
+    @media (prefers-reduced-motion: reduce) { .donate-btn { animation: none; } }
+
     /* ── Footer ─────────────────────────────────────────────────────────── */
     footer { background: #0c0907; border-top: 1px solid var(--line); padding: clamp(48px, 7vw, 80px) clamp(20px, 5vw, 48px) 40px; text-align: center; }
     footer .foot-play {
@@ -393,6 +417,18 @@
     </div>
   </section>
 
+  <!-- ════════════ SUPPORT ════════════ -->
+  <section id="support">
+    <div class="wrap reveal">
+      <div class="kicker center">Support</div>
+      <h2 class="title">Made by a father &amp; son</h2>
+      <p class="blurb">Underroot is built by a father and son, and it's free to play — always will be. If it's brightened a few of your days, a hot chocolate keeps the updates coming.</p>
+      <a class="donate-btn" href="https://www.paypal.com/ncp/payment/L9N5B5NRZPVQJ" target="_blank" rel="noopener noreferrer">
+        🍫 Buy the dev a hot chocolate
+      </a>
+    </div>
+  </section>
+
   <!-- ════════════ FOOTER ════════════ -->
   <footer>
     <a class="foot-play" href="https://play.underroot.se">
@@ -403,6 +439,7 @@
       <a href="story.html">Story</a>
       <a href="music.html">Music</a>
       <a href="stats.html">Stats</a>
+      <a href="#support">Support</a>
       <a href="eula.html">EULA</a>
       <a href="privacy.html">Privacy</a>
     </div>
