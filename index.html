@@ -145,6 +145,29 @@
     }
     #about .pitch .tag { color: var(--clay); font-style: italic; }
 
+    /* ── Trailer ────────────────────────────────────────────────────────── */
+    #trailer { background: var(--bg); }
+    #trailer .head { text-align: center; margin-bottom: clamp(28px, 4vw, 48px); }
+    .trailer-frame {
+      position: relative; max-width: var(--maxw); margin: 0 auto; width: 100%;
+      aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 3px;
+      overflow: hidden; background: #0c0907; box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+    }
+    .trailer-frame video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .trailer-play {
+      position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center;
+      border: 0; cursor: pointer; background: rgba(0,0,0,0.28); transition: background 0.2s;
+    }
+    .trailer-play:hover { background: rgba(0,0,0,0.16); }
+    .trailer-play::before {
+      content: ""; position: absolute; width: clamp(64px, 8vw, 92px); aspect-ratio: 1;
+      border-radius: 50%; background: rgba(140,40,40,0.9); border: 1px solid rgba(255,255,255,0.32);
+      box-shadow: 0 0 30px rgba(140,40,40,0.55); transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    }
+    .trailer-play:hover::before { background: rgba(160,46,46,0.98); box-shadow: 0 0 40px rgba(140,40,40,0.75); }
+    .trailer-play svg { position: relative; z-index: 1; width: clamp(24px, 3vw, 34px); height: auto; color: #fff; }
+    .trailer-play[hidden] { display: none; }
+
     /* ── Feature pillars ────────────────────────────────────────────────── */
     #features { display: flex; flex-direction: column; gap: clamp(48px, 8vw, 104px); }
     .pillar { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(22px, 4vw, 56px); align-items: center; max-width: var(--maxw); margin: 0 auto; width: 100%; }
@@ -274,6 +297,23 @@
         what mysteries will you uncover, and how long will you last?
         <span class="tag">Every layer buys time!</span>
       </p>
+    </div>
+  </section>
+
+  <!-- ════════════ TRAILER ════════════ -->
+  <section id="trailer">
+    <div class="head reveal">
+      <div class="kicker center">See it in motion</div>
+      <h2 class="title">Watch the trailer</h2>
+    </div>
+    <div class="trailer-frame reveal">
+      <video id="trailer-video" preload="none" playsinline controls
+             poster="assets/video/underroot_trailer_poster.jpg">
+        <source src="assets/video/underroot_trailer.mp4" type="video/mp4">
+      </video>
+      <button id="trailer-play" class="trailer-play" aria-label="Play trailer">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+      </button>
     </div>
   </section>
 
@@ -676,6 +716,34 @@
     function closeLightbox() { lightbox.classList.remove('open'); lightboxImg.src = ''; }
     lightbox.addEventListener('click', closeLightbox);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    // ── Trailer: click-to-play (poster only until the user opts in) ─────────────
+    const trailerVideo = document.getElementById('trailer-video');
+    const trailerPlay  = document.getElementById('trailer-play');
+    if (trailerVideo && trailerPlay) {
+      trailerPlay.addEventListener('click', () => {
+        trailerPlay.hidden = true;
+        trailerVideo.play();
+      });
+      trailerVideo.addEventListener('play', () => { trailerPlay.hidden = true; });
+
+      // Duck the background music while the trailer plays; resume it after.
+      let bgmPausedForVideo = false;
+      trailerVideo.addEventListener('play', () => {
+        if (audioStarted && !muted && !bgm.paused) {
+          bgm.pause();
+          bgmPausedForVideo = true;
+        }
+      });
+      const resumeBgm = () => {
+        if (bgmPausedForVideo) {
+          bgmPausedForVideo = false;
+          bgm.play().catch(() => {});
+        }
+      };
+      trailerVideo.addEventListener('pause', resumeBgm);
+      trailerVideo.addEventListener('ended', resumeBgm);
+    }
 
     // ── Reveal on scroll ───────────────────────────────────────────────────────
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
