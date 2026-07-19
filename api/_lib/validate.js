@@ -74,6 +74,16 @@ export function validateRun(p) {
     errors.push('bad challenges');
   }
 
+  // harrow: the harrowed design's name — "" / absent on normal runs. Same
+  // hygiene as digger_name, but empty stays empty (it MEANS "not harrowed").
+  const harrowRaw = p.harrow ?? '';
+  let harrow = '';
+  if (typeof harrowRaw !== 'string') {
+    errors.push('bad harrow');
+  } else if (harrowRaw.trim() !== '') {
+    harrow = sanitizeName(harrowRaw);
+  }
+
   // peaks: material -> int (optional)
   const peaks = p.peaks ?? {};
   if (typeof peaks !== 'object' || peaks === null || Array.isArray(peaks) || Object.keys(peaks).length > 20) {
@@ -139,6 +149,7 @@ export function validateRun(p) {
       astrolabe_uses: p.astrolabe_uses,
       tasks_fulfilled: p.tasks_fulfilled, tasks_denied: p.tasks_denied,
       challenges: [...challenges],
+      harrow,
       peaks: Object.fromEntries(Object.entries(peaks)),
       lineage: lineage.map((e) => ({ gen: e.gen, days: e.days, depth: e.depth, cause: e.cause })),
       history: history.map((row) => [...row]),

@@ -27,7 +27,7 @@ export async function upsertRun(sql, run, meta) {
       ${run.discoveries}, ${run.discovery_pct}, ${run.villager_deaths}, ${run.peak_population},
       ${run.wall_hp}, ${run.machines_built}, ${run.astrolabe_uses}, ${run.tasks_fulfilled}, ${run.tasks_denied},
       ${meta.firstDeathDays}, ${meta.firstDeathDepth},
-      ${JSON.stringify({ challenges: run.challenges, peaks: run.peaks, lineage: run.lineage, history: run.history, cosmetics: run.cosmetics })}
+      ${JSON.stringify({ challenges: run.challenges, peaks: run.peaks, lineage: run.lineage, history: run.history, cosmetics: run.cosmetics, ...(run.harrow ? { harrow: run.harrow } : {}) })}
     )
     ON CONFLICT (run_uuid) DO UPDATE SET
       received_at = now(),
@@ -66,6 +66,7 @@ export async function getRunByShareId(sql, id) {
            payload->'cosmetics' AS cosmetics,
            payload->'lineage' AS lineage,
            (payload->'peaks'->>'gold')::int AS gold,
+           coalesce(payload->>'harrow', '') AS harrow,
            received_at::date AS date
     FROM runs
     WHERE share_id = ${id} AND NOT quarantined

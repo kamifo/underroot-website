@@ -18,6 +18,16 @@ const truncate = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 const fang = (x, y, w, fill) =>
   `<polygon points="${x},${y} ${x + w},${y} ${x + w * 0.775},${y + w * 0.75} ${x + w / 2},${y + w * 1.375} ${x + w * 0.225},${y + w * 0.75}" fill="${fill}"/>`;
 
+// The Harrow's hex mark as a real polygon — like the ritual pips, the bundled
+// OG fonts have no U+2B21 glyph to lean on.
+const hexOutline = (cx, cy, r, stroke) => {
+  const pts = Array.from({ length: 6 }, (_, i) => {
+    const a = -Math.PI / 2 + (Math.PI / 3) * i;
+    return `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`;
+  }).join(' ');
+  return `<polygon points="${pts}" fill="none" stroke="${stroke}" stroke-width="3"/>`;
+};
+
 // Astrolabe ritual pips at the top-right of the portrait box (90..420 x, from
 // y 150). Same rule as ritualMark: 1–5 diamonds, above 5 one diamond + the
 // exact count. Real polygons, not ◆ text — the bundled OG fonts lack U+25C6.
@@ -71,6 +81,8 @@ export function buildOgSvg(run) {
   <text x="470" y="285" font-family="${PS}" font-size="48" fill="#ffffff">${name}</text>
   ${fang(470, 330, 20, '#c05a4c')}
   <text x="502" y="352" font-family="PT Serif" font-style="italic" font-size="30" fill="#c05a4c">${epitaph}</text>
+  ${run.harrow ? hexOutline(482, 392, 13, '#e0852e')
+    + `<text x="508" y="401" font-family="PT Serif" font-style="italic" font-size="24" fill="#e0852e">${escapeXml(truncate(`“${String(run.harrow)}” — a harrowed world`, 36))}</text>` : ''}
   ${stat(470, days, 'DAYS')}
   ${stat(700, tiles, 'TILES DUG')}
   ${stat(930, gen, 'LINEAGE')}
