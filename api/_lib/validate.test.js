@@ -165,3 +165,36 @@ test('pre-gate slice never leaves a lone surrogate', () => {
   const name = r.value.digger_name;
   assert.equal(Buffer.from(name, 'utf8').toString('utf8'), name);
 });
+
+test('harrow: absent and blank both normalize to "" (a normal run)', () => {
+  const r1 = validateRun(goodPayload());
+  assert.equal(r1.ok, true);
+  assert.equal(r1.value.harrow, '');
+  const p = goodPayload();
+  p.harrow = '   ';
+  const r2 = validateRun(p);
+  assert.equal(r2.ok, true);
+  assert.equal(r2.value.harrow, '');
+});
+
+test('harrow: a design name survives with digger_name hygiene', () => {
+  const p = goodPayload();
+  p.harrow = '  Ashfall Winter  ';
+  const r = validateRun(p);
+  assert.equal(r.ok, true);
+  assert.equal(r.value.harrow, 'Ashfall Winter');
+});
+
+test('harrow: caps at 24 code points', () => {
+  const p = goodPayload();
+  p.harrow = 'X'.repeat(80);
+  const r = validateRun(p);
+  assert.equal(r.ok, true);
+  assert.equal(r.value.harrow.length, 24);
+});
+
+test('harrow: non-string rejects', () => {
+  const p = goodPayload();
+  p.harrow = { evil: true };
+  assert.equal(validateRun(p).ok, false);
+});

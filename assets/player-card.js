@@ -56,6 +56,8 @@ const CSS = `
 
 .pc-inner { position:relative; z-index:2; padding:14px 16px 6px; text-align:center; }
 .pc-name { font-family:'Press Start 2P', monospace; font-size:14px; line-height:1.5; color:#fff; text-shadow:0 2px 10px rgba(0,0,0,0.7); margin:2px 24px 3px; }
+/* Harrowed-run mark — the Artificer's orange, same accent as in-game. */
+.pc-harrow { font-size:12px; font-style:italic; color:#e0852e; margin:0 12px 2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .pc-kicker { font-family:'Press Start 2P', monospace; font-size:8px; letter-spacing:0.16em; text-transform:uppercase; color:var(--red, #8c2828); margin-bottom:12px; }
 
 .pc-portrait {
@@ -179,6 +181,7 @@ function cardMarkup(run) {
     <div class="pc-corner br"><span class="pc-rank">${gen}</span>${FANG}</div>
     <div class="pc-inner">
       <div class="pc-name"></div>
+      <div class="pc-harrow" hidden title="A design of the Artificer's Harrow"></div>
       <div class="pc-kicker">The Maw&rsquo;s Ledger</div>
       <div class="pc-portrait">
         <div class="pc-glow"></div>
@@ -199,6 +202,11 @@ function cardMarkup(run) {
     </div>`;
   // Player-provided strings via textContent only — never innerHTML.
   card.querySelector('.pc-name').textContent = run.name ?? '';
+  if (run.harrow) {
+    const h = card.querySelector('.pc-harrow');
+    h.hidden = false;
+    h.textContent = `⬡ “${run.harrow}” — a harrowed world`;
+  }
   card.querySelector('.pc-cause').textContent = epitaph;
   if (run.astrolabe_uses > 0) {
     const pips = card.querySelector('.pc-pips');
@@ -263,6 +271,7 @@ export function attachCard(cell, run) {
     cosmetics: run.cosmetics,
     days: run.days, depth: run.depth, blocks: run.blocks, gen: run.gen, cause: run.cause, date: run.date,
     astrolabe_uses: run.astrolabe_uses,
+    harrow: run.harrow,
     share_id: run.share_id,
   };
   cell.addEventListener('click', () => open(normalized, cell));

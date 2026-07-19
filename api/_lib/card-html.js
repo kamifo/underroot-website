@@ -77,6 +77,8 @@ export function renderCardHtml(run, { origin, id }) {
   }
   if (run.peak_population != null) context.push(row('Peak village', num(run.peak_population)));
   if (run.gold != null) context.push(row('Greatest hoard', `${num(run.gold)} gold`));
+  // A harrowed run wears its design's name — the world was made crueler on purpose.
+  if (run.harrow) context.push(row('The Harrow', `“${run.harrow}”`));
 
   const body = `
 <header class="cp-head">
@@ -89,6 +91,7 @@ export function renderCardHtml(run, { origin, id }) {
     <div class="pc-corner br"><span>${run.gen != null ? escapeHtml(roman(run.gen)) : '·'}</span></div>
     <div class="pc-inner">
       <div class="pc-name">${escapeHtml(name)}</div>
+      ${run.harrow ? `<div class="pc-harrow" title="A design of the Artificer's Harrow">⬡ “${escapeHtml(run.harrow)}” — a harrowed world</div>` : ''}
       <div class="pc-kicker">The Maw's Ledger</div>
       <div class="pc-portrait"><div class="pc-glow"></div>${run.astrolabe_uses > 0
         ? `<div class="pc-pips" title="${escapeHtml(num(run.astrolabe_uses))} astrolabe ritual${run.astrolabe_uses === 1 ? '' : 's'} dared">${escapeHtml(ritualMark(run.astrolabe_uses))}</div>` : ''

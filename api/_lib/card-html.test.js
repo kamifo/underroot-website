@@ -117,3 +117,23 @@ test('renderNotFoundHtml is a themed 404 doc', () => {
   assert.ok(html.startsWith('<!DOCTYPE html>'));
   assert.ok(/no record|not found/i.test(html));
 });
+
+test('renderCardHtml shows the harrow chip and context row when harrowed', () => {
+  const html = renderCardHtml({ ...RUN, harrow: 'Ashfall Winter' }, OPTS);
+  assert.ok(html.includes('pc-harrow'));
+  assert.ok(html.includes('Ashfall Winter'));
+  assert.ok(html.includes('a harrowed world'));
+  assert.ok(html.includes('The Harrow'));
+});
+
+test('renderCardHtml omits the harrow chip on normal runs', () => {
+  const html = renderCardHtml(RUN, OPTS);
+  assert.ok(!html.includes('pc-harrow'));
+  assert.ok(!html.includes('a harrowed world'));
+});
+
+test('renderCardHtml escapes a hostile harrow name', () => {
+  const html = renderCardHtml({ ...RUN, harrow: '<img src=x>' }, OPTS);
+  assert.ok(!html.includes('<img src=x>'));
+  assert.ok(html.includes('&lt;img src=x&gt;'));
+});
