@@ -1,0 +1,7 @@
+UNDERROOT — BOILERPLATE (use as-is)
+
+One-liner:
+Every layer buys time. Underroot is an idle survival-crafter about digging deep to keep a doomed village alive one more day.
+
+About paragraph:
+Underroot is a single-player idle survival-crafter from Swavvy AB. You are the last digger of a village at the edge of the world, and the Maw is coming to eat it. Tunnel downward for the materials to wall it out, feed and grow the survivors above, and when you finally fall, your lineage takes up the shovel and digs on. Underroot plays free in your browser or on PC (Windows and Linux), keeps working while you are away, and never asks for a cent unless you want to give one.
