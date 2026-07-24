@@ -22,6 +22,51 @@ ${head}
 
 const row = (k, v) => `<div class="pc-row"><span class="pc-k">${escapeHtml(k)}</span><span class="pc-v">${escapeHtml(v)}</span></div>`;
 
+// Challenge id -> display (name, icon, accent), mirroring the game's
+// ChallengeManager.CATALOG + accent map. Only ids listed here render, so an
+// unknown/future challenge is dropped rather than shown raw — add new ones here
+// to surface them (the same port step the harrow chip needed).
+const CHALLENGES = {
+  lone_villager:    { name: 'The Lone Villager', icon: '🕯️', color: '#f0bd5e' },
+  brittle_world:    { name: 'Brittle World',     icon: '🔨', color: '#8fa6bf' },
+  eye_of_the_storm: { name: 'Eye of the Storm',  icon: '⛈️', color: '#5b9bf0' },
+  ravenous_maw:     { name: 'The Ravenous Maw',  icon: '🦷', color: '#e84736' },
+  black_rot:        { name: 'The Black Rot',     icon: '☠️', color: '#84c656' },
+  two_fronts:       { name: 'Two Fronts',        icon: '⚔️', color: '#b074ec' },
+};
+const CHALLENGE_ORDER = ['lone_villager', 'brittle_world', 'eye_of_the_storm', 'ravenous_maw', 'black_rot', 'two_fronts'];
+
+// The challenge chip strip, or '' for a normal run. Holding all six at once is
+// the game's Maw-Eaten apex condition, so it earns a distinct heading + flourish.
+function challengeStrip(run) {
+  const raw = Array.isArray(run.challenges) ? run.challenges : [];
+  const ids = CHALLENGE_ORDER.filter((id) => raw.includes(id));
+  if (ids.length === 0) return '';
+  const chips = ids.map((id) => {
+    const c = CHALLENGES[id];
+    return `<span class="chal-chip" style="--chal:${c.color}"><span class="chal-ico">${c.icon}</span>${escapeHtml(c.name)}</span>`;
+  }).join('');
+  const allSix = ids.length === CHALLENGE_ORDER.length;
+  const label = allSix ? 'All six Challenges — held at once' : `Under ${ids.length} Challenge${ids.length === 1 ? '' : 's'}`;
+  return `<div class="cp-challenges${allSix ? ' all-six' : ''}"><div class="cp-chal-label">${escapeHtml(label)}</div><div class="cp-chal-chips">${chips}</div></div>`;
+}
+
+// Compact icon cluster for the portrait's lower-left corner, so the challenges
+// ride ON the card visual (what gets shared/screenshotted), not just the side
+// panel. Each icon carries its accent glow; all-six gets a gilded frame.
+function challengeBadge(run) {
+  const raw = Array.isArray(run.challenges) ? run.challenges : [];
+  const ids = CHALLENGE_ORDER.filter((id) => raw.includes(id));
+  if (ids.length === 0) return '';
+  const allSix = ids.length === CHALLENGE_ORDER.length;
+  const icons = ids.map((id) => {
+    const c = CHALLENGES[id];
+    return `<span class="pc-chal-ico" style="--chal:${c.color}">${c.icon}</span>`;
+  }).join('');
+  const names = ids.map((id) => CHALLENGES[id].name).join(' · ');
+  return `<div class="pc-chal-badge${allSix ? ' all-six' : ''}" title="${escapeHtml(names)}">${icons}</div>`;
+}
+
 export function renderCardHtml(run, { origin, id }) {
   const name = String(run.digger_name ?? 'Unknown');
   const epitaph = causeLabel(run.cause) ?? 'Fate unrecorded';
@@ -95,7 +140,7 @@ export function renderCardHtml(run, { origin, id }) {
       <div class="pc-kicker">The Maw's Ledger</div>
       <div class="pc-portrait"><div class="pc-glow"></div>${run.astrolabe_uses > 0
         ? `<div class="pc-pips" title="${escapeHtml(num(run.astrolabe_uses))} astrolabe ritual${run.astrolabe_uses === 1 ? '' : 's'} dared">${escapeHtml(ritualMark(run.astrolabe_uses))}</div>` : ''
-      }<canvas id="card-canvas" width="440" height="440" style="width:220px;height:220px"></canvas></div>
+      }<canvas id="card-canvas" width="440" height="440" style="width:220px;height:220px"></canvas>${challengeBadge(run)}</div>
       <div class="pc-epitaph">${escapeHtml(epitaph)}</div>
       <div class="pc-ledger">${ledger.join('')}</div>
       <div class="pc-foot">Recorded ${escapeHtml(fmtDate(run.date))}</div>
@@ -104,6 +149,7 @@ export function renderCardHtml(run, { origin, id }) {
   <section class="cp-context">
     <h1>${escapeHtml(name)}'s village fell on day ${escapeHtml(num(run.days))}.</h1>
     <p class="cp-flavor">${escapeHtml(genPhrase ? genPhrase.replace(/ $/, '') + ' ' : 'A lone digger reached ')}${escapeHtml(metres(run.depth))} into the dark before ${escapeHtml(epitaph.toLowerCase())}.</p>
+    ${challengeStrip(run)}
     <div class="pc-ledger cp-fulllist">${context.join('')}</div>
     <a class="cp-cta" href="/stats.html">Explore the full Ledger →</a>
     <div class="cp-share-label">Share this end</div>

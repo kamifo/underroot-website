@@ -19,6 +19,22 @@ a { color:inherit; }
 .cp-context { flex:1; min-width:260px; }
 .cp-context h1 { font-family:Georgia,serif; font-weight:normal; color:#fff; font-size:1.5rem; margin-bottom:12px; }
 .cp-flavor { color:rgba(255,255,255,.7); font-style:italic; font-size:1.05rem; margin-bottom:18px; }
+/* Challenge chips — a run under one or more Challenges wears them. Per-chip
+   accent comes from --chal (set inline, mirrors the game's accent colours). */
+.cp-challenges { margin:0 0 20px; }
+.cp-chal-label { font-family:'Press Start 2P',monospace; font-size:8px; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.5); margin-bottom:10px; }
+.cp-chal-chips { display:flex; flex-wrap:wrap; gap:7px; }
+.chal-chip { display:inline-flex; align-items:center; gap:5px; font-size:.82rem; line-height:1; padding:5px 11px; border-radius:999px; white-space:nowrap;
+  color:var(--chal); border:1px solid color-mix(in srgb, var(--chal) 55%, transparent); background:color-mix(in srgb, var(--chal) 13%, rgba(10,8,6,.55)); }
+.chal-ico { font-size:.9rem; }
+/* Icon cluster on the portrait's lower-left, so challenges ride on the card visual. */
+.pc-chal-badge { position:absolute; z-index:3; left:8px; bottom:8px; display:flex; gap:3px; padding:3px 6px; border-radius:8px;
+  background:rgba(8,6,5,.58); border:1px solid var(--line); }
+.pc-chal-ico { font-size:13px; line-height:1; filter:drop-shadow(0 0 3px color-mix(in srgb, var(--chal) 75%, transparent)); }
+.pc-chal-badge.all-six { border-color:rgba(232,179,74,.55); box-shadow:0 0 9px rgba(232,179,74,.3); background:rgba(30,22,8,.6); }
+/* Holding all six at once is the Maw-Eaten apex — gild the heading + frame. */
+.cp-challenges.all-six .cp-chal-label { color:#e8b34a; text-shadow:0 0 10px rgba(232,179,74,.45); }
+.cp-challenges.all-six .cp-chal-chips { padding:9px; border-radius:12px; border:1px solid rgba(232,179,74,.22); background:radial-gradient(120% 100% at 50% 0%, rgba(232,179,74,.10), transparent 72%); }
 .cp-fulllist { margin-bottom:18px; }
 .cp-cta { display:inline-block; color:var(--clay); text-decoration:none; font-size:13px; letter-spacing:.06em; }
 .cp-cta:hover { color:#fff; }
