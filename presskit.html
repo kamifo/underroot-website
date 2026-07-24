@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Underroot — Press Kit</title>
+  <meta name="description" content="Underroot press kit — logo, key art, screenshots, trailer, fact sheet, and boilerplate for press and creators. A Swavvy AB game." />
+  <link rel="icon" type="image/png" href="assets/images/underroot_favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#14100c; --panel:#1b1611; --ink:rgba(255,255,255,0.88);
+      --muted:rgba(255,255,255,0.52); --faint:rgba(255,255,255,0.32);
+      --red:#8c2828; --line:rgba(255,255,255,0.10); --clay:#a36936; --maxw:1080px;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { background:var(--bg); color:var(--ink); font-family:'Georgia', serif; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+    a { color:inherit; }
+
+    section { padding: clamp(48px, 8vw, 96px) 24px; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; }
+    .kicker { font-family:'Press Start 2P', monospace; font-size:10px; letter-spacing:0.22em; color:var(--clay); text-transform:uppercase; }
+    .kicker.center { text-align:center; }
+    .title { font-size: clamp(24px, 4vw, 40px); font-weight:normal; margin-top:14px; }
+    .head { max-width: var(--maxw); margin:0 auto 40px; text-align:center; }
+
+    /* Header section */
+    #pk-header { text-align:center; border-bottom:1px solid var(--line); }
+    #pk-header h1 { font-size: clamp(30px, 6vw, 56px); font-weight:normal; margin:14px 0 18px; }
+    #pk-header .lede { max-width:680px; margin:0 auto 30px; color:var(--muted); font-size: clamp(15px, 2vw, 18px); line-height:1.6; }
+    .dl-all {
+      display:inline-flex; align-items:center; gap:10px;
+      background:rgba(140,40,40,0.85); border:1px solid rgba(255,255,255,0.32); border-radius:2px;
+      padding:13px 30px; color:#fff; font-size:14px; letter-spacing:0.12em; text-transform:uppercase;
+      text-decoration:none; box-shadow:0 0 26px rgba(140,40,40,0.5); transition:background 0.2s, box-shadow 0.2s;
+    }
+    .dl-all:hover { background:rgba(160,46,46,0.95); box-shadow:0 0 34px rgba(140,40,40,0.7); }
+  </style>
+</head>
+<body>
+
+  <section id="pk-header">
+    <div class="kicker center">Press Kit</div>
+    <h1>Underroot Press Kit</h1>
+    <p class="lede">Every layer buys time. Underroot is an idle survival-crafter about digging deep to keep a doomed village alive one more day.</p>
+    <a class="dl-all" href="assets/press/underroot-press-kit.zip" download>⬇ Download all assets (.zip)</a>
+  </section>
+
+</body>
+</html>
