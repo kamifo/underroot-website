@@ -56,6 +56,21 @@
     }
     .copy-btn:hover { background:rgba(0,0,0,0.65); color:#fff; }
     .copy-btn.done { color:var(--clay); border-color:var(--clay); }
+
+    /* Assets grid */
+    .assets-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:18px; }
+    .asset { background:var(--panel); border:1px solid var(--line); border-radius:4px; overflow:hidden; display:flex; flex-direction:column; }
+    .asset .thumb { aspect-ratio:16/9; background:#0d0a07; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .asset .thumb img, .asset .thumb video { width:100%; height:100%; object-fit:cover; display:block; }
+    .asset.logo .thumb { padding:22px; }
+    .asset.logo .thumb img { object-fit:contain; }
+    .asset .cap { padding:14px 16px; display:flex; flex-direction:column; gap:4px; flex:1; }
+    .asset .cap h3 { font-size:16px; font-weight:normal; }
+    .asset .cap p { color:var(--muted); font-size:13px; line-height:1.4; flex:1; }
+    .asset .dl { margin-top:8px; align-self:flex-start; background:rgba(0,0,0,0.4); border:1px solid var(--line); border-radius:2px; padding:7px 16px; color:var(--muted); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; text-decoration:none; transition:background 0.2s, color 0.2s; }
+    .asset .dl:hover { background:rgba(0,0,0,0.7); color:#fff; }
+    .asset.wide { grid-column:1 / -1; }
+    .asset.wide .thumb { aspect-ratio:auto; max-height:420px; }
   </style>
 </head>
 <body>
@@ -97,6 +112,64 @@
         <span class="lbl">About paragraph</span>
         <button class="copy-btn" data-copy="about">Copy</button>
         <p id="bp-about">Underroot is a single-player idle survival-crafter from Swavvy AB. You are the last digger of a village at the edge of the world, and the Maw is coming to eat it. Tunnel downward for the materials to wall it out, feed and grow the survivors above, and when you finally fall, your lineage takes up the shovel and digs on. Underroot plays free in your browser or on PC (Windows and Linux), keeps working while you are away, and never asks for a cent unless you want to give one.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pk-assets">
+    <div class="head"><div class="kicker center">From the deep</div><h2 class="title">Assets</h2></div>
+    <div class="wrap">
+      <div class="assets-grid">
+
+        <div class="asset logo wide">
+          <div class="thumb"><img src="assets/images/Underroot_title.png" alt="Underroot stone wordmark logo"></div>
+          <div class="cap"><h3>Logo</h3><p>The Underroot wordmark, transparent PNG.</p>
+            <a class="dl" href="assets/images/Underroot_title.png" download>Download PNG</a></div>
+        </div>
+
+        <div class="asset wide">
+          <div class="thumb"><img src="assets/images/Underroot_website_background.png" alt="Underroot key art — the village above, the deep below, the Maw at the edge"></div>
+          <div class="cap"><h3>Key art</h3><p>The village above, the deep below, and the Maw at the edge.</p>
+            <a class="dl" href="assets/images/Underroot_website_background.png" download>Download PNG</a></div>
+        </div>
+
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_world.jpg" alt="The surface village above the mine shaft, the Maw breaching on the right" loading="lazy"></div>
+          <div class="cap"><h3>Surface to the deep</h3>
+            <a class="dl" href="assets/images/shots/shot_world.jpg" download>Download JPG</a></div>
+        </div>
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_dig.jpg" alt="Deep underground among colourful ore layers and finds" loading="lazy"></div>
+          <div class="cap"><h3>Deep digging</h3>
+            <a class="dl" href="assets/images/shots/shot_dig.jpg" download>Download JPG</a></div>
+        </div>
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_dig2.jpg" alt="Sinking a shaft straight down through the rock" loading="lazy"></div>
+          <div class="cap"><h3>Sinking the shaft</h3>
+            <a class="dl" href="assets/images/shots/shot_dig2.jpg" download>Download JPG</a></div>
+        </div>
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_village.jpg" alt="A thriving daytime village of timber houses and a windmill" loading="lazy"></div>
+          <div class="cap"><h3>The village grows</h3>
+            <a class="dl" href="assets/images/shots/shot_village.jpg" download>Download JPG</a></div>
+        </div>
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_craft.jpg" alt="Processing machines and the smelting menu" loading="lazy"></div>
+          <div class="cap"><h3>Smelt &amp; refine</h3>
+            <a class="dl" href="assets/images/shots/shot_craft.jpg" download>Download JPG</a></div>
+        </div>
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_rain.jpg" alt="The village weathering a storm at night" loading="lazy"></div>
+          <div class="cap"><h3>Weather the storms</h3>
+            <a class="dl" href="assets/images/shots/shot_rain.jpg" download>Download JPG</a></div>
+        </div>
+
+        <div class="asset wide">
+          <div class="thumb"><video controls preload="none" poster="assets/video/underroot_trailer_poster.jpg"><source src="assets/video/underroot_trailer.mp4" type="video/mp4"></video></div>
+          <div class="cap"><h3>Trailer</h3><p>Underroot in motion.</p>
+            <a class="dl" href="assets/video/underroot_trailer.mp4" download>Download MP4</a></div>
+        </div>
+
       </div>
     </div>
   </section>
