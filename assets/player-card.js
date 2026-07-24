@@ -15,6 +15,35 @@ import { num, roman, metres, fmtDate, causeLabel, ritualMark } from './format.js
 // The Maw's tooth — the card's "suit" pip, reused for corners + epitaph flourishes.
 const FANG = '<svg viewBox="0 0 8 11" fill="currentColor" aria-hidden="true"><path d="M0 0 H8 L6.2 6 Q4 11 4 11 Q4 11 1.8 6 Z"/></svg>';
 
+// Challenge id -> {name, icon, color}, mirroring the /r/ card + game CATALOG.
+// Only listed ids render (icon/name are trusted constants, not player input),
+// so a new challenge needs a one-line add here (same as the harrow port).
+const CHALLENGES = {
+  lone_villager:    { name: 'The Lone Villager', icon: '🕯️', color: '#f0bd5e' },
+  brittle_world:    { name: 'Brittle World',     icon: '🔨', color: '#8fa6bf' },
+  eye_of_the_storm: { name: 'Eye of the Storm',  icon: '⛈️', color: '#5b9bf0' },
+  ravenous_maw:     { name: 'The Ravenous Maw',  icon: '🦷', color: '#e84736' },
+  black_rot:        { name: 'The Black Rot',     icon: '☠️', color: '#84c656' },
+  two_fronts:       { name: 'Two Fronts',        icon: '⚔️', color: '#b074ec' },
+};
+const CHALLENGE_ORDER = ['lone_villager', 'brittle_world', 'eye_of_the_storm', 'ravenous_maw', 'black_rot', 'two_fronts'];
+
+// Icon badge for the portrait's lower-left — the modal twin of the /r/ card's
+// on-card badge. Built from trusted constants keyed by the validated ids, so
+// safe to inject as innerHTML. All six held at once gets the gilded frame.
+function challengeBadgeHtml(run) {
+  const raw = Array.isArray(run.challenges) ? run.challenges : [];
+  const ids = CHALLENGE_ORDER.filter((id) => raw.includes(id));
+  if (ids.length === 0) return '';
+  const allSix = ids.length === CHALLENGE_ORDER.length;
+  const icons = ids.map((id) => {
+    const c = CHALLENGES[id];
+    return `<span class="pc-chal-ico" style="--chal:${c.color}">${c.icon}</span>`;
+  }).join('');
+  const names = ids.map((id) => CHALLENGES[id].name).join(' · ');
+  return `<div class="pc-chal-badge${allSix ? ' all-six' : ''}" title="${names}">${icons}</div>`;
+}
+
 const CSS = `
 .pc-backdrop {
   position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center;
@@ -74,6 +103,11 @@ const CSS = `
 .pc-portrait canvas { position:relative; z-index:2; margin-bottom:8px; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.55)); }
 .pc-pips { position:absolute; z-index:3; top:8px; right:10px; color:#d6924e; font-size:13px; letter-spacing:2px;
   text-shadow:0 1px 6px rgba(0,0,0,0.8); }
+/* Challenge icon badge on the portrait's lower-left (mirrors the /r/ card). */
+.pc-chal-badge { position:absolute; z-index:3; left:8px; bottom:8px; display:flex; gap:3px; padding:3px 6px; border-radius:8px;
+  background:rgba(8,6,5,0.58); border:1px solid var(--line, rgba(255,255,255,0.10)); }
+.pc-chal-ico { font-size:13px; line-height:1; filter:drop-shadow(0 0 3px color-mix(in srgb, var(--chal) 75%, transparent)); }
+.pc-chal-badge.all-six { border-color:rgba(232,179,74,0.55); box-shadow:0 0 9px rgba(232,179,74,0.3); background:rgba(30,22,8,0.6); }
 
 .pc-epitaph { display:flex; align-items:center; justify-content:center; gap:10px; color:#c86a63; font-size:0.98rem; font-style:italic; margin:12px 6px 14px; }
 .pc-epitaph svg { width:8px; height:11px; flex:none; opacity:0.7; }
@@ -188,6 +222,7 @@ function cardMarkup(run) {
         <div class="pc-pips" hidden></div>
         <div class="pc-ground"></div>
         <canvas width="440" height="440" style="width:220px;height:220px"></canvas>
+        ${challengeBadgeHtml(run)}
       </div>
       <div class="pc-epitaph">
         <span style="color:#c86a63">${FANG}</span>
@@ -272,6 +307,7 @@ export function attachCard(cell, run) {
     days: run.days, depth: run.depth, blocks: run.blocks, gen: run.gen, cause: run.cause, date: run.date,
     astrolabe_uses: run.astrolabe_uses,
     harrow: run.harrow,
+    challenges: run.challenges,
     share_id: run.share_id,
   };
   cell.addEventListener('click', () => open(normalized, cell));

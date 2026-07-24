@@ -27,13 +27,13 @@ export default async function handler(req, res) {
     const rows = board === 'unbroken'
       ? await sql`
           SELECT share_id, digger_name, first_death_days AS days, first_death_depth AS depth,
-                 payload->'cosmetics' AS cosmetics, coalesce(payload->>'harrow', '') AS harrow, received_at::date AS date
+                 payload->'challenges' AS challenges, payload->'cosmetics' AS cosmetics, coalesce(payload->>'harrow', '') AS harrow, received_at::date AS date
           FROM runs WHERE NOT quarantined AND first_death_days IS NOT NULL
           ORDER BY first_death_days DESC, first_death_depth DESC
           OFFSET ${offset} LIMIT ${limit}`
       : await sql`
           SELECT share_id, digger_name, days, depth, gen, cause, blocks, astrolabe_uses,
-                 payload->'cosmetics' AS cosmetics, coalesce(payload->>'harrow', '') AS harrow, received_at::date AS date
+                 payload->'challenges' AS challenges, payload->'cosmetics' AS cosmetics, coalesce(payload->>'harrow', '') AS harrow, received_at::date AS date
           FROM runs WHERE NOT quarantined
           ORDER BY gen DESC, days DESC, depth DESC
           OFFSET ${offset} LIMIT ${limit}`;

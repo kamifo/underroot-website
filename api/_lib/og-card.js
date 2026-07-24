@@ -45,6 +45,30 @@ function ritualPipsSvg(n) {
     + `<text x="${right - s * 2 - 10}" y="${y + 8}" font-family="Press Start 2P" font-size="22" fill="${PIP_FILL}" text-anchor="end">${num(n)}</text>`;
 }
 
+// Challenge accent colours (mirrors ChallengeManager's accent map / the HTML
+// card). Emoji don't rasterize through resvg, so the OG twin of the card's icon
+// badge is a row of accent-coloured dots in the portrait's lower-left.
+const CHAL_COLORS = {
+  lone_villager: '#f0bd5e', brittle_world: '#8fa6bf', eye_of_the_storm: '#5b9bf0',
+  ravenous_maw: '#e84736', black_rot: '#84c656', two_fronts: '#b074ec',
+};
+const CHAL_ORDER = ['lone_villager', 'brittle_world', 'eye_of_the_storm', 'ravenous_maw', 'black_rot', 'two_fronts'];
+
+function challengeDotsSvg(run) {
+  const raw = Array.isArray(run.challenges) ? run.challenges : [];
+  const ids = CHAL_ORDER.filter((id) => raw.includes(id));
+  if (ids.length === 0) return '';
+  const allSix = ids.length === CHAL_ORDER.length;
+  const r = 7, gap = 6, padX = 9, padY = 7, step = r * 2 + gap;
+  const boxW = ids.length * r * 2 + (ids.length - 1) * gap + padX * 2;
+  const boxH = r * 2 + padY * 2;
+  const bx = 104, by = 474 - boxH, cy = by + boxH / 2;
+  const frame = `<rect x="${bx}" y="${by}" width="${boxW}" height="${boxH}" rx="9" fill="rgba(8,6,5,0.62)" stroke="${allSix ? 'rgba(232,179,74,0.65)' : 'rgba(120,96,60,0.5)'}" stroke-width="${allSix ? 2 : 1}"/>`;
+  const dots = ids.map((id, i) =>
+    `<circle cx="${bx + padX + r + i * step}" cy="${cy}" r="${r}" fill="${CHAL_COLORS[id]}" stroke="rgba(0,0,0,0.35)" stroke-width="1.5"/>`).join('');
+  return frame + dots;
+}
+
 export function buildOgSvg(run) {
   const name = escapeXml(truncate(String(run.digger_name ?? 'Unknown'), 13)).toUpperCase();
   const epitaph = escapeXml(causeLabel(run.cause) ?? 'Fate unrecorded');
@@ -76,6 +100,7 @@ export function buildOgSvg(run) {
   <ellipse cx="255" cy="300" rx="200" ry="200" fill="url(#glow)"/>
   <g transform="translate(90 150)">${portrait}</g>
   ${ritualPipsSvg(run.astrolabe_uses)}
+  ${challengeDotsSvg(run)}
 
   <text x="470" y="185" font-family="${PS}" font-size="20" fill="#a36936" letter-spacing="4">THE MAW&apos;S LEDGER</text>
   <text x="470" y="285" font-family="${PS}" font-size="48" fill="#ffffff">${name}</text>
