@@ -29,7 +29,12 @@ const INT_FIELDS = {
   days: [0, 3650],
   depth: [0, 10000],
   blocks: [0, 5_000_000],
-  discoveries: [0, 500],
+  // Raw discovery POCKETS dug, not discovery types — this scales with digging
+  // (a long run finds thousands: e.g. 2375 over a 59-day run), so 500 was a wrong
+  // magnitude assumption that 422-rejected honest long runs — same failure the
+  // GEN_MAX 50->500 note above describes. Structural ceiling only, not anti-cheat:
+  // discoveries is not checked in plausibility.js and can't exceed blocks mined.
+  discoveries: [0, 5_000_000],
   villager_deaths: [0, 1_000_000],
   peak_population: [0, 100_000],
   wall_hp: [0, 100_000_000],
