@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Underroot — Press Kit</title>
+  <meta name="description" content="Underroot press kit — logo, key art, screenshots, trailer, fact sheet, and boilerplate for press and creators. A Swavvy AB game." />
+  <link rel="icon" type="image/png" href="assets/images/underroot_favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#14100c; --panel:#1b1611; --ink:rgba(255,255,255,0.88);
+      --muted:rgba(255,255,255,0.52); --faint:rgba(255,255,255,0.32);
+      --red:#8c2828; --line:rgba(255,255,255,0.10); --clay:#a36936; --maxw:1080px;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { background:var(--bg); color:var(--ink); font-family:'Georgia', serif; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+    a { color:inherit; }
+
+    section { padding: clamp(48px, 8vw, 96px) 24px; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; }
+    .kicker { font-family:'Press Start 2P', monospace; font-size:10px; letter-spacing:0.22em; color:var(--clay); text-transform:uppercase; }
+    .kicker.center { text-align:center; }
+    .title { font-size: clamp(24px, 4vw, 40px); font-weight:normal; margin-top:14px; }
+    .head { max-width: var(--maxw); margin:0 auto 40px; text-align:center; }
+
+    /* Header section */
+    #pk-header { text-align:center; border-bottom:1px solid var(--line); }
+    #pk-header h1 { font-size: clamp(30px, 6vw, 56px); font-weight:normal; margin:14px 0 18px; }
+    #pk-header .lede { max-width:680px; margin:0 auto 30px; color:var(--muted); font-size: clamp(15px, 2vw, 18px); line-height:1.6; }
+    .dl-all {
+      display:inline-flex; align-items:center; gap:10px;
+      background:rgba(140,40,40,0.85); border:1px solid rgba(255,255,255,0.32); border-radius:2px;
+      padding:13px 30px; color:#fff; font-size:14px; letter-spacing:0.12em; text-transform:uppercase;
+      text-decoration:none; box-shadow:0 0 26px rgba(140,40,40,0.5); transition:background 0.2s, box-shadow 0.2s;
+    }
+    .dl-all:hover { background:rgba(160,46,46,0.95); box-shadow:0 0 34px rgba(140,40,40,0.7); }
+
+    /* Fact sheet */
+    .factsheet { background:var(--panel); border:1px solid var(--line); border-radius:4px; padding: clamp(20px, 4vw, 36px); }
+    .factsheet dl { display:grid; grid-template-columns: max-content 1fr; gap:14px 28px; }
+    .factsheet dt { color:var(--clay); font-size:13px; letter-spacing:0.06em; text-transform:uppercase; }
+    .factsheet dd { color:var(--ink); font-size:15px; line-height:1.5; }
+    @media (max-width:560px){ .factsheet dl { grid-template-columns:1fr; gap:4px 0; } .factsheet dd { margin-bottom:12px; } }
+
+    /* Boilerplate */
+    .quote { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--clay); border-radius:4px; padding:20px 22px; margin-top:18px; position:relative; }
+    .quote .lbl { font-family:'Press Start 2P', monospace; font-size:9px; letter-spacing:0.18em; color:var(--faint); text-transform:uppercase; display:block; margin-bottom:12px; }
+    .quote p { color:var(--ink); line-height:1.65; font-size:15px; }
+    .copy-btn {
+      position:absolute; top:14px; right:14px; background:rgba(0,0,0,0.4); border:1px solid var(--line);
+      border-radius:2px; padding:6px 14px; color:var(--muted); font-family:'Georgia', serif; font-size:12px;
+      letter-spacing:0.06em; cursor:pointer; transition:background 0.2s, color 0.2s;
+    }
+    .copy-btn:hover { background:rgba(0,0,0,0.65); color:#fff; }
+    .copy-btn.done { color:var(--clay); border-color:var(--clay); }
+
+    /* Assets grid */
+    .assets-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:18px; }
+    .asset { background:var(--panel); border:1px solid var(--line); border-radius:4px; overflow:hidden; display:flex; flex-direction:column; }
+    .asset .thumb { aspect-ratio:16/9; background:#0d0a07; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .asset .thumb img, .asset .thumb video { width:100%; height:100%; object-fit:cover; display:block; }
+    .asset.logo .thumb { padding:22px; }
+    .asset.logo .thumb img { object-fit:contain; }
+    .asset .cap { padding:14px 16px; display:flex; flex-direction:column; gap:4px; flex:1; }
+    .asset .cap h3 { font-size:16px; font-weight:normal; }
+    .asset .cap p { color:var(--muted); font-size:13px; line-height:1.4; flex:1; }
+    .asset .dl { margin-top:8px; align-self:flex-start; background:rgba(0,0,0,0.4); border:1px solid var(--line); border-radius:2px; padding:7px 16px; color:var(--muted); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; text-decoration:none; transition:background 0.2s, color 0.2s; }
+    .asset .dl:hover { background:rgba(0,0,0,0.7); color:#fff; }
+    .asset.wide { grid-column:1 / -1; }
+    .asset.wide .thumb { aspect-ratio:auto; max-height:420px; }
+
+    /* Contact */
+    #pk-contact { border-top:1px solid var(--line); }
+    #pk-contact .blurb { max-width:640px; margin:0 auto 24px; text-align:center; color:var(--muted); font-size:15px; line-height:1.6; }
+    #pk-form { display:flex; gap:8px; max-width:560px; margin:0 auto; flex-wrap:wrap; }
+    #pk-form input[type=email], #pk-form textarea {
+      width:100%; background:rgba(0,0,0,0.4); border:1px solid var(--line); border-radius:2px;
+      padding:11px 16px; color:var(--ink); font-family:'Georgia', serif; font-size:14px; outline:none; transition:border-color 0.2s;
+    }
+    #pk-form textarea { min-height:96px; resize:vertical; }
+    #pk-form input:focus, #pk-form textarea:focus { border-color:rgba(255,255,255,0.4); }
+    #pk-form button {
+      background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.18); border-radius:2px;
+      padding:11px 24px; color:var(--ink); font-family:'Georgia', serif; font-size:14px; letter-spacing:0.08em; cursor:pointer; transition:background 0.2s, color 0.2s;
+    }
+    #pk-form button:hover { background:rgba(0,0,0,0.7); color:#fff; }
+    #pk-msg { text-align:center; color:var(--muted); font-size:13px; min-height:20px; margin-top:14px; }
+
+    /* Footer (mirrors index.html) */
+    footer { border-top:1px solid var(--line); padding:40px 24px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:18px; }
+    .foot-play { display:inline-flex; align-items:center; gap:8px; background:rgba(140,40,40,0.85); border:1px solid rgba(255,255,255,0.28); border-radius:2px; padding:11px 24px; color:#fff; font-size:13px; letter-spacing:0.12em; text-transform:uppercase; text-decoration:none; transition:background 0.2s; }
+    .foot-play:hover { background:rgba(160,46,46,0.95); }
+    .foot-links { display:flex; gap:18px; flex-wrap:wrap; justify-content:center; }
+    .foot-links a { color:var(--muted); font-size:13px; letter-spacing:0.06em; text-decoration:none; transition:color 0.2s; }
+    .foot-links a:hover { color:#fff; }
+    .legal { color:var(--faint); font-size:12px; letter-spacing:0.04em; }
+  </style>
+</head>
+<body>
+
+  <section id="pk-header">
+    <div class="kicker center">Press Kit</div>
+    <h1>Underroot Press Kit</h1>
+    <p class="lede">Every layer buys time. Underroot is an idle survival-crafter about digging deep to keep a doomed village alive one more day.</p>
+    <a class="dl-all" href="assets/press/underroot-press-kit.zip" download>⬇ Download all assets (.zip)</a>
+  </section>
+
+  <section id="pk-facts">
+    <div class="head"><div class="kicker center">The quick reference</div><h2 class="title">Fact sheet</h2></div>
+    <div class="wrap factsheet">
+      <dl>
+        <dt>Title</dt><dd>Underroot</dd>
+        <dt>Tagline</dt><dd>Every layer buys time.</dd>
+        <dt>Developer</dt><dd>Swavvy AB</dd>
+        <dt>Genre</dt><dd>Idle / incremental survival-crafter, with base-defense and light colony-management</dd>
+        <dt>Platforms</dt><dd>Play free in the browser, or download for PC (Windows and Linux)</dd>
+        <dt>Price</dt><dd>Free / name-your-own-price (pay what you want)</dd>
+        <dt>Engine</dt><dd>Godot 4</dd>
+        <dt>Players</dt><dd>Single-player</dd>
+        <dt>Release</dt><dd>Launching on itch.io — playable free in the browser, downloadable for Windows and Linux</dd>
+        <dt>Website</dt><dd><a href="https://underroot.se">underroot.se</a></dd>
+      </dl>
+    </div>
+  </section>
+
+  <section id="pk-boiler">
+    <div class="head"><div class="kicker center">Boilerplate</div><h2 class="title">Use these as-is</h2></div>
+    <div class="wrap">
+      <div class="quote">
+        <span class="lbl">One-liner</span>
+        <button class="copy-btn" data-copy="oneliner">Copy</button>
+        <p id="bp-oneliner">Every layer buys time. Underroot is an idle survival-crafter about digging deep to keep a doomed village alive one more day.</p>
+      </div>
+      <div class="quote">
+        <span class="lbl">About paragraph</span>
+        <button class="copy-btn" data-copy="about">Copy</button>
+        <p id="bp-about">Underroot is a single-player idle survival-crafter from Swavvy AB. You are the last digger of a village at the edge of the world, and the Maw is coming to eat it. Tunnel downward for the materials to wall it out, feed and grow the survivors above, and when you finally fall, your lineage takes up the shovel and digs on. Underroot plays free in your browser or on PC (Windows and Linux), keeps working while you are away, and never asks for a cent unless you want to give one.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pk-assets">
+    <div class="head"><div class="kicker center">From the deep</div><h2 class="title">Assets</h2></div>
+    <div class="wrap">
+      <div class="assets-grid">
+
+        <div class="asset logo wide">
+          <div class="thumb"><img src="assets/images/Underroot_title.png" alt="Underroot stone wordmark logo"></div>
+          <div class="cap"><h3>Logo</h3><p>The Underroot wordmark, transparent PNG.</p>
+            <a class="dl" href="assets/images/Underroot_title.png" download>Download PNG</a></div>
+        </div>
+
+        <div class="asset wide">
+          <div class="thumb"><img src="assets/images/Underroot_website_background.png" alt="Underroot key art — the village above, the deep below, the Maw at the edge"></div>
+          <div class="cap"><h3>Key art</h3><p>The village above, the deep below, and the Maw at the edge.</p>
+            <a class="dl" href="assets/images/Underroot_website_background.png" download>Download PNG</a></div>
+        </div>
+
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_world.jpg" alt="The surface village above the mine shaft, the Maw breaching on the right" loading="lazy"></div>
+          <div class="cap"><h3>Surface to the deep</h3>
+            <a class="dl" href="assets/images/shots/shot_world.jpg" download>Download JPG</a></div>
+        </div>
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_dig.jpg" alt="Deep underground among colourful ore layers and finds" loading="lazy"></div>
+          <div class="cap"><h3>Deep digging</h3>
+            <a class="dl" href="assets/images/shots/shot_dig.jpg" download>Download JPG</a></div>
+        </div>
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_dig2.jpg" alt="Sinking a shaft straight down through the rock" loading="lazy"></div>
+          <div class="cap"><h3>Sinking the shaft</h3>
+            <a class="dl" href="assets/images/shots/shot_dig2.jpg" download>Download JPG</a></div>
+        </div>
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_village.jpg" alt="A thriving daytime village of timber houses and a windmill" loading="lazy"></div>
+          <div class="cap"><h3>The village grows</h3>
+            <a class="dl" href="assets/images/shots/shot_village.jpg" download>Download JPG</a></div>
+        </div>
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_craft.jpg" alt="Processing machines and the smelting menu" loading="lazy"></div>
+          <div class="cap"><h3>Smelt &amp; refine</h3>
+            <a class="dl" href="assets/images/shots/shot_craft.jpg" download>Download JPG</a></div>
+        </div>
+        <div class="asset">
+          <div class="thumb"><img src="assets/images/shots/shot_rain.jpg" alt="The village weathering a storm at night" loading="lazy"></div>
+          <div class="cap"><h3>Weather the storms</h3>
+            <a class="dl" href="assets/images/shots/shot_rain.jpg" download>Download JPG</a></div>
+        </div>
+
+        <div class="asset wide">
+          <div class="thumb"><video controls preload="none" poster="assets/video/underroot_trailer_poster.jpg"><source src="assets/video/underroot_trailer.mp4" type="video/mp4"></video></div>
+          <div class="cap"><h3>Trailer</h3><p>Underroot in motion.</p>
+            <a class="dl" href="assets/video/underroot_trailer.mp4" download>Download MP4</a></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="pk-contact">
+    <div class="head"><div class="kicker center">Press &amp; creators</div><h2 class="title">Need something else?</h2></div>
+    <p class="blurb">Coverage, streams, and videos are welcome. Need a specific resolution, additional captures, or the trailer file for embedding? Ask and we'll send it over.</p>
+    <form id="pk-form" action="https://formspree.io/f/mgoqyvqp" method="POST">
+      <input type="hidden" name="_subject" value="[Press] Underroot press enquiry" />
+      <input type="email" name="email" placeholder="Your email (so we can reply)" required />
+      <textarea name="message" placeholder="What do you need?" required></textarea>
+      <button type="submit">Send enquiry</button>
+    </form>
+    <p id="pk-msg" role="status"></p>
+  </section>
+
+  <footer>
+    <a class="foot-play" href="https://play.underroot.se">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+      Play Free in Browser
+    </a>
+    <div class="foot-links">
+      <a href="index.html">Home</a>
+      <a href="story.html">Story</a>
+      <a href="music.html">Music</a>
+      <a href="stats.html">Stats</a>
+      <a href="eula.html">EULA</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+    <p class="legal">A Swavvy AB game · © 2026 Swavvy AB. All rights reserved.</p>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.copy-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const el = document.getElementById('bp-' + btn.dataset.copy);
+        const text = el.textContent.trim();
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const r = document.createRange(); r.selectNodeContents(el);
+          const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        }
+        const old = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('done');
+        setTimeout(() => { btn.textContent = old; btn.classList.remove('done'); }, 1600);
+      });
+    });
+
+    const pkForm = document.getElementById('pk-form');
+    const pkMsg = document.getElementById('pk-msg');
+    pkForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      pkMsg.textContent = 'Sending…';
+      try {
+        const res = await fetch(pkForm.action, { method:'POST', body:new FormData(pkForm), headers:{ 'Accept':'application/json' } });
+        if (res.ok) { pkForm.reset(); pkMsg.textContent = 'Thanks — we\'ll be in touch.'; }
+        else { pkMsg.textContent = 'Something went wrong. Email us instead.'; }
+      } catch { pkMsg.textContent = 'Something went wrong. Email us instead.'; }
+    });
+  </script>
+
+</body>
+</html>

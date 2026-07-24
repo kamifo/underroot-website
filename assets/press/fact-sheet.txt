@@ -1,0 +1,12 @@
+UNDERROOT — FACT SHEET
+
+Title:      Underroot
+Tagline:    Every layer buys time.
+Developer:  Swavvy AB
+Genre:      Idle / incremental survival-crafter, with base-defense and light colony-management
+Platforms:  Play free in the browser, or download for PC (Windows and Linux)
+Price:      Free / name-your-own-price (pay what you want)
+Engine:     Godot 4
+Players:    Single-player
+Release:    Launching on itch.io — playable free in browser, downloadable for Windows and Linux
+Website:    https://underroot.se
