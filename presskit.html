@@ -71,6 +71,32 @@
     .asset .dl:hover { background:rgba(0,0,0,0.7); color:#fff; }
     .asset.wide { grid-column:1 / -1; }
     .asset.wide .thumb { aspect-ratio:auto; max-height:420px; }
+
+    /* Contact */
+    #pk-contact { border-top:1px solid var(--line); }
+    #pk-contact .blurb { max-width:640px; margin:0 auto 24px; text-align:center; color:var(--muted); font-size:15px; line-height:1.6; }
+    #pk-form { display:flex; gap:8px; max-width:560px; margin:0 auto; flex-wrap:wrap; }
+    #pk-form input[type=email], #pk-form textarea {
+      width:100%; background:rgba(0,0,0,0.4); border:1px solid var(--line); border-radius:2px;
+      padding:11px 16px; color:var(--ink); font-family:'Georgia', serif; font-size:14px; outline:none; transition:border-color 0.2s;
+    }
+    #pk-form textarea { min-height:96px; resize:vertical; }
+    #pk-form input:focus, #pk-form textarea:focus { border-color:rgba(255,255,255,0.4); }
+    #pk-form button {
+      background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.18); border-radius:2px;
+      padding:11px 24px; color:var(--ink); font-family:'Georgia', serif; font-size:14px; letter-spacing:0.08em; cursor:pointer; transition:background 0.2s, color 0.2s;
+    }
+    #pk-form button:hover { background:rgba(0,0,0,0.7); color:#fff; }
+    #pk-msg { text-align:center; color:var(--muted); font-size:13px; min-height:20px; margin-top:14px; }
+
+    /* Footer (mirrors index.html) */
+    footer { border-top:1px solid var(--line); padding:40px 24px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:18px; }
+    .foot-play { display:inline-flex; align-items:center; gap:8px; background:rgba(140,40,40,0.85); border:1px solid rgba(255,255,255,0.28); border-radius:2px; padding:11px 24px; color:#fff; font-size:13px; letter-spacing:0.12em; text-transform:uppercase; text-decoration:none; transition:background 0.2s; }
+    .foot-play:hover { background:rgba(160,46,46,0.95); }
+    .foot-links { display:flex; gap:18px; flex-wrap:wrap; justify-content:center; }
+    .foot-links a { color:var(--muted); font-size:13px; letter-spacing:0.06em; text-decoration:none; transition:color 0.2s; }
+    .foot-links a:hover { color:#fff; }
+    .legal { color:var(--faint); font-size:12px; letter-spacing:0.04em; }
   </style>
 </head>
 <body>
@@ -174,6 +200,34 @@
     </div>
   </section>
 
+  <section id="pk-contact">
+    <div class="head"><div class="kicker center">Press &amp; creators</div><h2 class="title">Need something else?</h2></div>
+    <p class="blurb">Coverage, streams, and videos are welcome. Need a specific resolution, additional captures, or the trailer file for embedding? Ask and we'll send it over.</p>
+    <form id="pk-form" action="https://formspree.io/f/mgoqyvqp" method="POST">
+      <input type="hidden" name="_subject" value="[Press] Underroot press enquiry" />
+      <input type="email" name="email" placeholder="Your email (so we can reply)" required />
+      <textarea name="message" placeholder="What do you need?" required></textarea>
+      <button type="submit">Send enquiry</button>
+    </form>
+    <p id="pk-msg" role="status"></p>
+  </section>
+
+  <footer>
+    <a class="foot-play" href="https://play.underroot.se">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+      Play Free in Browser
+    </a>
+    <div class="foot-links">
+      <a href="index.html">Home</a>
+      <a href="story.html">Story</a>
+      <a href="music.html">Music</a>
+      <a href="stats.html">Stats</a>
+      <a href="eula.html">EULA</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+    <p class="legal">A Swavvy AB game · © 2026 Swavvy AB. All rights reserved.</p>
+  </footer>
+
   <script>
     document.querySelectorAll('.copy-btn').forEach((btn) => {
       btn.addEventListener('click', async () => {
@@ -188,6 +242,18 @@
         const old = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('done');
         setTimeout(() => { btn.textContent = old; btn.classList.remove('done'); }, 1600);
       });
+    });
+
+    const pkForm = document.getElementById('pk-form');
+    const pkMsg = document.getElementById('pk-msg');
+    pkForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      pkMsg.textContent = 'Sending…';
+      try {
+        const res = await fetch(pkForm.action, { method:'POST', body:new FormData(pkForm), headers:{ 'Accept':'application/json' } });
+        if (res.ok) { pkForm.reset(); pkMsg.textContent = 'Thanks — we\'ll be in touch.'; }
+        else { pkMsg.textContent = 'Something went wrong. Email us instead.'; }
+      } catch { pkMsg.textContent = 'Something went wrong. Email us instead.'; }
     });
   </script>
 
