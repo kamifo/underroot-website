@@ -353,11 +353,22 @@ function render(data) {
     data: {
       datasets: [{
         label: 'each dot is a shared run',
-        data: charts.scatter.map((r) => ({ x: r.days, y: r.blocks })),
+        data: charts.scatter.map((r) => ({ x: r.days, y: r.blocks, name: r.digger_name })),
         backgroundColor: charts.scatter.map((r) => (r.cause === 'maw_breach' ? red : clay)),
       }],
     },
-    options: { maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'days survived' } }, y: { title: { display: true, text: 'tiles dug' } } } },
+    options: {
+      maintainAspectRatio: false,
+      scales: { x: { title: { display: true, text: 'days survived' } }, y: { title: { display: true, text: 'tiles dug' } } },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            title: (items) => items[0]?.raw?.name || 'a lone digger',
+            label: (ctx) => `${num(ctx.raw.x)} days · ${num(ctx.raw.y)} tiles dug`,
+          },
+        },
+      },
+    },
   });
 }
 
