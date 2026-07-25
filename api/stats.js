@@ -193,7 +193,7 @@ export default async function handler(req, res) {
 
     // Tiles-vs-days scatter (cap the dots).
     const scatter = await sql`
-      SELECT days, blocks, cause FROM runs WHERE NOT quarantined
+      SELECT digger_name, days, blocks, cause FROM runs WHERE NOT quarantined
       ORDER BY received_at DESC LIMIT 1000`;
 
     // Deaths by cause per generation, from every lineage entry across all runs.
