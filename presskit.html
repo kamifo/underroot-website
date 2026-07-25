@@ -28,6 +28,9 @@
 
     /* Header section */
     #pk-header { text-align:center; border-bottom:1px solid var(--line); }
+    .pk-home { display:inline-flex; align-items:center; gap:7px; margin-bottom:22px; color:var(--muted); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; text-decoration:none; transition:color 0.2s; }
+    .pk-home:hover { color:#fff; }
+    .pk-home svg { width:14px; height:14px; }
     #pk-header h1 { font-size: clamp(30px, 6vw, 56px); font-weight:normal; margin:14px 0 18px; }
     #pk-header .lede { max-width:680px; margin:0 auto 30px; color:var(--muted); font-size: clamp(15px, 2vw, 18px); line-height:1.6; }
     .dl-all {
@@ -102,6 +105,10 @@
 <body>
 
   <section id="pk-header">
+    <a class="pk-home" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Underroot home
+    </a>
     <div class="kicker center">Press Kit</div>
     <h1>Underroot Press Kit</h1>
     <p class="lede">Every layer buys time. Underroot is an idle survival-crafter about digging deep to keep a doomed village alive one more day.</p>
